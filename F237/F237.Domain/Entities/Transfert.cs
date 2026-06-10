@@ -1,4 +1,6 @@
-﻿namespace F237.Domain.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace F237.Domain.Entities
 {
     public class Transfert
     {
@@ -7,6 +9,8 @@
         public int EquipeDepartId { get; set; }
         public int EquipeArriveeId { get; set; }
         public DateTime DateTransfert { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
         public decimal? Montant { get; set; }
         public string Type { get; set; } = string.Empty;
         public string? Notes { get; set; }
