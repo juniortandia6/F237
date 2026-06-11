@@ -5,6 +5,7 @@ namespace F237.Domain.Entities
     public class Match
     {
         public int Id { get; set; }
+        public int ApiFootballId { get; set; }
         public int EquipeDomicileId { get; set; }
         public int EquipeExterieurId { get; set; }
         public int? ScoreDomicile { get; set; }

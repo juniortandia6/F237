@@ -4,6 +4,7 @@ using F237.DAL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace F237.DAL.Migrations
 {
     [DbContext(typeof(F237DbContext))]
-    partial class F237DbContextModelSnapshot : ModelSnapshot
+    [Migration("20260611232402_AddApiFootballIdToEquipe")]
+    partial class AddApiFootballIdToEquipe
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -167,7 +170,7 @@ namespace F237.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Pays")
+                    b.Property<string>("Ville")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -233,9 +236,6 @@ namespace F237.DAL.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ApiFootballId")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("DateMatch")
                         .HasColumnType("datetime2");

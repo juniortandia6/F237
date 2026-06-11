@@ -9,11 +9,9 @@ namespace F237.API.Controllers
     {
         private readonly IApiFootballService _apiFootballService;
 
-        // MTN Elite One League ID = 715
-        // MTN Elite Two League ID = 716
-        private const int ELITE_ONE_ID = 715;
-        private const int ELITE_TWO_ID = 716;
-        private const int SAISON = 2025;
+        private const int ELITE_ONE_ID = 411;  
+        private const int ELITE_TWO_ID = 813;
+        private const int SAISON = 2024; 
 
         public SyncController(IApiFootballService apiFootballService)
         {
