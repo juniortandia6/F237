@@ -21,64 +21,155 @@ const ClassementPage = () => {
     fetchClassement();
   }, [saisonId]);
 
+  const getForme = () => ['W', 'W', 'L', 'D', 'W'];
+
+  const getFormeColor = (r) => {
+    if (r === 'W') return { backgroundColor: '#1a7a3c', color: 'white' };
+    if (r === 'L') return { backgroundColor: '#CE1126', color: 'white' };
+    return { backgroundColor: '#555', color: 'white' };
+  };
+
+  const getZoneColor = (pos) => {
+    if (pos <= 3) return '#1a7a3c';
+    if (pos >= classement.length - 1) return '#CE1126';
+    return 'transparent';
+  };
+
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Classement MTN Elite</h1>
+      {/* Header */}
+      <div className="flex items-start justify-between mb-8">
+        <div>
+          <p className="font-bold tracking-widest uppercase mb-2" style={{ color: '#FCD116', fontSize: '13px' }}>
+            Saison 2024
+          </p>
+          <h1 className="font-black uppercase mb-2" style={{ fontSize: '48px', letterSpacing: '-1px' }}>
+            Classement
+          </h1>
+          <p className="text-gray-500" style={{ fontSize: '16px' }}>
+            Saison 2024 — mis à jour régulièrement.
+          </p>
+        </div>
 
-      <div className="flex gap-4 mb-6">
-        <button
-          onClick={() => setSaisonId(1)}
-          className={`px-4 py-2 rounded font-medium ${saisonId === 1 ? 'bg-green-600' : 'bg-gray-700'}`}
-        >
-          Elite One
-        </button>
-        <button
-          onClick={() => setSaisonId(2)}
-          className={`px-4 py-2 rounded font-medium ${saisonId === 2 ? 'bg-green-600' : 'bg-gray-700'}`}
-        >
-          Elite Two
-        </button>
+        {/* Toggle Elite One / Elite Two */}
+        <div className="flex items-center rounded-full p-1 mt-2" style={{ backgroundColor: '#e8e8e3', border: '1px solid #d0d0c8' }}>
+          <button
+            onClick={() => setSaisonId(1)}
+            className="px-5 py-2 rounded-full font-bold tracking-widest uppercase transition-all"
+            style={{
+              fontSize: '13px',
+              backgroundColor: saisonId === 1 ? '#1a1a1a' : 'transparent',
+              color: saisonId === 1 ? 'white' : '#666',
+            }}
+          >
+            Elite One
+          </button>
+          <button
+            onClick={() => setSaisonId(2)}
+            className="px-5 py-2 rounded-full font-bold tracking-widest uppercase transition-all"
+            style={{
+              fontSize: '13px',
+              backgroundColor: saisonId === 2 ? '#1a1a1a' : 'transparent',
+              color: saisonId === 2 ? 'white' : '#666',
+            }}
+          >
+            Elite Two
+          </button>
+        </div>
       </div>
 
-      {loading ? (
-        <p className="text-gray-400">Chargement...</p>
-      ) : (
-        <table className="w-full text-sm">
-          <thead className="bg-gray-800 text-gray-300">
-            <tr>
-              <th className="p-3 text-left">#</th>
-              <th className="p-3 text-left">Équipe</th>
-              <th className="p-3 text-center">MJ</th>
-              <th className="p-3 text-center">V</th>
-              <th className="p-3 text-center">N</th>
-              <th className="p-3 text-center">D</th>
-              <th className="p-3 text-center">BP</th>
-              <th className="p-3 text-center">BC</th>
-              <th className="p-3 text-center">DB</th>
-              <th className="p-3 text-center font-bold text-white">Pts</th>
-            </tr>
-          </thead>
-          <tbody>
-            {classement.map((c, index) => (
-              <tr key={c.id} className={`border-b border-gray-800 hover:bg-gray-800 ${index % 2 === 0 ? 'bg-gray-900' : 'bg-gray-950'}`}>
-                <td className="p-3 text-gray-400">{c.position}</td>
-                <td className="p-3 flex items-center gap-2">
-                  <img src={c.equipe?.logoUrl} alt={c.equipe?.nom} className="h-6 w-6 object-contain" />
-                  {c.equipe?.nom}
-                </td>
-                <td className="p-3 text-center">{c.matchsJoues}</td>
-                <td className="p-3 text-center text-green-400">{c.victoires}</td>
-                <td className="p-3 text-center text-yellow-400">{c.nuls}</td>
-                <td className="p-3 text-center text-red-400">{c.defaites}</td>
-                <td className="p-3 text-center">{c.butsPour}</td>
-                <td className="p-3 text-center">{c.butsContre}</td>
-                <td className="p-3 text-center">{c.differenceDesButs}</td>
-                <td className="p-3 text-center font-bold text-white">{c.points}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      {/* Légende zones */}
+      <div className="flex items-center gap-6 mb-4">
+        <div className="flex items-center gap-2">
+          <span className="w-1 h-5 rounded-full inline-block" style={{ backgroundColor: '#1a7a3c' }}></span>
+          <span className="text-gray-500 font-semibold uppercase tracking-widest" style={{ fontSize: '12px' }}>Zone Promotion</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-1 h-5 rounded-full inline-block" style={{ backgroundColor: '#CE1126' }}></span>
+          <span className="text-gray-500 font-semibold uppercase tracking-widest" style={{ fontSize: '12px' }}>Zone Relégation</span>
+        </div>
+      </div>
+
+      {/* Tableau */}
+      <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+        {/* Header tableau */}
+        <div className="grid px-6 py-3 border-b border-gray-100" style={{
+          gridTemplateColumns: '40px 1fr 60px 60px 60px 60px 70px 70px 70px 80px 140px',
+          fontSize: '12px',
+          color: '#999',
+          fontWeight: '700',
+          letterSpacing: '1px',
+          textTransform: 'uppercase'
+        }}>
+          <span>#</span>
+          <span>Équipe</span>
+          <span className="text-center">J</span>
+          <span className="text-center">V</span>
+          <span className="text-center">N</span>
+          <span className="text-center">D</span>
+          <span className="text-center">BP</span>
+          <span className="text-center">BC</span>
+          <span className="text-center">DB</span>
+          <span className="text-center">PTS</span>
+          <span className="text-right">Forme</span>
+        </div>
+
+        {/* Lignes */}
+        {loading ? (
+          <div className="text-center py-12 text-gray-400" style={{ fontSize: '16px' }}>Chargement...</div>
+        ) : classement.length === 0 ? (
+          <div className="text-center py-12 text-gray-400" style={{ fontSize: '16px' }}>Aucune donnée disponible</div>
+        ) : (
+          classement.map((c) => (
+            <div
+              key={c.id}
+              className="grid px-6 py-4 border-b border-gray-50 hover:bg-gray-50 transition-colors items-center"
+              style={{ gridTemplateColumns: '40px 1fr 60px 60px 60px 60px 70px 70px 70px 80px 140px' }}
+            >
+              {/* Position + indicateur zone */}
+              <div className="flex items-center gap-2">
+                <span className="w-1 h-6 rounded-full" style={{ backgroundColor: getZoneColor(c.position), minWidth: '4px' }}></span>
+                <span className="font-bold text-gray-700" style={{ fontSize: '16px' }}>{c.position}</span>
+              </div>
+
+              {/* Équipe */}
+              <div className="flex items-center gap-3">
+                <img
+                  src={c.equipe?.logoUrl}
+                  alt={c.equipe?.nom}
+                  className="rounded-full object-contain"
+                  style={{ width: '32px', height: '32px', backgroundColor: '#f0f0f0', padding: '2px' }}
+                />
+                <span className="font-semibold text-gray-900" style={{ fontSize: '16px' }}>{c.equipe?.nom}</span>
+              </div>
+
+              <span className="text-center text-gray-600" style={{ fontSize: '16px' }}>{c.matchsJoues}</span>
+              <span className="text-center font-medium" style={{ fontSize: '16px', color: '#1a7a3c' }}>{c.victoires}</span>
+              <span className="text-center text-gray-500" style={{ fontSize: '16px' }}>{c.nuls}</span>
+              <span className="text-center" style={{ fontSize: '16px', color: '#CE1126' }}>{c.defaites}</span>
+              <span className="text-center text-gray-600" style={{ fontSize: '16px' }}>{c.butsPour}</span>
+              <span className="text-center text-gray-600" style={{ fontSize: '16px' }}>{c.butsContre}</span>
+              <span className="text-center font-medium" style={{ fontSize: '16px', color: c.differenceDesButs > 0 ? '#1a7a3c' : c.differenceDesButs < 0 ? '#CE1126' : '#666' }}>
+                {c.differenceDesButs > 0 ? `+${c.differenceDesButs}` : c.differenceDesButs}
+              </span>
+              <span className="text-center font-black text-gray-900" style={{ fontSize: '20px' }}>{c.points}</span>
+
+              {/* Forme */}
+              <div className="flex items-center justify-end gap-1">
+                {getForme().map((r, i) => (
+                  <span
+                    key={i}
+                    className="flex items-center justify-center rounded font-bold"
+                    style={{ ...getFormeColor(r), width: '22px', height: '22px', fontSize: '11px' }}
+                  >
+                    {r}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 };

@@ -1,5 +1,4 @@
 ﻿using F237.BLL.Services.Interfaces;
-using F237.DAL.Repositories.Implementations;
 using F237.DAL.Repositories.Interfaces;
 using F237.Domain.Entities;
 using F237.Domain.Enums;
@@ -34,60 +33,72 @@ namespace F237.BLL.Services.Implementations
 
         public async Task RecalculerClassementAsync(int saisonId)
         {
-            await _classementRepository.RecalculerClassementAsync(saisonId);
+            var matchs = await _matchRepository.GetMatchsParSaisonAsync(saisonId);
+            var matchsTermines = matchs.Where(m => m.Statut == StatutMatchEnum.Terminé).ToList();
+
+            // Construire stats depuis zéro
+            var stats = new Dictionary<int, Classement>();
+
+            foreach (var m in matchsTermines)
+            {
+                if (m.ScoreDomicile == null || m.ScoreExterieur == null) continue;
+
+                if (!stats.ContainsKey(m.EquipeDomicileId))
+                    stats[m.EquipeDomicileId] = new Classement { EquipeId = m.EquipeDomicileId, SaisonId = saisonId };
+
+                if (!stats.ContainsKey(m.EquipeExterieurId))
+                    stats[m.EquipeExterieurId] = new Classement { EquipeId = m.EquipeExterieurId, SaisonId = saisonId };
+
+                var dom = stats[m.EquipeDomicileId];
+                var ext = stats[m.EquipeExterieurId];
+
+                dom.MatchsJoues++;
+                ext.MatchsJoues++;
+                dom.ButsPour += m.ScoreDomicile.Value;
+                dom.ButsContre += m.ScoreExterieur.Value;
+                ext.ButsPour += m.ScoreExterieur.Value;
+                ext.ButsContre += m.ScoreDomicile.Value;
+
+                if (m.ScoreDomicile > m.ScoreExterieur)
+                {
+                    dom.Victoires++; dom.Points += 3; ext.Defaites++;
+                }
+                else if (m.ScoreExterieur > m.ScoreDomicile)
+                {
+                    ext.Victoires++; ext.Points += 3; dom.Defaites++;
+                }
+                else
+                {
+                    dom.Nuls++; ext.Nuls++; dom.Points++; ext.Points++;
+                }
+            }
+
+            // Trier
+            var classementTrie = stats.Values
+                .Select(c => { c.DifferenceDesButs = c.ButsPour - c.ButsContre; return c; })
+                .OrderByDescending(c => c.Points)
+                .ThenByDescending(c => c.DifferenceDesButs)
+                .ThenByDescending(c => c.ButsPour)
+                .ToList();
+
+            for (int i = 0; i < classementTrie.Count; i++)
+                classementTrie[i].Position = i + 1;
+
+            // Supprimer anciens classements
+            var anciens = await _classementRepository.GetClassementParSaisonAsync(saisonId);
+            foreach (var ancien in anciens)
+                await _classementRepository.DeleteAsync(ancien.Id);
+
+            // Insérer nouveaux
+            foreach (var c in classementTrie)
+                await _classementRepository.AddAsync(c);
         }
 
         public async Task MettreAJourClassementApresMatchAsync(int matchId)
         {
             var match = await _matchRepository.GetMatchAvecButsAsync(matchId);
             if (match == null || match.Statut != StatutMatchEnum.Terminé) return;
-
-            // Mettre à jour classement équipe domicile
-            var classementDomicile = await _classementRepository
-                .GetClassementEquipeAsync(match.EquipeDomicileId, match.SaisonId);
-
-            // Mettre à jour classement équipe extérieur
-            var classementExterieur = await _classementRepository
-                .GetClassementEquipeAsync(match.EquipeExterieurId, match.SaisonId);
-
-            if (classementDomicile == null || classementExterieur == null) return;
-
-            classementDomicile.MatchsJoues++;
-            classementExterieur.MatchsJoues++;
-            classementDomicile.ButsPour += match.ScoreDomicile ?? 0;
-            classementDomicile.ButsContre += match.ScoreExterieur ?? 0;
-            classementExterieur.ButsPour += match.ScoreExterieur ?? 0;
-            classementExterieur.ButsContre += match.ScoreDomicile ?? 0;
-
-            // Victoire domicile
-            if (match.ScoreDomicile > match.ScoreExterieur)
-            {
-                classementDomicile.Victoires++;
-                classementDomicile.Points += 3;
-                classementExterieur.Defaites++;
-            }
-            // Victoire extérieur
-            else if (match.ScoreExterieur > match.ScoreDomicile)
-            {
-                classementExterieur.Victoires++;
-                classementExterieur.Points += 3;
-                classementDomicile.Defaites++;
-            }
-            // Nul
-            else
-            {
-                classementDomicile.Nuls++;
-                classementExterieur.Nuls++;
-                classementDomicile.Points++;
-                classementExterieur.Points++;
-            }
-
-            classementDomicile.DifferenceDesButs = classementDomicile.ButsPour - classementDomicile.ButsContre;
-            classementExterieur.DifferenceDesButs = classementExterieur.ButsPour - classementExterieur.ButsContre;
-
-            await _classementRepository.UpdateAsync(classementDomicile);
-            await _classementRepository.UpdateAsync(classementExterieur);
-            await _classementRepository.RecalculerClassementAsync(match.SaisonId);
+            await RecalculerClassementAsync(match.SaisonId);
         }
     }
 }

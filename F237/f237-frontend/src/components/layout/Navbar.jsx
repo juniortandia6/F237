@@ -21,7 +21,7 @@ const Navbar = () => {
     );
 
     return (
-        <nav className="bg-white border-b border-gray-200 px-8 flex items-center justify-between" style={{ height: '80px' }}>
+        <nav className="bg-white border-b border-gray-200 px-8 flex items-center justify-between sticky top-0 z-50 overflow-hidden" style={{ height: '64px' }}>
             {/* Logo */}
             <div style={{ height: '80px', overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
                 <img src={logo} alt="F237" style={{ height: '130px', width: 'auto', marginTop: '25px' }} />
