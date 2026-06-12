@@ -1,4 +1,5 @@
-﻿using F237.BLL.Services.Interfaces;
+﻿using F237.API.DTOs;
+using F237.BLL.Services.Interfaces;
 using F237.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +10,6 @@ namespace F237.API.Controllers
     public class MatchsController : ControllerBase
     {
         private readonly IMatchService _matchService;
-
         public MatchsController(IMatchService matchService)
         {
             _matchService = matchService;
@@ -19,7 +19,31 @@ namespace F237.API.Controllers
         public async Task<IActionResult> GetAll()
         {
             var matchs = await _matchService.GetAllMatchsAsync();
-            return Ok(matchs);
+            var dto = matchs.Select(m => new MatchDto
+            {
+                Id = m.Id,
+                ApiFootballId = m.ApiFootballId,
+                DateMatch = m.DateMatch,
+                Statut = (int)m.Statut,
+                ScoreDomicile = m.ScoreDomicile,
+                ScoreExterieur = m.ScoreExterieur,
+                SaisonId = m.SaisonId,
+                EquipeDomicile = m.EquipeDomicile == null ? null : new EquipeSimpleDto
+                {
+                    Id = m.EquipeDomicile.Id,
+                    Nom = m.EquipeDomicile.Nom,
+                    LogoUrl = m.EquipeDomicile.LogoUrl,
+                    Division = (int)m.EquipeDomicile.Division
+                },
+                EquipeExterieur = m.EquipeExterieur == null ? null : new EquipeSimpleDto
+                {
+                    Id = m.EquipeExterieur.Id,
+                    Nom = m.EquipeExterieur.Nom,
+                    LogoUrl = m.EquipeExterieur.LogoUrl,
+                    Division = (int)m.EquipeExterieur.Division
+                }
+            });
+            return Ok(dto);
         }
 
         [HttpGet("{id}")]
@@ -27,35 +51,155 @@ namespace F237.API.Controllers
         {
             var match = await _matchService.GetMatchParIdAsync(id);
             if (match == null) return NotFound();
-            return Ok(match);
+            var dto = new MatchDto
+            {
+                Id = match.Id,
+                ApiFootballId = match.ApiFootballId,
+                DateMatch = match.DateMatch,
+                Statut = (int)match.Statut,
+                ScoreDomicile = match.ScoreDomicile,
+                ScoreExterieur = match.ScoreExterieur,
+                SaisonId = match.SaisonId,
+                EquipeDomicile = match.EquipeDomicile == null ? null : new EquipeSimpleDto
+                {
+                    Id = match.EquipeDomicile.Id,
+                    Nom = match.EquipeDomicile.Nom,
+                    LogoUrl = match.EquipeDomicile.LogoUrl,
+                    Division = (int)match.EquipeDomicile.Division
+                },
+                EquipeExterieur = match.EquipeExterieur == null ? null : new EquipeSimpleDto
+                {
+                    Id = match.EquipeExterieur.Id,
+                    Nom = match.EquipeExterieur.Nom,
+                    LogoUrl = match.EquipeExterieur.LogoUrl,
+                    Division = (int)match.EquipeExterieur.Division
+                }
+            };
+            return Ok(dto);
         }
 
         [HttpGet("live")]
         public async Task<IActionResult> GetLive()
         {
             var matchs = await _matchService.GetMatchsEnCoursAsync();
-            return Ok(matchs);
+            var dto = matchs.Select(m => new MatchDto
+            {
+                Id = m.Id,
+                ApiFootballId = m.ApiFootballId,
+                DateMatch = m.DateMatch,
+                Statut = (int)m.Statut,
+                ScoreDomicile = m.ScoreDomicile,
+                ScoreExterieur = m.ScoreExterieur,
+                SaisonId = m.SaisonId,
+                EquipeDomicile = m.EquipeDomicile == null ? null : new EquipeSimpleDto
+                {
+                    Id = m.EquipeDomicile.Id,
+                    Nom = m.EquipeDomicile.Nom,
+                    LogoUrl = m.EquipeDomicile.LogoUrl,
+                    Division = (int)m.EquipeDomicile.Division
+                },
+                EquipeExterieur = m.EquipeExterieur == null ? null : new EquipeSimpleDto
+                {
+                    Id = m.EquipeExterieur.Id,
+                    Nom = m.EquipeExterieur.Nom,
+                    LogoUrl = m.EquipeExterieur.LogoUrl,
+                    Division = (int)m.EquipeExterieur.Division
+                }
+            });
+            return Ok(dto);
         }
 
         [HttpGet("date/{date}")]
         public async Task<IActionResult> GetByDate(DateTime date)
         {
             var matchs = await _matchService.GetMatchsParDateAsync(date);
-            return Ok(matchs);
+            var dto = matchs.Select(m => new MatchDto
+            {
+                Id = m.Id,
+                ApiFootballId = m.ApiFootballId,
+                DateMatch = m.DateMatch,
+                Statut = (int)m.Statut,
+                ScoreDomicile = m.ScoreDomicile,
+                ScoreExterieur = m.ScoreExterieur,
+                SaisonId = m.SaisonId,
+                EquipeDomicile = m.EquipeDomicile == null ? null : new EquipeSimpleDto
+                {
+                    Id = m.EquipeDomicile.Id,
+                    Nom = m.EquipeDomicile.Nom,
+                    LogoUrl = m.EquipeDomicile.LogoUrl,
+                    Division = (int)m.EquipeDomicile.Division
+                },
+                EquipeExterieur = m.EquipeExterieur == null ? null : new EquipeSimpleDto
+                {
+                    Id = m.EquipeExterieur.Id,
+                    Nom = m.EquipeExterieur.Nom,
+                    LogoUrl = m.EquipeExterieur.LogoUrl,
+                    Division = (int)m.EquipeExterieur.Division
+                }
+            });
+            return Ok(dto);
         }
 
         [HttpGet("saison/{saisonId}")]
         public async Task<IActionResult> GetBySaison(int saisonId)
         {
             var matchs = await _matchService.GetMatchsParSaisonAsync(saisonId);
-            return Ok(matchs);
+            var dto = matchs.Select(m => new MatchDto
+            {
+                Id = m.Id,
+                ApiFootballId = m.ApiFootballId,
+                DateMatch = m.DateMatch,
+                Statut = (int)m.Statut,
+                ScoreDomicile = m.ScoreDomicile,
+                ScoreExterieur = m.ScoreExterieur,
+                SaisonId = m.SaisonId,
+                EquipeDomicile = m.EquipeDomicile == null ? null : new EquipeSimpleDto
+                {
+                    Id = m.EquipeDomicile.Id,
+                    Nom = m.EquipeDomicile.Nom,
+                    LogoUrl = m.EquipeDomicile.LogoUrl,
+                    Division = (int)m.EquipeDomicile.Division
+                },
+                EquipeExterieur = m.EquipeExterieur == null ? null : new EquipeSimpleDto
+                {
+                    Id = m.EquipeExterieur.Id,
+                    Nom = m.EquipeExterieur.Nom,
+                    LogoUrl = m.EquipeExterieur.LogoUrl,
+                    Division = (int)m.EquipeExterieur.Division
+                }
+            });
+            return Ok(dto);
         }
 
         [HttpGet("equipe/{equipeId}")]
         public async Task<IActionResult> GetByEquipe(int equipeId)
         {
             var matchs = await _matchService.GetMatchsParEquipeAsync(equipeId);
-            return Ok(matchs);
+            var dto = matchs.Select(m => new MatchDto
+            {
+                Id = m.Id,
+                ApiFootballId = m.ApiFootballId,
+                DateMatch = m.DateMatch,
+                Statut = (int)m.Statut,
+                ScoreDomicile = m.ScoreDomicile,
+                ScoreExterieur = m.ScoreExterieur,
+                SaisonId = m.SaisonId,
+                EquipeDomicile = m.EquipeDomicile == null ? null : new EquipeSimpleDto
+                {
+                    Id = m.EquipeDomicile.Id,
+                    Nom = m.EquipeDomicile.Nom,
+                    LogoUrl = m.EquipeDomicile.LogoUrl,
+                    Division = (int)m.EquipeDomicile.Division
+                },
+                EquipeExterieur = m.EquipeExterieur == null ? null : new EquipeSimpleDto
+                {
+                    Id = m.EquipeExterieur.Id,
+                    Nom = m.EquipeExterieur.Nom,
+                    LogoUrl = m.EquipeExterieur.LogoUrl,
+                    Division = (int)m.EquipeExterieur.Division
+                }
+            });
+            return Ok(dto);
         }
 
         [HttpGet("{id}/buts")]
@@ -63,7 +207,31 @@ namespace F237.API.Controllers
         {
             var match = await _matchService.GetMatchAvecButsAsync(id);
             if (match == null) return NotFound();
-            return Ok(match);
+            var dto = new MatchDto
+            {
+                Id = match.Id,
+                ApiFootballId = match.ApiFootballId,
+                DateMatch = match.DateMatch,
+                Statut = (int)match.Statut,
+                ScoreDomicile = match.ScoreDomicile,
+                ScoreExterieur = match.ScoreExterieur,
+                SaisonId = match.SaisonId,
+                EquipeDomicile = match.EquipeDomicile == null ? null : new EquipeSimpleDto
+                {
+                    Id = match.EquipeDomicile.Id,
+                    Nom = match.EquipeDomicile.Nom,
+                    LogoUrl = match.EquipeDomicile.LogoUrl,
+                    Division = (int)match.EquipeDomicile.Division
+                },
+                EquipeExterieur = match.EquipeExterieur == null ? null : new EquipeSimpleDto
+                {
+                    Id = match.EquipeExterieur.Id,
+                    Nom = match.EquipeExterieur.Nom,
+                    LogoUrl = match.EquipeExterieur.LogoUrl,
+                    Division = (int)match.EquipeExterieur.Division
+                }
+            };
+            return Ok(dto);
         }
 
         [HttpPost]
