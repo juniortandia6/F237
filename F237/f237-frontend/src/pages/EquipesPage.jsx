@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { equipeService } from '../services/equipeService';
 
 const EquipesPage = () => {
   const [equipes, setEquipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [division, setDivision] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchEquipes = async () => {
@@ -40,7 +42,7 @@ const EquipesPage = () => {
       <div className="flex items-start justify-between mb-8">
         <div>
           <p className="font-bold tracking-widest uppercase mb-2" style={{ color: '#FCD116', fontSize: '13px' }}>
-            Saison 2024
+            Saison 2026
           </p>
           <h1 className="font-black uppercase mb-2" style={{ fontSize: '48px', letterSpacing: '-1px' }}>
             Équipes
@@ -85,7 +87,8 @@ const EquipesPage = () => {
           {equipesFiltrees.map(e => (
             <div
               key={e.id}
-              className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col items-center text-center"
+              onClick={() => navigate(`/equipes/${e.id}`)}
+              className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer flex flex-col items-center text-center"
               style={{ border: '1px solid #f0f0e8' }}
             >
               {/* Logo ou avatar */}
@@ -115,14 +118,9 @@ const EquipesPage = () => {
                 {e.nom}
               </p>
 
-              {/* Pays */}
-              <p className="text-gray-400 mb-3" style={{ fontSize: '13px' }}>
-                📍 {e.pays}
-              </p>
-
               {/* Badge division */}
               <span
-                className="px-3 py-1 rounded-full font-bold uppercase tracking-widest"
+                className="px-3 py-1 rounded-full font-bold uppercase tracking-widest mt-2"
                 style={{
                   fontSize: '11px',
                   backgroundColor: division === 0 ? '#e8f5ee' : '#fff3cd',

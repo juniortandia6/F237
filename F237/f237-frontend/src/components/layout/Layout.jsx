@@ -1,9 +1,11 @@
 import Navbar from './Navbar';
+import LiveScoresBanner from '../LiveScoresBanner';
 
 const Layout = ({ children }) => {
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f5f5f0', fontFamily: 'Raleway, sans-serif' }}>
       <Navbar />
+      <LiveScoresBanner />
       <main className="max-w-screen-2xl mx-auto px-4 py-8">
         {children}
       </main>

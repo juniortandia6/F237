@@ -102,7 +102,7 @@ namespace F237.BLL.Services.Implementations
             await _context.SaveChangesAsync();
         }
 
-        public async Task SyncMatchsJourneeAsync(int leagueId, int saison)
+        public async Task SyncMatchsJourneeAsync(int leagueId, int saison, int saisonId = 1)
         {
             var response = await _httpClient.GetAsync($"/fixtures?league={leagueId}&season={saison}");
             if (!response.IsSuccessStatusCode) return;
@@ -128,11 +128,8 @@ namespace F237.BLL.Services.Implementations
                 if (equipeDomicile == null || equipeExterieur == null) continue;
 
                 var apiFixtureId = fixtureInfo.GetProperty("id").GetInt32();
-
                 var matchExistant = await _context.Matchs
                     .FirstOrDefaultAsync(m => m.ApiFootballId == apiFixtureId);
-
-                if (matchExistant != null) continue;
 
                 var statutStr = fixtureInfo.GetProperty("status").GetProperty("short").GetString();
                 var statut = statutStr switch
@@ -142,20 +139,34 @@ namespace F237.BLL.Services.Implementations
                     _ => StatutMatchEnum.Planifié
                 };
 
-                var match = new Match
+                var scoreDomicile = goals.GetProperty("home").ValueKind != JsonValueKind.Null
+                    ? goals.GetProperty("home").GetInt32() : (int?)null;
+                var scoreExterieur = goals.GetProperty("away").ValueKind != JsonValueKind.Null
+                    ? goals.GetProperty("away").GetInt32() : (int?)null;
+
+                if (matchExistant != null)
                 {
-                    ApiFootballId = apiFixtureId,
-                    DateMatch = fixtureInfo.GetProperty("date").GetDateTime(),
-                    Statut = statut,
-                    EquipeDomicileId = equipeDomicile.Id,
-                    EquipeExterieurId = equipeExterieur.Id,
-                    SaisonId = leagueId == 411 ? 1 : 2,
-                    ScoreDomicile = goals.GetProperty("home").ValueKind != JsonValueKind.Null
-                        ? goals.GetProperty("home").GetInt32() : null,
-                    ScoreExterieur = goals.GetProperty("away").ValueKind != JsonValueKind.Null
-                        ? goals.GetProperty("away").GetInt32() : null,
-                };
-                await _context.Matchs.AddAsync(match);
+                    matchExistant.Statut = statut;
+                    matchExistant.ScoreDomicile = scoreDomicile;
+                    matchExistant.ScoreExterieur = scoreExterieur;
+                    matchExistant.SaisonId = saisonId;
+                    _context.Matchs.Update(matchExistant);
+                }
+                else
+                {
+                    var match = new Match
+                    {
+                        ApiFootballId = apiFixtureId,
+                        DateMatch = fixtureInfo.GetProperty("date").GetDateTime(),
+                        Statut = statut,
+                        EquipeDomicileId = equipeDomicile.Id,
+                        EquipeExterieurId = equipeExterieur.Id,
+                        SaisonId = saisonId,
+                        ScoreDomicile = scoreDomicile,
+                        ScoreExterieur = scoreExterieur,
+                    };
+                    await _context.Matchs.AddAsync(match);
+                }
             }
             await _context.SaveChangesAsync();
         }
@@ -191,7 +202,7 @@ namespace F237.BLL.Services.Implementations
             await _context.SaveChangesAsync();
         }
 
-        public async Task SyncClassementAsync(int leagueId, int saison)
+        public async Task SyncClassementAsync(int leagueId, int saison, int saisonId = 1)
         {
             var response = await _httpClient.GetAsync($"/standings?league={leagueId}&season={saison}");
             if (!response.IsSuccessStatusCode) return;
@@ -207,7 +218,6 @@ namespace F237.BLL.Services.Implementations
                 .GetProperty("standings")[0];
 
             var equipes = await _context.Equipes.ToListAsync();
-            var saisonId = leagueId == 411 ? 1 : 2;
 
             foreach (var entry in standings.EnumerateArray())
             {
@@ -216,7 +226,6 @@ namespace F237.BLL.Services.Implementations
                 if (equipe == null) continue;
 
                 var all = entry.GetProperty("all");
-
                 var existant = await _context.Classements
                     .FirstOrDefaultAsync(c => c.EquipeId == equipe.Id && c.SaisonId == saisonId);
 
@@ -262,6 +271,54 @@ namespace F237.BLL.Services.Implementations
 
             var json = await response.Content.ReadAsStringAsync();
             // Parser et mettre à jour les joueurs
+        }
+
+        public async Task SyncEvenementsAsync(int leagueId, int saison, int saisonId)
+        {
+            var matchs = await _context.Matchs
+                .Where(m => m.SaisonId == saisonId && m.Statut == StatutMatchEnum.Terminé)
+                .ToListAsync();
+
+            foreach (var match in matchs)
+            {
+                // Skip si déjà des buts pour ce match
+                var butsExistants = await _context.ButsMatch
+                    .AnyAsync(b => b.MatchId == match.Id);
+                if (butsExistants) continue;
+
+                var response = await _httpClient.GetAsync($"/fixtures/events?fixture={match.ApiFootballId}");
+                if (!response.IsSuccessStatusCode) continue;
+
+                var json = await response.Content.ReadAsStringAsync();
+                var data = JsonDocument.Parse(json);
+                var events = data.RootElement.GetProperty("response");
+
+                foreach (var evt in events.EnumerateArray())
+                {
+                    var type = evt.GetProperty("type").GetString();
+                    if (type != "Goal") continue;
+
+                    var detail = evt.GetProperty("detail").GetString();
+                    var minute = evt.GetProperty("time").GetProperty("elapsed").GetInt32();
+                    var nomJoueur = evt.GetProperty("player").GetProperty("name").GetString() ?? "Inconnu";
+                    var nomEquipe = evt.GetProperty("team").GetProperty("name").GetString() ?? "";
+                    var apiJoueurId = evt.GetProperty("player").GetProperty("id").ValueKind != JsonValueKind.Null
+                        ? evt.GetProperty("player").GetProperty("id").GetInt32() : 0;
+
+                    var but = new ButMatch
+                    {
+                        MatchId = match.Id,
+                        NomJoueur = nomJoueur,
+                        NomEquipe = nomEquipe,
+                        ApiJoueurId = apiJoueurId,
+                        Minute = minute,
+                        EstButCSC = detail == "Own Goal",
+                        EstPenalty = detail == "Penalty"
+                    };
+                    await _context.ButsMatch.AddAsync(but);
+                }
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

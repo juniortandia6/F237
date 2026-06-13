@@ -17,6 +17,7 @@ namespace F237.DAL.Repositories.Implementations
             return await _context.Matchs
                 .Include(m => m.EquipeDomicile)
                 .Include(m => m.EquipeExterieur)
+                .Include(m => m.Buts)
                 .Where(m => m.Statut == StatutMatchEnum.EnCours)
                 .ToListAsync();
         }
@@ -26,6 +27,7 @@ namespace F237.DAL.Repositories.Implementations
             return await _context.Matchs
                 .Include(m => m.EquipeDomicile)
                 .Include(m => m.EquipeExterieur)
+                .Include(m => m.Buts)
                 .Where(m => m.SaisonId == saisonId)
                 .OrderBy(m => m.DateMatch)
                 .ToListAsync();
@@ -36,6 +38,7 @@ namespace F237.DAL.Repositories.Implementations
             return await _context.Matchs
                 .Include(m => m.EquipeDomicile)
                 .Include(m => m.EquipeExterieur)
+                .Include(m => m.Buts)
                 .Where(m => m.EquipeDomicileId == equipeId ||
                             m.EquipeExterieurId == equipeId)
                 .OrderByDescending(m => m.DateMatch)
@@ -47,6 +50,7 @@ namespace F237.DAL.Repositories.Implementations
             return await _context.Matchs
                 .Include(m => m.EquipeDomicile)
                 .Include(m => m.EquipeExterieur)
+                .Include(m => m.Buts)
                 .Where(m => m.DateMatch.Date == date.Date)
                 .ToListAsync();
         }
@@ -57,7 +61,6 @@ namespace F237.DAL.Repositories.Implementations
                 .Include(m => m.EquipeDomicile)
                 .Include(m => m.EquipeExterieur)
                 .Include(m => m.Buts)
-                    .ThenInclude(b => b.Joueur)
                 .FirstOrDefaultAsync(m => m.Id == matchId);
         }
     }

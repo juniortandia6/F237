@@ -1,6 +1,5 @@
 ﻿using F237.BLL.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-
 namespace F237.API.Controllers
 {
     [ApiController]
@@ -8,10 +7,11 @@ namespace F237.API.Controllers
     public class SyncController : ControllerBase
     {
         private readonly IApiFootballService _apiFootballService;
-
-        private const int ELITE_ONE_ID = 411;  
+        private const int ELITE_ONE_ID = 411;
         private const int ELITE_TWO_ID = 813;
-        private const int SAISON = 2024; 
+        private const int SAISON = 2026;
+        private const int ELITE_ONE_SAISONID = 3;
+        private const int ELITE_TWO_SAISONID = 4;
 
         public SyncController(IApiFootballService apiFootballService)
         {
@@ -36,8 +36,8 @@ namespace F237.API.Controllers
         [HttpPost("matchs")]
         public async Task<IActionResult> SyncMatchs()
         {
-            await _apiFootballService.SyncMatchsJourneeAsync(ELITE_ONE_ID, SAISON);
-            await _apiFootballService.SyncMatchsJourneeAsync(ELITE_TWO_ID, SAISON);
+            await _apiFootballService.SyncMatchsJourneeAsync(ELITE_ONE_ID, SAISON, ELITE_ONE_SAISONID);
+            await _apiFootballService.SyncMatchsJourneeAsync(ELITE_TWO_ID, SAISON, ELITE_TWO_SAISONID);
             return Ok("Matchs synchronisés avec succès");
         }
 
@@ -52,8 +52,8 @@ namespace F237.API.Controllers
         [HttpPost("classement")]
         public async Task<IActionResult> SyncClassement()
         {
-            await _apiFootballService.SyncClassementAsync(ELITE_ONE_ID, SAISON);
-            await _apiFootballService.SyncClassementAsync(ELITE_TWO_ID, SAISON);
+            await _apiFootballService.SyncClassementAsync(ELITE_ONE_ID, SAISON, ELITE_ONE_SAISONID);
+            await _apiFootballService.SyncClassementAsync(ELITE_TWO_ID, SAISON, ELITE_TWO_SAISONID);
             return Ok("Classement synchronisé avec succès");
         }
 
@@ -65,17 +65,27 @@ namespace F237.API.Controllers
             return Ok("Joueurs synchronisés avec succès");
         }
 
+        [HttpPost("evenements")]
+        public async Task<IActionResult> SyncEvenements()
+        {
+            await _apiFootballService.SyncEvenementsAsync(ELITE_ONE_ID, SAISON, ELITE_ONE_SAISONID);
+            await _apiFootballService.SyncEvenementsAsync(ELITE_TWO_ID, SAISON, ELITE_TWO_SAISONID);
+            return Ok("Événements synchronisés avec succès");
+        }
+
         [HttpPost("tout")]
         public async Task<IActionResult> SyncTout()
         {
             await _apiFootballService.SyncEquipesAsync(ELITE_ONE_ID, SAISON);
             await _apiFootballService.SyncEquipesAsync(ELITE_TWO_ID, SAISON);
-            await _apiFootballService.SyncMatchsJourneeAsync(ELITE_ONE_ID, SAISON);
-            await _apiFootballService.SyncMatchsJourneeAsync(ELITE_TWO_ID, SAISON);
-            await _apiFootballService.SyncClassementAsync(ELITE_ONE_ID, SAISON);
-            await _apiFootballService.SyncClassementAsync(ELITE_TWO_ID, SAISON);
+            await _apiFootballService.SyncMatchsJourneeAsync(ELITE_ONE_ID, SAISON, ELITE_ONE_SAISONID);
+            await _apiFootballService.SyncMatchsJourneeAsync(ELITE_TWO_ID, SAISON, ELITE_TWO_SAISONID);
+            await _apiFootballService.SyncClassementAsync(ELITE_ONE_ID, SAISON, ELITE_ONE_SAISONID);
+            await _apiFootballService.SyncClassementAsync(ELITE_TWO_ID, SAISON, ELITE_TWO_SAISONID);
             await _apiFootballService.SyncJoueursAsync(ELITE_ONE_ID, SAISON);
             await _apiFootballService.SyncJoueursAsync(ELITE_TWO_ID, SAISON);
+            await _apiFootballService.SyncEvenementsAsync(ELITE_ONE_ID, SAISON, ELITE_ONE_SAISONID);
+            await _apiFootballService.SyncEvenementsAsync(ELITE_TWO_ID, SAISON, ELITE_TWO_SAISONID);
             return Ok("Synchronisation complète effectuée avec succès");
         }
     }
