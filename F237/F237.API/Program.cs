@@ -1,11 +1,14 @@
-using F237.API.Hubs;
+﻿using F237.API.Hubs;
 using F237.API.Services;
 using F237.BLL.Services.Implementations;
 using F237.BLL.Services.Interfaces;
 using F237.DAL.Data;
 using F237.DAL.Repositories.Implementations;
 using F237.DAL.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,27 +26,54 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddDbContext<F237DbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// CORS pour React � AllowCredentials() requis pour SignalR WebSocket
+// CORS pour React — AllowCredentials() requis pour SignalR WebSocket
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReact", policy =>
     {
         policy.WithOrigins(
-    "http://localhost:5173",
-    "http://localhost:5174",
-    "http://localhost:5175",
-    "http://localhost:5176",
-    "http://localhost:5177",
-    "http://localhost:5178",
-    "http://localhost:5179",
-    "http://localhost:5180",
-    "http://localhost:5181"
-)
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+            "http://localhost:5173",
+            "http://localhost:5174",
+            "http://localhost:5175",
+            "http://localhost:5176",
+            "http://localhost:5177",
+            "http://localhost:5178",
+            "http://localhost:5179",
+            "http://localhost:5180",
+            "http://localhost:5181"
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
     });
 });
+
+// ── JWT Authentication 
+var jwtKey = builder.Configuration["Jwt:Key"]!;
+var jwtIssuer = builder.Configuration["Jwt:Issuer"]!;
+var jwtAudience = builder.Configuration["Jwt:Audience"]!;
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(jwtKey))
+    };
+});
+
+builder.Services.AddAuthorization();
 
 // Repositories
 builder.Services.AddScoped<IEquipeRepository, EquipeRepository>();
@@ -62,7 +92,7 @@ builder.Services.AddScoped<IPariService, PariService>();
 // ApiFootball Service (existant)
 builder.Services.AddHttpClient<IApiFootballService, ApiFootballService>();
 
-// HttpClient nomm� pour EquipesController + LiveScoreService
+// HttpClient nommé pour EquipesController + LiveScoreService
 builder.Services.AddHttpClient("ApiFootball", client =>
 {
     client.BaseAddress = new Uri("https://v3.football.api-sports.io/");
@@ -88,7 +118,11 @@ if (app.Environment.IsDevelopment())
 // app.UseHttpsRedirection();
 
 app.UseCors("AllowReact");
+
+//  Authentication AVANT Authorization
+app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 
 // Hub SignalR
