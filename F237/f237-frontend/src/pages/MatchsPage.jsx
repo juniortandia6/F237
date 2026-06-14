@@ -215,11 +215,13 @@ const MatchsPage = () => {
                               .filter(b => b.nomEquipe === m.equipeDomicile?.nom)
                               .map((b, i) => (
                                 <div key={i} className="flex items-center gap-2">
-                                  <span className="text-gray-600" style={{ fontSize: '13px' }}>
-                                    {b.nomJoueur}
-                                    {b.estButCSC && <span className="ml-1" style={{ color: '#CE1126', fontSize: '11px' }}>(CSC)</span>}
-                                    {b.estPenalty && <span className="ml-1" style={{ color: '#1a7a3c', fontSize: '11px' }}>(pen.)</span>}
-                                  </span>
+                                  {b.nomJoueur && b.nomJoueur !== 'Inconnu' && (
+                                    <span className="text-gray-600" style={{ fontSize: '13px' }}>
+                                      {b.nomJoueur}
+                                      {b.estButCSC && <span className="ml-1" style={{ color: '#CE1126', fontSize: '11px' }}>(CSC)</span>}
+                                      {b.estPenalty && <span className="ml-1" style={{ color: '#1a7a3c', fontSize: '11px' }}>(pen.)</span>}
+                                    </span>
+                                  )}
                                   <span style={{ fontSize: '12px' }}>⚽</span>
                                   <span className="text-gray-400 font-semibold" style={{ fontSize: '12px' }}>{b.minute}'</span>
                                 </div>
@@ -237,11 +239,13 @@ const MatchsPage = () => {
                                 <div key={i} className="flex items-center gap-2">
                                   <span className="text-gray-400 font-semibold" style={{ fontSize: '12px' }}>{b.minute}'</span>
                                   <span style={{ fontSize: '12px' }}>⚽</span>
-                                  <span className="text-gray-600" style={{ fontSize: '13px' }}>
-                                    {b.nomJoueur}
-                                    {b.estButCSC && <span className="ml-1" style={{ color: '#CE1126', fontSize: '11px' }}>(CSC)</span>}
-                                    {b.estPenalty && <span className="ml-1" style={{ color: '#1a7a3c', fontSize: '11px' }}>(pen.)</span>}
-                                  </span>
+                                  {b.nomJoueur && b.nomJoueur !== 'Inconnu' && (
+                                    <span className="text-gray-600" style={{ fontSize: '13px' }}>
+                                      {b.nomJoueur}
+                                      {b.estButCSC && <span className="ml-1" style={{ color: '#CE1126', fontSize: '11px' }}>(CSC)</span>}
+                                      {b.estPenalty && <span className="ml-1" style={{ color: '#1a7a3c', fontSize: '11px' }}>(pen.)</span>}
+                                    </span>
+                                  )}
                                 </div>
                               ))}
                           </div>
