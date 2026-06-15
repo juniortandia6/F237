@@ -28,7 +28,7 @@ function formatDateCourte(dateStr) {
 }
 
 const AccueilPage = () => {
-    const { matchsLive, isConnected, aucunMatchLive } = useLiveScores();
+    const { matchsLive, isConnected } = useLiveScores();
 
     const [top5, setTop5] = useState([]);
     const [prochains, setProchains] = useState([]);
@@ -153,7 +153,7 @@ const AccueilPage = () => {
                     </div>
                 ) : (
                     <p className="text-center text-gray-400 py-4" style={{ fontSize: '15px' }}>
-                        {aucunMatchLive ? 'Aucun match en direct pour le moment.' : 'Chargement des scores live...'}
+                        Aucun match en direct pour le moment.
                     </p>
                 )}
             </div>

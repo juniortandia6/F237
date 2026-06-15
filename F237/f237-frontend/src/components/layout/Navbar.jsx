@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from '../../assets/transparent-logo.png';
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { LogOut, Trophy } from 'lucide-react';
+import { LogOut, Trophy, Home, Calendar, Shield, Dices } from 'lucide-react';
 
 const Navbar = () => {
     const location = useLocation();
@@ -12,14 +12,16 @@ const Navbar = () => {
 
     const isActive = (path) => location.pathname === path;
 
-    const navLink = (to, label) => (
+    const navLink = (to, label, Icon) => (
         <Link
             to={to}
-            className={`text-base font-semibold px-4 py-2 rounded-full transition-colors ${isActive(to)
+            className={`flex items-center gap-1.5 text-base font-semibold px-4 py-2 rounded-full transition-colors ${
+                isActive(to)
                     ? 'bg-gray-900 text-white'
                     : 'text-gray-600 hover:text-gray-900'
-                }`}
+            }`}
         >
+            <Icon size={15} />
             {label}
         </Link>
     );
@@ -38,17 +40,16 @@ const Navbar = () => {
 
             {/* Liens */}
             <div className="flex items-center gap-1">
-                {navLink('/', 'Accueil')}
-                {navLink('/classement', 'Classement')}
-                {navLink('/matchs', 'Matchs')}
-                {navLink('/equipes', 'Équipes')}
-                {navLink('/jouer', 'Jouer')}
+                {navLink('/', 'Accueil', Home)}
+                {navLink('/classement', 'Classement', Trophy)}
+                {navLink('/matchs', 'Matchs', Calendar)}
+                {navLink('/equipes', 'Équipes', Shield)}
+                {navLink('/jouer', 'Jouer', Dices)}
             </div>
 
             {/* Droite : auth + langue */}
             <div className="flex items-center gap-2">
                 {user ? (
-                    // Connecté
                     <>
                         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full"
                             style={{ backgroundColor: '#f0f9f4', border: '1px solid #c8e6d4' }}>
@@ -69,7 +70,6 @@ const Navbar = () => {
                         </button>
                     </>
                 ) : (
-                    // Non connecté
                     <>
                         <Link
                             to="/login"

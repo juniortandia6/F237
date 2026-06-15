@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { Trophy, TrendingUp, Users, Plus } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Trophy, TrendingUp, Users, Plus, Lock } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const JouerPage = () => {
   const [mises, setMises] = useState({});
+  const { user } = useAuth();
 
   const parisDisponibles = [
     { id: 1, ligue: 'ELITE ONE', date: '15 juin, 16:00', dom: 'Cotonsport', ext: 'Stade Renard', coteDom: 2.10, coteNul: 3.20, coteExt: 2.80 },
@@ -18,9 +21,62 @@ const JouerPage = () => {
     { nom: 'Patrice D.', pts: 980, initiales: 'PD', couleur: '#1a3a7a' },
   ];
 
+  // ── Si non connecté ───────────────────────────────────────────────────────
+  if (!user) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <div className="flex items-center justify-center w-20 h-20 rounded-full mx-auto mb-6"
+            style={{ backgroundColor: '#f0f9f4', border: '2px solid #c8e6d4' }}>
+            <Lock size={36} style={{ color: '#1a7a3c' }} />
+          </div>
+
+          <h1 className="font-black text-gray-900 mb-3" style={{ fontSize: '32px' }}>
+            Connectez-vous pour jouer
+          </h1>
+          <p className="text-gray-500 mb-8" style={{ fontSize: '16px' }}>
+            Pariez sur les matchs MTN Elite One et Elite Two, grimpez au classement et convertissez vos points en FCFA.
+          </p>
+
+          <div className="bg-white rounded-2xl p-5 mb-6 text-left space-y-3"
+            style={{ border: '1px solid #f0f0e8' }}>
+            {[
+              { emoji: '🎁', text: "1 000 points offerts à l'inscription" },
+              { emoji: '⚽', text: 'Pariez sur tous les matchs Elite One & Two' },
+              { emoji: '🏆', text: 'Grimpez au classement entre amis' },
+              { emoji: '💸', text: 'Convertissez vos points en FCFA via Mobile Money' },
+            ].map((a, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <span style={{ fontSize: '20px' }}>{a.emoji}</span>
+                <span className="text-gray-700 font-medium" style={{ fontSize: '15px' }}>{a.text}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex gap-3">
+            <Link
+              to="/register"
+              className="flex-1 py-3 rounded-xl font-bold text-white text-center transition-opacity hover:opacity-90"
+              style={{ backgroundColor: '#1a7a3c', fontSize: '16px' }}
+            >
+              S'inscrire gratuitement
+            </Link>
+            <Link
+              to="/login"
+              className="flex-1 py-3 rounded-xl font-bold text-gray-700 text-center border border-gray-200 hover:bg-gray-50 transition-colors"
+              style={{ fontSize: '16px' }}
+            >
+              Se connecter
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Si connecté ───────────────────────────────────────────────────────────
   return (
     <div>
-      {/* Header */}
       <div className="mb-8">
         <h1 className="font-black mb-2" style={{ fontSize: '40px' }}>Joueur</h1>
         <p className="text-gray-500" style={{ fontSize: '16px' }}>
@@ -36,7 +92,7 @@ const JouerPage = () => {
           </div>
           <div>
             <p className="text-gray-400 font-semibold uppercase tracking-widest" style={{ fontSize: '12px' }}>Mes points</p>
-            <p className="font-black text-gray-900" style={{ fontSize: '28px' }}>1 240</p>
+            <p className="font-black text-gray-900" style={{ fontSize: '28px' }}>{user.soldePoints?.toLocaleString()}</p>
           </div>
         </div>
 
@@ -63,56 +119,48 @@ const JouerPage = () => {
 
       {/* Contenu principal */}
       <div className="grid grid-cols-3 gap-6">
-        {/* Paris disponibles */}
         <div className="col-span-2">
           <h2 className="font-black mb-4" style={{ fontSize: '22px' }}>Paris disponibles</h2>
           <div className="flex flex-col gap-4">
             {parisDisponibles.map(p => (
               <div key={p.id} className="bg-white rounded-2xl p-5 shadow-sm" style={{ border: '1px solid #f0f0e8' }}>
-                {/* Header match */}
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-gray-400 font-bold uppercase tracking-widest" style={{ fontSize: '12px' }}>{p.ligue}</span>
                   <span className="text-gray-400" style={{ fontSize: '13px' }}>{p.date}</span>
                 </div>
 
-                {/* Équipes */}
                 <div className="flex items-center justify-center gap-4 mb-5">
                   <span className="font-bold text-gray-900" style={{ fontSize: '18px' }}>{p.dom}</span>
-                  <div className="flex items-center justify-center rounded-full bg-gray-200 font-black text-gray-600" style={{ width: '36px', height: '36px', fontSize: '11px' }}>
+                  <div className="flex items-center justify-center rounded-full bg-gray-200 font-black text-gray-600"
+                    style={{ width: '36px', height: '36px', fontSize: '11px' }}>
                     {p.dom.split(' ').map(w => w[0]).join('').substring(0, 3)}
                   </div>
                   <span className="font-bold text-gray-400" style={{ fontSize: '16px' }}>vs</span>
-                  <div className="flex items-center justify-center rounded-full bg-gray-200 font-black text-gray-600" style={{ width: '36px', height: '36px', fontSize: '11px' }}>
+                  <div className="flex items-center justify-center rounded-full bg-gray-200 font-black text-gray-600"
+                    style={{ width: '36px', height: '36px', fontSize: '11px' }}>
                     {p.ext.split(' ').map(w => w[0]).join('').substring(0, 3)}
                   </div>
                   <span className="font-bold text-gray-900" style={{ fontSize: '18px' }}>{p.ext}</span>
                 </div>
 
-                {/* Cotes */}
                 <div className="grid grid-cols-3 gap-3 mb-4">
                   {[
                     { label: '1 · Domicile', cote: p.coteDom },
                     { label: 'X · Nul', cote: p.coteNul },
                     { label: '2 · Extérieur', cote: p.coteExt },
                   ].map((c, i) => (
-                    <button
-                      key={i}
-                      className="rounded-xl p-3 text-left hover:shadow-md transition-all"
-                      style={{ border: '1px solid #e8e8e0', backgroundColor: '#fafaf8' }}
-                    >
+                    <button key={i} className="rounded-xl p-3 text-left hover:shadow-md transition-all"
+                      style={{ border: '1px solid #e8e8e0', backgroundColor: '#fafaf8' }}>
                       <p className="text-gray-400 font-semibold uppercase tracking-widest mb-1" style={{ fontSize: '11px' }}>{c.label}</p>
                       <p className="font-black text-gray-900" style={{ fontSize: '22px' }}>{c.cote.toFixed(2)}</p>
                     </button>
                   ))}
                 </div>
 
-                {/* Mise slider */}
                 <div className="flex items-center gap-4">
                   <span className="text-gray-400 font-semibold uppercase tracking-widest" style={{ fontSize: '12px' }}>Mise</span>
                   <input
-                    type="range"
-                    min="10"
-                    max="500"
+                    type="range" min="10" max="500"
                     value={mises[p.id] || 50}
                     onChange={e => setMises({ ...mises, [p.id]: e.target.value })}
                     className="flex-1"
@@ -127,7 +175,6 @@ const JouerPage = () => {
 
         {/* Sidebar */}
         <div className="col-span-1 flex flex-col gap-4">
-          {/* Mes amis */}
           <div className="bg-white rounded-2xl p-5 shadow-sm" style={{ border: '1px solid #f0f0e8' }}>
             <div className="flex items-center gap-2 mb-4">
               <Users size={18} color="#666" />
@@ -138,38 +185,35 @@ const JouerPage = () => {
                 <div key={i} className={`flex items-center justify-between ${a.isMoi ? 'font-black' : ''}`}>
                   <div className="flex items-center gap-3">
                     <span className="text-gray-400" style={{ fontSize: '14px', minWidth: '16px' }}>{i + 1}</span>
-                    <div
-                      className="flex items-center justify-center rounded-full font-black text-white"
-                      style={{ width: '32px', height: '32px', backgroundColor: a.couleur, fontSize: '11px' }}
-                    >
+                    <div className="flex items-center justify-center rounded-full font-black text-white"
+                      style={{ width: '32px', height: '32px', backgroundColor: a.couleur, fontSize: '11px' }}>
                       {a.initiales}
                     </div>
                     <span style={{ fontSize: '15px', color: a.isMoi ? '#1a7a3c' : '#333' }}>{a.nom}</span>
                   </div>
-                  <span className="font-bold" style={{ fontSize: '15px', color: a.isMoi ? '#1a7a3c' : '#666' }}>{a.pts.toLocaleString()}</span>
+                  <span className="font-bold" style={{ fontSize: '15px', color: a.isMoi ? '#1a7a3c' : '#666' }}>
+                    {a.pts.toLocaleString()}
+                  </span>
                 </div>
               ))}
             </div>
-            <button
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-white transition-colors hover:opacity-90"
-              style={{ backgroundColor: '#1a7a3c', fontSize: '15px' }}
-            >
+            <button className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-white transition-colors hover:opacity-90"
+              style={{ backgroundColor: '#1a7a3c', fontSize: '15px' }}>
               <Plus size={16} /> Inviter un ami
             </button>
           </div>
 
-          {/* Convertir points */}
           <div className="rounded-2xl p-5" style={{ backgroundColor: '#fdf9e8', border: '1px solid #f0e8a0' }}>
             <p className="font-black uppercase tracking-wide mb-1" style={{ fontSize: '14px' }}>Convertir mes points</p>
             <p className="text-gray-500 mb-3" style={{ fontSize: '13px' }}>1 000 points = 500 FCFA</p>
             <div className="flex items-baseline gap-2 mb-4">
-              <span className="font-black text-gray-900" style={{ fontSize: '36px' }}>500</span>
+              <span className="font-black text-gray-900" style={{ fontSize: '36px' }}>
+                {Math.floor((user.soldePoints ?? 0) / 1000) * 500}
+              </span>
               <span className="text-gray-500 font-semibold" style={{ fontSize: '14px' }}>FCFA dispo</span>
             </div>
-            <button
-              className="w-full py-3 rounded-xl font-bold text-white transition-colors hover:opacity-90"
-              style={{ backgroundColor: '#1a1a1a', fontSize: '15px' }}
-            >
+            <button className="w-full py-3 rounded-xl font-bold text-white transition-colors hover:opacity-90"
+              style={{ backgroundColor: '#1a1a1a', fontSize: '15px' }}>
               Demander un retrait
             </button>
           </div>
