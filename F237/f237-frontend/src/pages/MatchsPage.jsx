@@ -6,30 +6,24 @@ const MatchsPage = () => {
   const [loading, setLoading] = useState(true);
   const [saisonId, setSaisonId] = useState(3);
   const [filtre, setFiltre] = useState('tous');
-  const aujourdhuiRef = useRef(null);
+  const prochainRef = useRef(null);
 
   useEffect(() => {
-    const fetchMatchs = async () => {
-      setLoading(true);
-      try {
-        const data = await matchService.getBySaison(saisonId);
-        setMatchs(data);
-      } catch (error) {
-        console.error('Erreur matchs:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchMatchs();
+    let ignore = false;
+    matchService.getBySaison(saisonId)
+      .then(data => { if (!ignore) { setMatchs(data); setLoading(false); } })
+      .catch(() => { if (!ignore) setLoading(false); });
+    return () => { ignore = true; };
   }, [saisonId]);
 
+  // Scroll vers le match le plus proche après chargement
   useEffect(() => {
-    if (!loading && aujourdhuiRef.current) {
+    if (!loading && prochainRef.current) {
       setTimeout(() => {
-        aujourdhuiRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        prochainRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 300);
     }
-  }, [loading]);
+  }, [loading, filtre]);
 
   const getStatutLabel = (statut) => {
     if (statut === 2) return { label: 'FT', color: '#999' };
@@ -38,17 +32,10 @@ const MatchsPage = () => {
   };
 
   const filtrerMatchs = (matchs) => {
-    const maintenant = new Date();
-    const matchsValides = matchs.filter(m => {
-      const dateMatch = new Date(m.dateMatch);
-      if (dateMatch < maintenant && m.statut === 0 && m.scoreDomicile === null) return false;
-      return true;
-    });
-
-    if (filtre === 'direct') return matchsValides.filter(m => m.statut === 1);
-    if (filtre === 'termine') return matchsValides.filter(m => m.statut === 2);
-    if (filtre === 'avenir') return matchsValides.filter(m => m.statut === 0);
-    return matchsValides;
+    if (filtre === 'direct') return matchs.filter(m => m.statut === 1);
+    if (filtre === 'termine') return matchs.filter(m => m.statut === 2);
+    if (filtre === 'avenir') return matchs.filter(m => m.statut === 0);
+    return matchs;
   };
 
   const grouperParDate = (matchs) => {
@@ -64,13 +51,15 @@ const MatchsPage = () => {
       groupes[dateKey].matchs.push(m);
     });
 
+    // Tous les groupes triés du plus récent/futur au plus ancien
+    // → À venir en haut (ASC), terminés en bas (DESC)
     const avenir = Object.entries(groupes)
       .filter(([, g]) => g.matchs.some(m => m.statut === 0 || m.statut === 1))
-      .sort(([a], [b]) => a.localeCompare(b));
+      .sort(([a], [b]) => a.localeCompare(b)); // ASC : plus tôt en premier
 
     const termines = Object.entries(groupes)
       .filter(([, g]) => g.matchs.every(m => m.statut === 2))
-      .sort(([a], [b]) => b.localeCompare(a));
+      .sort(([a], [b]) => b.localeCompare(a)); // DESC : plus récent en premier
 
     return [...avenir, ...termines];
   };
@@ -79,7 +68,10 @@ const MatchsPage = () => {
   const groupes = grouperParDate(matchsFiltres);
 
   const aujourd = new Date().toISOString().split('T')[0];
-  const dateProche = groupes.find(([dateKey]) => dateKey >= aujourd)?.[0] || groupes[0]?.[0];
+
+  // Trouver la date la plus proche (aujourd'hui ou futur)
+  const dateProcheKey = groupes.find(([dateKey]) => dateKey >= aujourd)?.[0]
+    ?? groupes[0]?.[0];
 
   return (
     <div>
@@ -97,17 +89,20 @@ const MatchsPage = () => {
         </div>
 
         <div className="flex items-center rounded-full p-1 mt-2" style={{ backgroundColor: '#e8e8e3', border: '1px solid #d0d0c8' }}>
-          <button onClick={() => setSaisonId(3)} className="px-5 py-2 rounded-full font-bold tracking-widest uppercase transition-all"
+          <button onClick={() => { setSaisonId(3); setFiltre('tous'); }}
+            className="px-5 py-2 rounded-full font-bold tracking-widest uppercase transition-all"
             style={{ fontSize: '13px', backgroundColor: saisonId === 3 ? '#1a1a1a' : 'transparent', color: saisonId === 3 ? 'white' : '#666' }}>
             Elite One
           </button>
-          <button onClick={() => setSaisonId(4)} className="px-5 py-2 rounded-full font-bold tracking-widest uppercase transition-all"
+          <button onClick={() => { setSaisonId(4); setFiltre('tous'); }}
+            className="px-5 py-2 rounded-full font-bold tracking-widest uppercase transition-all"
             style={{ fontSize: '13px', backgroundColor: saisonId === 4 ? '#1a1a1a' : 'transparent', color: saisonId === 4 ? 'white' : '#666' }}>
             Elite Two
           </button>
         </div>
       </div>
 
+      {/* Filtres */}
       <div className="flex items-center gap-2 mb-8">
         {[
           { key: 'tous', label: 'Tous' },
@@ -130,9 +125,15 @@ const MatchsPage = () => {
 
       {loading ? (
         <div className="text-center py-12 text-gray-400">Chargement...</div>
+      ) : groupes.length === 0 ? (
+        <div className="text-center py-12 text-gray-400">Aucun match trouvé.</div>
       ) : (
         groupes.map(([dateKey, groupe]) => (
-          <div key={dateKey} className="mb-8" ref={dateKey === dateProche ? aujourdhuiRef : null}>
+          <div
+            key={dateKey}
+            className="mb-8"
+            ref={dateKey === dateProcheKey ? prochainRef : null}
+          >
             <div className="flex items-center gap-3 mb-4">
               <p className="font-bold tracking-widest uppercase text-gray-400" style={{ fontSize: '13px' }}>
                 {groupe.label}
@@ -141,6 +142,12 @@ const MatchsPage = () => {
                 <span className="px-2 py-1 rounded-full font-bold text-white uppercase"
                   style={{ backgroundColor: '#1a7a3c', fontSize: '10px', letterSpacing: '1px' }}>
                   Aujourd'hui
+                </span>
+              )}
+              {dateKey > aujourd && groupe.matchs.some(m => m.statut === 0) && dateKey === dateProcheKey && (
+                <span className="px-2 py-1 rounded-full font-bold text-white uppercase"
+                  style={{ backgroundColor: '#FCD116', color: '#000', fontSize: '10px', letterSpacing: '1px' }}>
+                  Prochain
                 </span>
               )}
             </div>
@@ -209,7 +216,6 @@ const MatchsPage = () => {
                     {m.statut === 2 && m.buts && m.buts.length > 0 && (
                       <div className="px-6 pb-4 border-t border-gray-50">
                         <div className="flex gap-4 pt-3">
-                          {/* Buts domicile */}
                           <div className="flex-1 flex flex-col gap-1 items-end">
                             {m.buts
                               .filter(b => b.nomEquipe === m.equipeDomicile?.nom)
@@ -227,11 +233,7 @@ const MatchsPage = () => {
                                 </div>
                               ))}
                           </div>
-
-                          {/* Séparateur central */}
                           <div style={{ width: '100px' }}></div>
-
-                          {/* Buts extérieur */}
                           <div className="flex-1 flex flex-col gap-1">
                             {m.buts
                               .filter(b => b.nomEquipe === m.equipeExterieur?.nom)
