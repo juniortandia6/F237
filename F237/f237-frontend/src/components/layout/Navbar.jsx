@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from '../../assets/transparent-logo.png';
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { LogOut, Trophy, Home, Calendar, Shield, Dices } from 'lucide-react';
+import { LogOut, Trophy, Home, Calendar, Shield, Dices, User } from 'lucide-react';
 
 const Navbar = () => {
     const location = useLocation();
@@ -51,6 +51,7 @@ const Navbar = () => {
             <div className="flex items-center gap-2">
                 {user ? (
                     <>
+                        {/* Points */}
                         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full"
                             style={{ backgroundColor: '#f0f9f4', border: '1px solid #c8e6d4' }}>
                             <Trophy size={14} style={{ color: '#1a7a3c' }} />
@@ -58,9 +59,17 @@ const Navbar = () => {
                                 {user.soldePoints?.toLocaleString()} pts
                             </span>
                         </div>
-                        <span className="font-semibold text-gray-700 text-sm">
+
+                        {/* Lien vers le profil */}
+                        <Link
+                            to="/profil"
+                            className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 px-3 py-1.5 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
+                        >
+                            <User size={14} />
                             {user.prenom}
-                        </span>
+                        </Link>
+
+                        {/* Déconnexion */}
                         <button
                             onClick={handleLogout}
                             className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 border border-gray-200 rounded-full px-3 py-1.5 hover:bg-gray-100 transition-colors"

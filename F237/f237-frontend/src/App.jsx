@@ -9,6 +9,7 @@ import JouerPage from './pages/JouerPage';
 import EquipeDetailPage from './pages/EquipeDetailPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ProfilPage from './pages/ProfilPage';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
             <Route path="/jouer" element={<JouerPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/profil" element={<ProfilPage />} />
           </Routes>
         </Layout>
       </AuthProvider>
