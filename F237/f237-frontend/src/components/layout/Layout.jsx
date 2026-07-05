@@ -3,13 +3,13 @@ import LiveScoresBanner from '../LiveScoresBanner';
 
 const Layout = ({ children }) => {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#f5f5f0', fontFamily: 'Raleway, sans-serif' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#cfcdcc', fontFamily: 'Raleway, sans-serif' }}>
       <Navbar />
       <LiveScoresBanner />
-      <main className="max-w-screen-2xl mx-auto px-4 py-8">
+      <main>
         {children}
       </main>
-      <footer className="text-center text-gray-400 py-6 border-t border-gray-200" style={{ fontSize: '16px' }}>
+      <footer className="text-center py-6" style={{ fontSize: '14px', color: '#888', borderTop: '1px solid #b8b6b5' }}>
         © 2026 F237 · MTN Elite One & Elite Two
       </footer>
     </div>
