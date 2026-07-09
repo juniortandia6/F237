@@ -107,7 +107,7 @@ const AccueilPage = () => {
     <div>
 
       {/* ── HERO PLEINE LARGEUR ───────────────────────────────────────────── */}
-      <div style={{ position: 'relative', height: '560px', overflow: 'hidden' }}>
+      <div style={{ position: 'relative', height: '700px', overflow: 'hidden' }}>
 
         {/* Image fond */}
         {ACTUS.map((a, i) => (
