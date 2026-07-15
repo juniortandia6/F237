@@ -34,7 +34,7 @@ const Navbar = () => {
             style={{ height: '68px', backgroundColor: '#cfcdcc', borderBottom: '1px solid #b8b6b5' }}
         >
             {/* Logo */}
-            <div style={{ height: '68px', overflow: 'hidden', display: 'flex', alignItems: 'center', minWidth: '120px' }}>
+            <div style={{ height: '68px', paddingLeft:'80px' , overflow: 'hidden', display: 'flex', alignItems: 'center', minWidth: '120px' }}>
                 <img src={logo} alt="F237" style={{ height: '110px', width: 'auto', marginTop: '20px' }} />
             </div>
 
@@ -72,7 +72,7 @@ const Navbar = () => {
             </div>
 
             {/* Droite */}
-            <div className="flex items-center gap-3" style={{ minWidth: '200px', justifyContent: 'flex-end' }}>
+            <div className="flex items-center gap-3" style={{ minWidth: '200px', justifyContent: 'flex-end', paddingRight:'50px' }}>
                 {user ? (
                     <>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"

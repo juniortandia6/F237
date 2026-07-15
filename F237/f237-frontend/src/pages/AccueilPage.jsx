@@ -43,33 +43,36 @@ const AccueilPage = () => {
   const startTimeRef = useRef(null);
 
   const goTo = useCallback((index) => {
+    clearInterval(intervalRef.current);
     setActuActive(index);
     setProgress(0);
     startTimeRef.current = Date.now();
+    intervalRef.current = setInterval(() => {
+      setActuActive(prev => {
+        startTimeRef.current = Date.now();
+        setProgress(0);
+        return (prev + 1) % ACTUS.length;
+      });
+    }, DUREE);
   }, []);
 
   const next = useCallback(() => {
     setActuActive(prev => {
-      const n = (prev + 1) % ACTUS.length;
       startTimeRef.current = Date.now();
       setProgress(0);
-      return n;
+      return (prev + 1) % ACTUS.length;
     });
   }, []);
 
-  // Auto-slide + progress bar
   useEffect(() => {
     startTimeRef.current = Date.now();
-
     intervalRef.current = setInterval(next, DUREE);
-
     const tick = () => {
       const elapsed = Date.now() - (startTimeRef.current || Date.now());
       setProgress(Math.min((elapsed / DUREE) * 100, 100));
       progressRef.current = requestAnimationFrame(tick);
     };
     progressRef.current = requestAnimationFrame(tick);
-
     return () => {
       clearInterval(intervalRef.current);
       cancelAnimationFrame(progressRef.current);
@@ -105,97 +108,109 @@ const AccueilPage = () => {
 
   return (
     <div>
-
       {/* ── HERO PLEINE LARGEUR ───────────────────────────────────────────── */}
       <div style={{ position: 'relative', height: '700px', overflow: 'hidden' }}>
 
-        {/* Image fond */}
+        {/* Images fond */}
         {ACTUS.map((a, i) => (
-          <img
-            key={i}
-            src={a.img}
-            alt=""
+          <img key={i} src={a.img} alt=""
             style={{
               position: 'absolute', inset: 0,
               width: '100%', height: '100%', objectFit: 'cover',
               opacity: i === actuActive ? 1 : 0,
-              transition: 'opacity 0.6s ease',
+              transition: 'opacity 0.5s ease',
             }}
           />
         ))}
 
-        {/* Overlay gradient */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(to top, rgba(0,0,0,0.92) 30%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0.1) 100%)',
-        }} />
+        {/* Overlay */}
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)' }} />
 
-        {/* Contenu bas gauche */}
-        <div style={{ position: 'absolute', bottom: '120px', left: '48px', right: '48px' }}>
+        {/* Contenu centré */}
+        <div style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0, bottom: '130px',
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center',
+          textAlign: 'center', padding: '0 80px',
+          marginTop: '100px',
+        }}>
           <span style={{
-            display: 'inline-block', backgroundColor: '#FCD116', color: '#000',
-            padding: '4px 14px', borderRadius: '20px',
-            fontSize: '11px', fontWeight: 700, letterSpacing: '1px',
-            textTransform: 'uppercase', marginBottom: '16px',
+            display: 'inline-block', backgroundColor: '#fc1621', color: '#000',
+            padding: '4px 16px', borderRadius: '20px',
+            fontSize: '11px', fontWeight: 700, letterSpacing: '1.5px',
+            textTransform: 'uppercase', marginBottom: '20px',
           }}>
             {ACTUS[actuActive].tag}
           </span>
+
           <h2 style={{
-            color: '#fff', fontWeight: 900, fontSize: '36px',
-            lineHeight: 1.15, maxWidth: '650px', marginBottom: '20px',
+            color: '#fff', fontWeight: 800, fontSize: '44px',
+            lineHeight: 1.05, maxWidth: '800px', marginBottom: '28px',
             textTransform: 'uppercase',
+            fontFamily: '"Barlow Condensed", "Arial Narrow", Arial, sans-serif',
           }}>
             {ACTUS[actuActive].titre}
           </h2>
+
           <a href={ACTUS[actuActive].lien} style={{
             display: 'inline-flex', alignItems: 'center', gap: '8px',
-            backgroundColor: '#FCD116', color: '#000',
-            padding: '10px 22px', borderRadius: '24px',
+            backgroundColor: '#fc1621', color: '#000',
+            padding: '10px 24px', borderRadius: '24px',
             fontWeight: 700, fontSize: '13px', textDecoration: 'none',
+            textTransform: 'uppercase',
           }}>
-            Lire plus →
+            En savoir plus →
           </a>
         </div>
 
-        {/* Miniatures horizontales en bas */}
+        {/* ── MINIATURES STYLE FIBA EXACT ──────────────────────────────────
+            - Fond très sombre
+            - Barre colorée EN HAUT de l'actu active (progression)
+            - Pas de tag visible
+            - Titre blanc gras si actif, gris si inactif
+            - Séparateurs verticaux fins
+        */}
         <div style={{
           position: 'absolute', bottom: 0, left: 0, right: 0,
           display: 'flex',
+          backgroundColor: 'rgba(20,20,20,0.92)',
         }}>
           {ACTUS.map((a, i) => (
             <button
               key={i}
               onClick={() => goTo(i)}
               style={{
-                flex: 1, textAlign: 'left', padding: '12px 20px 10px',
-                backgroundColor: i === actuActive ? 'rgba(0,0,0,0.75)' : 'rgba(0,0,0,0.5)',
+                flex: 1, textAlign: 'left',
+                padding: '16px 20px 18px',
+                backgroundColor: 'transparent',
                 border: 'none', cursor: 'pointer',
-                borderTop: i === actuActive ? '2px solid #FCD116' : '2px solid transparent',
-                transition: 'all 0.3s',
-                position: 'relative', overflow: 'hidden',
+                borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+                position: 'relative',
               }}
             >
-              {/* Barre de progression */}
+
+              {/* Barre de progression cyan/verte EN HAUT comme FIBA */}
               {i === actuActive && (
                 <div style={{
                   position: 'absolute', top: 0, left: 0,
-                  height: '2px', backgroundColor: '#FCD116',
+                  height: '3px',
+                  backgroundColor: '#eedf0d',
                   width: `${progress}%`,
-                  transition: 'width 0.1s linear',
+                  transition: 'width 0.05s linear',
                 }} />
               )}
+
+              {/* Titre uniquement — pas de tag comme FIBA */}
               <span style={{
-                display: 'block', fontSize: '10px', fontWeight: 700,
-                color: '#FCD116', textTransform: 'uppercase',
-                letterSpacing: '0.8px', marginBottom: '4px',
-              }}>
-                {a.tag}
-              </span>
-              <span style={{
-                display: '-webkit-box', WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical', overflow: 'hidden',
-                fontSize: '12px', color: i === actuActive ? '#fff' : '#ccc',
-                fontWeight: i === actuActive ? 600 : 400, lineHeight: 1.35,
+                display: '-webkit-box',
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                fontSize: '13px',
+                color: i === actuActive ? '#ffffff' : 'white',
+                fontWeight: i === actuActive ? 600 : 400,
+                lineHeight: 1.45,
               }}>
                 {a.titre}
               </span>
@@ -204,47 +219,35 @@ const AccueilPage = () => {
         </div>
       </div>
 
-      {/* ── BARRE MATCHS HORIZONTALE ─────────────────────────────────────── */}
-      <div style={{ backgroundColor: '#b8b6b5', padding: '10px 0 12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px 8px' }}>
-          <span style={{ fontSize: '12px', fontWeight: 700, color: '#444', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            Matchs — Elite One 2026
+      {/* ── BARRE MATCHS ─────────────────────────────────────────────────── */}
+      <div style={{ backgroundColor: '#b8b6b5', padding: '14px 0 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px 10px' }}>
+          <span style={{ fontSize: '20px', fontWeight: 700, color: '#333', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            Matchs
           </span>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={() => scrollBarre(-1)} style={{
-              width: '28px', height: '28px', borderRadius: '50%',
-              backgroundColor: '#cfcdcc', border: 'none', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <Link to="/matchs" style={{ fontSize: '13px', color: '#555', fontWeight: 600, textDecoration: 'none', marginRight: '8px' }}>
+              Tous les matchs →
+            </Link>
+            <button onClick={() => scrollBarre(-1)} style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#cfcdcc', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <ChevronLeft size={16} color="#444" />
             </button>
-            <button onClick={() => scrollBarre(1)} style={{
-              width: '28px', height: '28px', borderRadius: '50%',
-              backgroundColor: '#cfcdcc', border: 'none', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
+            <button onClick={() => scrollBarre(1)} style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#cfcdcc', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <ChevronRight size={16} color="#444" />
             </button>
           </div>
         </div>
 
-        <div ref={barreRef} style={{
-          display: 'flex', gap: '12px', padding: '0 24px',
-          overflowX: 'auto', scrollbarWidth: 'none',
-        }}>
+        <div ref={barreRef} style={{ display: 'flex', gap: '12px', padding: '0 24px', overflowX: 'auto', scrollbarWidth: 'none' }}>
           {loadingMatchs ? (
             <span style={{ fontSize: '13px', color: '#777' }}>Chargement...</span>
           ) : matchs.map((m, i) => (
-            <div key={m.id ?? i} style={{
-              flexShrink: 0, minWidth: '220px', borderRadius: '12px',
-              backgroundColor: '#cfcdcc', border: '1px solid #b0aeac', padding: '10px 12px',
-            }}>
+            <div key={m.id ?? i} style={{ flexShrink: 0, minWidth: '220px', borderRadius: '12px', backgroundColor: '#cfcdcc', border: '1px solid #b0aeac', padding: '10px 12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                 <span style={{ fontSize: '10px', color: '#777', fontWeight: 700, textTransform: 'uppercase' }}>Elite One</span>
                 {m.statut === 1 ? (
                   <span style={{ fontSize: '10px', color: '#e53e3e', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span style={{ width: '6px', height: '6px', backgroundColor: '#e53e3e', borderRadius: '50%', display: 'inline-block' }} />
-                    LIVE
+                    <span style={{ width: '6px', height: '6px', backgroundColor: '#e53e3e', borderRadius: '50%', display: 'inline-block' }} />LIVE
                   </span>
                 ) : m.statut === 2 ? (
                   <span style={{ fontSize: '10px', color: '#888', fontWeight: 600 }}>FT</span>
@@ -254,9 +257,7 @@ const AccueilPage = () => {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, justifyContent: 'flex-end' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', maxWidth: '70px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {m.equipeDomicile?.nom}
-                  </span>
+                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', maxWidth: '70px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.equipeDomicile?.nom}</span>
                   {m.equipeDomicile?.logoUrl && <img src={m.equipeDomicile.logoUrl} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />}
                 </div>
                 <div style={{ textAlign: 'center', padding: '0 6px' }}>
@@ -266,16 +267,12 @@ const AccueilPage = () => {
                       <div style={{ fontSize: '9px', color: '#888' }}>{formatHeure(m.dateMatch)}</div>
                     </div>
                   ) : (
-                    <span style={{ fontSize: '16px', fontWeight: 900, color: '#1a1a1a' }}>
-                      {m.scoreDomicile}:{m.scoreExterieur}
-                    </span>
+                    <span style={{ fontSize: '16px', fontWeight: 900, color: '#1a1a1a' }}>{m.scoreDomicile}:{m.scoreExterieur}</span>
                   )}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1 }}>
                   {m.equipeExterieur?.logoUrl && <img src={m.equipeExterieur.logoUrl} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />}
-                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', maxWidth: '70px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {m.equipeExterieur?.nom}
-                  </span>
+                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', maxWidth: '70px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.equipeExterieur?.nom}</span>
                 </div>
               </div>
             </div>
@@ -283,7 +280,7 @@ const AccueilPage = () => {
         </div>
       </div>
 
-      {/* ── CONTENU CENTRÉ ───────────────────────────────────────────────── */}
+      {/* ── CONTENU ──────────────────────────────────────────────────────── */}
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 24px' }}>
 
         {/* En direct */}
@@ -301,16 +298,13 @@ const AccueilPage = () => {
           {matchsLive.length > 0 ? (
             <div className="flex flex-col gap-3">
               {matchsLive.map((m, i) => (
-                <div key={m.apiFootballId ?? i} className="flex items-center justify-between px-6 py-4 rounded-xl"
-                  style={{ backgroundColor: '#b5b3b2' }}>
+                <div key={m.apiFootballId ?? i} className="flex items-center justify-between px-6 py-4 rounded-xl" style={{ backgroundColor: '#b5b3b2' }}>
                   <div className="flex items-center gap-3 flex-1 justify-end">
                     {m.equipeDomicile?.logoUrl && <img src={m.equipeDomicile.logoUrl} alt="" className="w-8 h-8 object-contain" />}
                     <span className="font-semibold" style={{ fontSize: '17px', color: '#1a1a1a' }}>{m.equipeDomicile?.nom}</span>
                   </div>
                   <div className="flex flex-col items-center px-6">
-                    <span className="font-black" style={{ fontSize: '26px', color: '#1a1a1a' }}>
-                      {m.scoreDomicile ?? '–'} : {m.scoreExterieur ?? '–'}
-                    </span>
+                    <span className="font-black" style={{ fontSize: '26px', color: '#1a1a1a' }}>{m.scoreDomicile ?? '–'} : {m.scoreExterieur ?? '–'}</span>
                   </div>
                   <div className="flex items-center gap-3 flex-1">
                     <span className="font-semibold" style={{ fontSize: '17px', color: '#1a1a1a' }}>{m.equipeExterieur?.nom}</span>
@@ -324,7 +318,7 @@ const AccueilPage = () => {
           )}
         </div>
 
-        {/* Grille Top 5 + Résultats */}
+        {/* Grille */}
         <div className="grid grid-cols-3 gap-6">
           <div className="col-span-1">
             <div className="p-5" style={CARD}>
@@ -338,8 +332,7 @@ const AccueilPage = () => {
               {loadingClassement ? (
                 <div className="text-center py-4" style={{ fontSize: '14px', color: '#777' }}>Chargement...</div>
               ) : top5.map((e) => (
-                <div key={e.equipeId ?? e.id} className="flex items-center justify-between py-3"
-                  style={{ borderBottom: '1px solid #aaa8a7' }}>
+                <div key={e.equipeId ?? e.id} className="flex items-center justify-between py-3" style={{ borderBottom: '1px solid #aaa8a7' }}>
                   <div className="flex items-center gap-3">
                     <span className="w-4" style={{ fontSize: '15px', color: '#777' }}>{e.position}</span>
                     {e.equipe?.logoUrl && <img src={e.equipe.logoUrl} alt="" className="w-6 h-6 object-contain" />}
