@@ -21,6 +21,7 @@ const ACTUS = [
 
 const CARD = { backgroundColor: '#bfbdbc', border: '1px solid #b0aeac', borderRadius: '16px' };
 const DUREE = 5000;
+const COULEUR_PROGRESSION = '#00c8d7'; // cyan/turquoise FIBA
 
 function formatHeure(dateStr) {
   return new Date(dateStr).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
@@ -123,30 +124,35 @@ const AccueilPage = () => {
           />
         ))}
 
-        {/* Overlay */}
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)' }} />
+        {/* Overlay en DÉGRADÉ — clair en haut, très sombre en bas (comme FIBA) */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.35) 35%, rgba(0,0,0,0.55) 65%, rgba(0,0,0,0.92) 100%)',
+        }} />
 
-        {/* Contenu centré */}
+        {/* Contenu — tag + titre + bouton + ticker regroupés en UN SEUL bloc
+            compact, ancré en bas de l'image (comme FIBA). Plus de grand
+            vide entre le bouton et les barres. */}
         <div style={{
           position: 'absolute',
-          top: 0, left: 0, right: 0, bottom: '130px',
+          top: 0, left: 0, right: 0, bottom: 0,
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
-          textAlign: 'center', padding: '0 80px',
-          marginTop: '100px',
+          padding: '0 60px',
         }}>
+          <div style={{ width: '100%', maxWidth: '1150px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
           <span style={{
             display: 'inline-block', backgroundColor: '#fc1621', color: '#000',
             padding: '4px 16px', borderRadius: '20px',
             fontSize: '11px', fontWeight: 700, letterSpacing: '1.5px',
-            textTransform: 'uppercase', marginBottom: '20px',
+            textTransform: 'uppercase', marginBottom: '16px',
           }}>
             {ACTUS[actuActive].tag}
           </span>
 
           <h2 style={{
-            color: '#fff', fontWeight: 800, fontSize: '44px',
-            lineHeight: 1.05, maxWidth: '800px', marginBottom: '28px',
+            color: '#fff', fontWeight: 800, fontSize: '40px',
+            lineHeight: 1.05, maxWidth: '780px', marginBottom: '16px',
             textTransform: 'uppercase',
             fontFamily: '"Barlow Condensed", "Arial Narrow", Arial, sans-serif',
           }}>
@@ -158,64 +164,73 @@ const AccueilPage = () => {
             backgroundColor: '#fc1621', color: '#000',
             padding: '10px 24px', borderRadius: '24px',
             fontWeight: 700, fontSize: '13px', textDecoration: 'none',
-            textTransform: 'uppercase',
+            textTransform: 'uppercase', marginBottom: '22px',
           }}>
             En savoir plus →
           </a>
-        </div>
 
-        {/* ── MINIATURES STYLE FIBA EXACT ──────────────────────────────────
-            - Fond très sombre
-            - Barre colorée EN HAUT de l'actu active (progression)
-            - Pas de tag visible
-            - Titre blanc gras si actif, gris si inactif
-            - Séparateurs verticaux fins
-        */}
-        <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0,
-          display: 'flex',
-          backgroundColor: 'rgba(20,20,20,0.92)',
-        }}>
-          {ACTUS.map((a, i) => (
-            <button
-              key={i}
-              onClick={() => goTo(i)}
-              style={{
-                flex: 1, textAlign: 'left',
-                padding: '16px 20px 18px',
-                backgroundColor: 'transparent',
-                border: 'none', cursor: 'pointer',
-                borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.07)' : 'none',
-                position: 'relative',
-              }}
-            >
+          {/* ── TICKER / CARROUSEL D'ACTUS STYLE FIBA ────────────────────
+              - Directement en dessous du bouton, espacement resserré
+              - Largeur réduite (pas de bord à bord)
+              - AUCUN fond noir, texte flottant sur l'image
+              - Barres de progression avec petit espace entre chacune
+          */}
+          <div style={{ width: '100%', maxWidth: '1150px' }}>
+            {/* Rangée des barres de progression */}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+              {ACTUS.map((a, i) => {
+                const active = i === actuActive;
+                return (
+                  <div key={i} style={{ flex: 1, position: 'relative', height: '3px', borderRadius: '2px', overflow: 'hidden', backgroundColor: 'rgba(255,255,255,0.28)' }}>
+                    {active && (
+                      <div style={{
+                        position: 'absolute', top: 0, left: 0, bottom: 0,
+                        borderRadius: '2px',
+                        backgroundColor: COULEUR_PROGRESSION,
+                        width: `${progress}%`,
+                        transition: 'width 0.05s linear',
+                        boxShadow: `0 0 6px ${COULEUR_PROGRESSION}`,
+                      }} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
 
-              {/* Barre de progression cyan/verte EN HAUT comme FIBA */}
-              {i === actuActive && (
-                <div style={{
-                  position: 'absolute', top: 0, left: 0,
-                  height: '3px',
-                  backgroundColor: '#eedf0d',
-                  width: `${progress}%`,
-                  transition: 'width 0.05s linear',
-                }} />
-              )}
-
-              {/* Titre uniquement — pas de tag comme FIBA */}
-              <span style={{
-                display: '-webkit-box',
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                fontSize: '13px',
-                color: i === actuActive ? '#ffffff' : 'white',
-                fontWeight: i === actuActive ? 600 : 400,
-                lineHeight: 1.45,
-              }}>
-                {a.titre}
-              </span>
-            </button>
-          ))}
+            {/* Rangée des textes, alignée sur la même grille que les barres */}
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {ACTUS.map((a, i) => {
+                const active = i === actuActive;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => goTo(i)}
+                    style={{
+                      flex: 1, textAlign: 'left',
+                      padding: 0, margin: 0,
+                      backgroundColor: 'transparent',
+                      border: 'none', cursor: 'pointer',
+                    }}
+                  >
+                    <span style={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      fontSize: '12px',
+                      lineHeight: 1.4,
+                      color: active ? '#ffffff' : 'rgba(230,230,230,0.55)',
+                      fontWeight: active ? 700 : 400,
+                      textShadow: '0 1px 3px rgba(0,0,0,0.6)',
+                    }}>
+                      {a.titre}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          </div>
         </div>
       </div>
 
