@@ -9,8 +9,8 @@ const Layout = ({ children }) => {
       <main>
         {children}
       </main>
-      <footer className="text-center py-6" style={{ fontSize: '14px', color: '#888', borderTop: '1px solid #b8b6b5' }}>
-        © 2026 F237 · MTN Elite One & Elite Two
+      <footer className="text-center py-6" style={{ fontSize: '14px', color: 'black', borderTop: '1px solid #b8b6b5'}}>
+        © 2026 F237 · Le pouls du football Camerounais 
       </footer>
     </div>
   );

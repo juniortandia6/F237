@@ -4,7 +4,6 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLiveScores } from '../hooks/useLiveScores';
 import { classementService } from '../services/classementService';
 import { matchService } from '../services/matchService';
-
 import actu1 from '../assets/accueil1.jpg';
 import actu2 from '../assets/accueil2.jpg';
 import actu3 from '../assets/accueil3.jpg';
@@ -110,7 +109,7 @@ const AccueilPage = () => {
   return (
     <div>
       {/* ── HERO PLEINE LARGEUR ───────────────────────────────────────────── */}
-      <div style={{ position: 'relative', height: '700px', overflow: 'hidden' }}>
+      <div style={{ position: 'relative', height: '860px', overflow: 'hidden' }}>
 
         {/* Images fond */}
         {ACTUS.map((a, i) => (
@@ -135,7 +134,7 @@ const AccueilPage = () => {
             vide entre le bouton et les barres. */}
         <div style={{
           position: 'absolute',
-          top: 0, left: 0, right: 0, bottom: 0,
+          top: 0, left: 0, right: 0, bottom: '170px',
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
           padding: '0 60px',
@@ -151,10 +150,9 @@ const AccueilPage = () => {
           </span>
 
           <h2 style={{
-            color: '#fff', fontWeight: 800, fontSize: '40px',
-            lineHeight: 1.05, maxWidth: '780px', marginBottom: '16px',
-            textTransform: 'uppercase',
-            fontFamily: '"Barlow Condensed", "Arial Narrow", Arial, sans-serif',
+            color: '#fff', fontWeight: 400, fontSize: '38px',
+            lineHeight: 1.25, maxWidth: '700px', marginBottom: '16px',
+            fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif',
           }}>
             {ACTUS[actuActive].titre}
           </h2>
@@ -175,13 +173,13 @@ const AccueilPage = () => {
               - AUCUN fond noir, texte flottant sur l'image
               - Barres de progression avec petit espace entre chacune
           */}
-          <div style={{ width: '100%', maxWidth: '1150px' }}>
+          <div style={{ width: '100%', maxWidth: '980px' }}>
             {/* Rangée des barres de progression */}
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+            <div style={{ display: 'flex', gap: '20px', marginBottom: '10px' }}>
               {ACTUS.map((a, i) => {
                 const active = i === actuActive;
                 return (
-                  <div key={i} style={{ flex: 1, position: 'relative', height: '3px', borderRadius: '2px', overflow: 'hidden', backgroundColor: 'rgba(255,255,255,0.28)' }}>
+                  <div key={i} style={{ flex: '0 0 170px', position: 'relative', height: '2px', borderRadius: '2px', overflow: 'hidden', backgroundColor: 'rgba(255,255,255,0.28)' }}>
                     {active && (
                       <div style={{
                         position: 'absolute', top: 0, left: 0, bottom: 0,
@@ -198,7 +196,7 @@ const AccueilPage = () => {
             </div>
 
             {/* Rangée des textes, alignée sur la même grille que les barres */}
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '20px' }}>
               {ACTUS.map((a, i) => {
                 const active = i === actuActive;
                 return (
@@ -206,7 +204,7 @@ const AccueilPage = () => {
                     key={i}
                     onClick={() => goTo(i)}
                     style={{
-                      flex: 1, textAlign: 'left',
+                      flex: '0 0 170px', textAlign: 'left',
                       padding: 0, margin: 0,
                       backgroundColor: 'transparent',
                       border: 'none', cursor: 'pointer',
@@ -219,6 +217,7 @@ const AccueilPage = () => {
                       overflow: 'hidden',
                       fontSize: '12px',
                       lineHeight: 1.4,
+                      fontFamily: '"Raleway", Arial, sans-serif',
                       color: active ? '#ffffff' : 'rgba(230,230,230,0.55)',
                       fontWeight: active ? 700 : 400,
                       textShadow: '0 1px 3px rgba(0,0,0,0.6)',
@@ -232,66 +231,76 @@ const AccueilPage = () => {
           </div>
           </div>
         </div>
-      </div>
 
-      {/* ── BARRE MATCHS ─────────────────────────────────────────────────── */}
-      <div style={{ backgroundColor: '#b8b6b5', padding: '14px 0 16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px 10px' }}>
-          <span style={{ fontSize: '20px', fontWeight: 700, color: '#333', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            Matchs
-          </span>
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <Link to="/matchs" style={{ fontSize: '13px', color: '#555', fontWeight: 600, textDecoration: 'none', marginRight: '8px' }}>
-              Tous les matchs →
-            </Link>
-            <button onClick={() => scrollBarre(-1)} style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#cfcdcc', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <ChevronLeft size={16} color="#444" />
-            </button>
-            <button onClick={() => scrollBarre(1)} style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#cfcdcc', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <ChevronRight size={16} color="#444" />
-            </button>
+        {/* ── BARRE MATCHS — À L'INTÉRIEUR DU HERO, dans la continuité de
+              l'image de fond (comme la section "GAMES" du site FIBA).
+              Chaque match est une carte BLANCHE aux bords arrondis avec
+              un petit espace entre chacune. ───────────────────────────── */}
+        <div style={{
+          position: 'absolute', bottom: 0, left: 0, right: 0,
+          padding: '0 60px 28px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+            <span style={{ fontSize: '18px', fontWeight: 700, color: '#fff', textTransform: 'uppercase', letterSpacing: '1px', textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
+              Matchs
+            </span>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <Link to="/matchs" style={{ fontSize: '13px', color: '#fff', fontWeight: 600, textDecoration: 'none', marginRight: '4px', textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
+                Tous les matchs →
+              </Link>
+              <button onClick={() => scrollBarre(-1)} style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.9)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ChevronLeft size={16} color="#333" />
+              </button>
+              <button onClick={() => scrollBarre(1)} style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.9)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ChevronRight size={16} color="#333" />
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div ref={barreRef} style={{ display: 'flex', gap: '12px', padding: '0 24px', overflowX: 'auto', scrollbarWidth: 'none' }}>
-          {loadingMatchs ? (
-            <span style={{ fontSize: '13px', color: '#777' }}>Chargement...</span>
-          ) : matchs.map((m, i) => (
-            <div key={m.id ?? i} style={{ flexShrink: 0, minWidth: '220px', borderRadius: '12px', backgroundColor: '#cfcdcc', border: '1px solid #b0aeac', padding: '10px 12px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '10px', color: '#777', fontWeight: 700, textTransform: 'uppercase' }}>Elite One</span>
-                {m.statut === 1 ? (
-                  <span style={{ fontSize: '10px', color: '#e53e3e', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span style={{ width: '6px', height: '6px', backgroundColor: '#e53e3e', borderRadius: '50%', display: 'inline-block' }} />LIVE
-                  </span>
-                ) : m.statut === 2 ? (
-                  <span style={{ fontSize: '10px', color: '#888', fontWeight: 600 }}>FT</span>
-                ) : (
-                  <span style={{ fontSize: '10px', color: '#1a7a3c', fontWeight: 600 }}>{formatDateCourte(m.dateMatch)}</span>
-                )}
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, justifyContent: 'flex-end' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', maxWidth: '70px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.equipeDomicile?.nom}</span>
-                  {m.equipeDomicile?.logoUrl && <img src={m.equipeDomicile.logoUrl} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />}
-                </div>
-                <div style={{ textAlign: 'center', padding: '0 6px' }}>
-                  {m.statut === 0 ? (
-                    <div>
-                      <div style={{ fontSize: '14px', fontWeight: 900, color: '#333' }}>—:—</div>
-                      <div style={{ fontSize: '9px', color: '#888' }}>{formatHeure(m.dateMatch)}</div>
-                    </div>
+          <div ref={barreRef} style={{ display: 'flex', gap: '8px', overflowX: 'auto', scrollbarWidth: 'none' }}>
+            {loadingMatchs ? (
+              <span style={{ fontSize: '13px', color: '#eee' }}>Chargement...</span>
+            ) : matchs.map((m, i) => (
+              <div key={m.id ?? i} style={{ flexShrink: 0, minWidth: '190px', borderRadius: '12px', backgroundColor: '#ffffff', boxShadow: '0 4px 14px rgba(0,0,0,0.25)', padding: '10px 12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '9px', color: '#888', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Elite One</span>
+                  {m.statut === 1 ? (
+                    <span style={{ fontSize: '9px', color: '#e53e3e', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ width: '5px', height: '5px', backgroundColor: '#e53e3e', borderRadius: '50%', display: 'inline-block' }} />LIVE
+                    </span>
+                  ) : m.statut === 2 ? (
+                    <span style={{ fontSize: '9px', color: '#999', fontWeight: 700, textTransform: 'uppercase' }}>Terminé</span>
                   ) : (
-                    <span style={{ fontSize: '16px', fontWeight: 900, color: '#1a1a1a' }}>{m.scoreDomicile}:{m.scoreExterieur}</span>
+                    <span style={{ fontSize: '9px', color: '#1a7a3c', fontWeight: 700 }}>{formatDateCourte(m.dateMatch)}</span>
                   )}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1 }}>
-                  {m.equipeExterieur?.logoUrl && <img src={m.equipeExterieur.logoUrl} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />}
-                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', maxWidth: '70px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.equipeExterieur?.nom}</span>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
+                    {m.equipeDomicile?.logoUrl && <img src={m.equipeDomicile.logoUrl} alt="" style={{ width: '18px', height: '18px', objectFit: 'contain', flexShrink: 0 }} />}
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.equipeDomicile?.nom}</span>
+                  </div>
+                  <span style={{ fontSize: '13px', fontWeight: 900, color: '#1a1a1a', flexShrink: 0 }}>
+                    {m.statut === 0 ? '—' : m.scoreDomicile}
+                  </span>
                 </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
+                    {m.equipeExterieur?.logoUrl && <img src={m.equipeExterieur.logoUrl} alt="" style={{ width: '18px', height: '18px', objectFit: 'contain', flexShrink: 0 }} />}
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.equipeExterieur?.nom}</span>
+                  </div>
+                  <span style={{ fontSize: '13px', fontWeight: 900, color: '#1a1a1a', flexShrink: 0 }}>
+                    {m.statut === 0 ? '—' : m.scoreExterieur}
+                  </span>
+                </div>
+
+                {m.statut === 0 && (
+                  <div style={{ fontSize: '10px', color: '#999', marginTop: '6px', textAlign: 'right' }}>{formatHeure(m.dateMatch)}</div>
+                )}
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 
