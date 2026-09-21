@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import logo from '../../assets/transparent-logo.png';
+import logo from '../../assets/logo2.png';
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import {

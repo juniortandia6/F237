@@ -20,7 +20,7 @@ const ACTUS = [
 
 const CARD = { backgroundColor: '#bfbdbc', border: '1px solid #b0aeac', borderRadius: '16px' };
 const DUREE = 5000;
-const COULEUR_PROGRESSION = '#00c8d7'; // cyan/turquoise FIBA
+const COULEUR_PROGRESSION = '#00c8d7'; 
 
 function formatHeure(dateStr) {
   return new Date(dateStr).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
