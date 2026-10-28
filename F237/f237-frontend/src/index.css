@@ -1,9 +1,36 @@
 @import "tailwindcss";
 
+/* Tailwind v4 : pas de tailwind.config.js, les couleurs se déclarent ici.
+   Tu peux ensuite écrire bg-f237-bg, text-f237-green, etc. */
+@theme {
+  --color-f237-bg: #16261e;
+  --color-f237-deep: #111e18;
+  --color-f237-surface: #1f3329;
+  --color-f237-green: #1f9d55;
+  --color-f237-green-bright: #3ccf7a;
+  --color-f237-red: #e1252b;
+  --color-f237-yellow: #fcd116;
+}
+
 * {
   font-family: 'Raleway', sans-serif;
 }
 
-body {
-  background-color: #f5f5f0;
+html {
+  color-scheme: dark;
 }
+
+body {
+  background-color: #16261e;
+  color: #f2f5f3;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar sombre (Chrome / Edge) */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #111e18; }
+::-webkit-scrollbar-thumb { background: #2b4639; border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: #365847; }
+
+/* Sélection de texte aux couleurs F237 */
+::selection { background: #1f9d55; color: #fff; }

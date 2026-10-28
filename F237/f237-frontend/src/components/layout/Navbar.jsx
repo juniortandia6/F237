@@ -1,11 +1,13 @@
+// f237-frontend/src/components/layout/Navbar.jsx
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import logo from '../../assets/logo2.png';
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import {
     Home, LayoutList, Trophy, Dices, MoreHorizontal,
     UserCircle, Globe, ChevronDown, Shield
 } from 'lucide-react';
+import LogoF237 from './LogoF237';
+import theme from '../../theme';
 
 const Navbar = () => {
     const location = useLocation();
@@ -31,12 +33,18 @@ const Navbar = () => {
     return (
         <nav
             className="sticky top-0 z-50 flex items-center justify-between px-8"
-            style={{ height: '68px', backgroundColor: '#cfcdcc', borderBottom: '1px solid #b8b6b5' }}
+            style={{
+                height: '68px',
+                backgroundColor: theme.nav,
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                borderBottom: `1px solid ${theme.border}`,
+            }}
         >
             {/* Logo */}
-            <div style={{ height: '68px', paddingLeft:'80px' , overflow: 'hidden', display: 'flex', alignItems: 'center', minWidth: '120px' }}>
-                <img src={logo} alt="F237" style={{ height: '110px', width: 'auto', marginTop: '20px' }} />
-            </div>
+            <Link to="/" style={{ paddingLeft: '80px', display: 'flex', alignItems: 'center', minWidth: '120px' }}>
+                <LogoF237 size={32} />
+            </Link>
 
             {/* Navigation centrée */}
             <div className="flex items-center">
@@ -46,15 +54,17 @@ const Navbar = () => {
                         <Link
                             key={to}
                             to={to}
-                            className="flex flex-col items-center justify-center px-5 transition-all"
+                            className="flex flex-col items-center justify-center px-5 transition-colors"
                             style={{
                                 height: '68px',
-                                color: active ? '#1a1a1a' : '#555453',
-                                borderBottom: active ? '3px solid #1a7a3c' : '3px solid transparent',
+                                color: active ? theme.text : theme.textMuted,
+                                borderBottom: active ? `3px solid ${theme.greenBright}` : '3px solid transparent',
                                 minWidth: '80px',
                             }}
+                            onMouseEnter={e => { if (!active) e.currentTarget.style.color = theme.text; }}
+                            onMouseLeave={e => { if (!active) e.currentTarget.style.color = theme.textMuted; }}
                         >
-                            <Icon size={20} style={{ marginBottom: '3px' }} />
+                            <Icon size={20} style={{ marginBottom: '3px', color: active ? theme.greenBright : 'inherit' }} />
                             <span className="font-semibold" style={{ fontSize: '12px', letterSpacing: '0.3px' }}>
                                 {label}
                             </span>
@@ -63,8 +73,10 @@ const Navbar = () => {
                 })}
 
                 <button
-                    className="flex flex-col items-center justify-center px-5 transition-all"
-                    style={{ height: '68px', color: '#555453', minWidth: '60px' }}
+                    className="flex flex-col items-center justify-center px-5 transition-colors"
+                    style={{ height: '68px', color: theme.textMuted, minWidth: '60px' }}
+                    onMouseEnter={e => { e.currentTarget.style.color = theme.text; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = theme.textMuted; }}
                 >
                     <MoreHorizontal size={20} style={{ marginBottom: '3px' }} />
                     <span className="font-semibold" style={{ fontSize: '12px' }}>Plus</span>
@@ -72,21 +84,21 @@ const Navbar = () => {
             </div>
 
             {/* Droite */}
-            <div className="flex items-center gap-3" style={{ minWidth: '200px', justifyContent: 'flex-end', paddingRight:'50px' }}>
+            <div className="flex items-center gap-3" style={{ minWidth: '200px', justifyContent: 'flex-end', paddingRight: '50px' }}>
                 {user ? (
                     <>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-                            style={{ backgroundColor: '#bfbdbc', border: '1px solid #a8a6a5' }}>
-                            <Trophy size={13} style={{ color: '#1a7a3c' }} />
-                            <span className="font-bold text-sm" style={{ color: '#1a7a3c' }}>
+                            style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}` }}>
+                            <Trophy size={13} style={{ color: theme.yellow }} />
+                            <span className="font-bold text-sm" style={{ color: theme.yellow }}>
                                 {user.soldePoints?.toLocaleString()} pts
                             </span>
                         </div>
 
                         <Link
                             to="/profil"
-                            className="flex items-center gap-2 px-4 py-2 rounded-full font-semibold transition-all hover:opacity-90"
-                            style={{ backgroundColor: '#1a7a3c', color: '#fff', fontSize: '13px' }}
+                            className="flex items-center gap-2 px-4 py-2 rounded-full font-semibold transition-all hover:brightness-110"
+                            style={{ backgroundColor: theme.green, color: '#fff', fontSize: '13px' }}
                         >
                             <UserCircle size={16} />
                             {user.prenom}
@@ -94,39 +106,40 @@ const Navbar = () => {
 
                         <button
                             onClick={handleLogout}
-                            className="font-semibold transition-colors hover:text-gray-900"
-                            style={{ color: '#555453', fontSize: '13px' }}
+                            className="font-semibold transition-colors"
+                            style={{ color: theme.textMuted, fontSize: '13px' }}
+                            onMouseEnter={e => { e.currentTarget.style.color = theme.text; }}
+                            onMouseLeave={e => { e.currentTarget.style.color = theme.textMuted; }}
                         >
                             Quitter
                         </button>
                     </>
                 ) : (
-                    <>
-                        <Link
-                            to="/login"
-                            className="flex items-center gap-2 px-4 py-2 rounded-full font-bold transition-all hover:opacity-90"
-                            style={{ backgroundColor: '#1a7a3c', color: '#fff', fontSize: '13px' }}
-                        >
-                            <UserCircle size={16} />
-                            Se connecter
-                        </Link>
-
-                        <Link
-                            to="/register"
-                            className="flex items-center gap-2 px-4 py-2 rounded-full font-bold transition-colors"
-                            style={{ border: '1px solid #555453', color: '#1a1a1a', fontSize: '13px' }}
-                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#1a1a1a'; e.currentTarget.style.color = '#fff'; }}
-                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#1a1a1a'; }}
-                        >
-                            S'inscrire
-                        </Link>
-                    </>
+                    /* Bouton unique "Connexion" (style FIBA) — l'inscription
+                       se fait depuis la page de connexion */
+                    <Link
+                        to="/login"
+                        className="flex items-center gap-2 rounded-full font-semibold transition-colors"
+                        style={{
+                            backgroundColor: theme.surfaceHover,
+                            color: theme.text,
+                            fontSize: '15px',
+                            padding: '9px 20px 9px 12px',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = theme.green; }}
+                        onMouseLeave={e => { e.currentTarget.style.backgroundColor = theme.surfaceHover; }}
+                    >
+                        <UserCircle size={22} fill="#fff" color={theme.surfaceHover} strokeWidth={1.8} />
+                        Connexion
+                    </Link>
                 )}
 
                 <button
                     onClick={() => setLang(lang === 'FR' ? 'EN' : 'FR')}
-                    className="flex items-center gap-1 font-semibold transition-colors hover:text-gray-900"
-                    style={{ color: '#555453', fontSize: '13px' }}
+                    className="flex items-center gap-1 font-semibold transition-colors"
+                    style={{ color: theme.textMuted, fontSize: '13px' }}
+                    onMouseEnter={e => { e.currentTarget.style.color = theme.text; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = theme.textMuted; }}
                 >
                     <Globe size={15} />
                     {lang}

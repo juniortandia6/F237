@@ -2,20 +2,25 @@
 
 import { useLiveScores } from "../hooks/useLiveScores";
 import { Wifi, WifiOff, Radio } from "lucide-react";
+import theme from "../theme";
+
+const BANDE = {
+  backgroundColor: theme.bgDeep,
+  borderBottom: `1px solid ${theme.border}`,
+};
 
 function LiveScoresBanner() {
   const { matchsLive, isConnected, aucunMatchLive } = useLiveScores();
 
   if (aucunMatchLive || matchsLive.length === 0) {
     return (
-      <div className="w-full px-4 py-2 flex items-center gap-2"
-        style={{ backgroundColor: '#cfcdcc', borderBottom: '1px solid #b8b6b5' }}>
+      <div className="w-full px-4 py-2 flex items-center gap-2" style={BANDE}>
         {isConnected ? (
-          <Wifi size={14} className="text-green-500 flex-shrink-0" />
+          <Wifi size={14} className="flex-shrink-0" style={{ color: theme.greenBright }} />
         ) : (
-          <WifiOff size={14} className="flex-shrink-0" style={{ color: '#888' }} />
+          <WifiOff size={14} className="flex-shrink-0" style={{ color: theme.textFaint }} />
         )}
-        <span className="text-xs font-medium" style={{ color: '#666' }}>
+        <span className="text-xs font-medium" style={{ color: theme.textMuted }}>
           {isConnected
             ? "Aucun match en cours · Scores mis à jour en temps réel"
             : "Connexion live en cours..."}
@@ -25,18 +30,17 @@ function LiveScoresBanner() {
   }
 
   return (
-    <div className="w-full px-4 py-2 flex items-center gap-2"
-      style={{ backgroundColor: '#cfcdcc', borderBottom: '1px solid #b8b6b5' }}>
-      <Radio size={14} className="text-red-400 animate-pulse flex-shrink-0" />
-      <span className="text-xs font-black text-red-400 uppercase tracking-widest">
+    <div className="w-full px-4 py-2 flex items-center gap-2" style={BANDE}>
+      <Radio size={14} className="animate-pulse flex-shrink-0" style={{ color: theme.red }} />
+      <span className="text-xs font-black uppercase tracking-widest" style={{ color: theme.red }}>
         Live
       </span>
-      <span className="text-xs font-medium" style={{ color: '#555' }}>
+      <span className="text-xs font-medium" style={{ color: theme.textMuted }}>
         · {matchsLive.length} match{matchsLive.length > 1 ? "s" : ""} en cours
       </span>
       {isConnected && (
-        <span className="ml-auto flex items-center gap-1 text-xs text-green-500 font-medium">
-          <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse inline-block" />
+        <span className="ml-auto flex items-center gap-1 text-xs font-medium" style={{ color: theme.greenBright }}>
+          <span className="w-1.5 h-1.5 rounded-full animate-pulse inline-block" style={{ backgroundColor: theme.greenBright }} />
           Connecté
         </span>
       )}
