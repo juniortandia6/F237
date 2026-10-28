@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import {
-    Home, LayoutList, Trophy, Dices, MoreHorizontal,
+    Home, LayoutList, Trophy, Dices, Newspaper,
     UserCircle, Globe, ChevronDown, Shield
 } from 'lucide-react';
 import LogoF237 from './LogoF237';
@@ -15,7 +15,10 @@ const Navbar = () => {
     const [lang, setLang] = useState('FR');
     const { user, logout } = useAuth();
 
-    const isActive = (path) => location.pathname === path;
+    // "/" seulement sur l'accueil ; les autres onglets restent actifs sur leurs
+    // sous-pages (ex. /actualites/mon-article, /equipes/12)
+    const isActive = (path) =>
+        path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
 
     const navItems = [
         { to: '/', label: 'Accueil', Icon: Home },
@@ -23,6 +26,7 @@ const Navbar = () => {
         { to: '/classement', label: 'Classements', Icon: Trophy },
         { to: '/equipes', label: 'Équipes', Icon: Shield },
         { to: '/jouer', label: 'Fantasy', Icon: Dices },
+        { to: '/actualites', label: 'Actualités', Icon: Newspaper },
     ];
 
     const handleLogout = () => {
@@ -72,15 +76,6 @@ const Navbar = () => {
                     );
                 })}
 
-                <button
-                    className="flex flex-col items-center justify-center px-5 transition-colors"
-                    style={{ height: '68px', color: theme.textMuted, minWidth: '60px' }}
-                    onMouseEnter={e => { e.currentTarget.style.color = theme.text; }}
-                    onMouseLeave={e => { e.currentTarget.style.color = theme.textMuted; }}
-                >
-                    <MoreHorizontal size={20} style={{ marginBottom: '3px' }} />
-                    <span className="font-semibold" style={{ fontSize: '12px' }}>Plus</span>
-                </button>
             </div>
 
             {/* Droite */}
