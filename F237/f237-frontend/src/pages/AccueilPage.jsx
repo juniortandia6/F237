@@ -1050,9 +1050,9 @@ const AccueilPage = () => {
                         <div style={{
                           position: 'absolute', top: 0, left: 0, bottom: 0,
                           borderRadius: '2px',
-                          backgroundColor: theme.cyan,
+                          backgroundColor: theme.greenBright,
                           width: `${progress}%`,
-                          boxShadow: `0 0 6px ${theme.cyan}`,
+                          boxShadow: `0 0 6px ${theme.greenBright}`,
                         }} />
                       )}
                     </div>
