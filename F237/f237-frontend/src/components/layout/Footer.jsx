@@ -179,14 +179,16 @@ function Footer() {
               ))}
             </div>
 
-            <p style={{ ...TITRE_COLONNE, marginTop: '28px' }}>Le projet</p>
+            <p style={{ ...TITRE_COLONNE, marginTop: '28px' }}></p>
             <p style={{ color: theme.textMuted, fontSize: '14px', lineHeight: 1.6 }}>
-              Plateforme indépendante créée par{' '}
+              Plateforme indépendante créée par :  {' '}
+              <br />
               <a href="https://cyrjunior-tandia.com" target="_blank" rel="noopener noreferrer"
                 style={{ color: theme.text, fontWeight: 700, textDecoration: 'underline', textUnderlineOffset: '3px' }}>
-                Cyr Junior Tandia
-              </a>.
-              <br />Données fournies par API-Football.
+                Cyr Junior Tandia Mouafou
+                <br />
+              </a>
+              <br />Données fournies par API-Football , plateforme de données sur le football.
             </p>
           </div>
         </div>
