@@ -7,7 +7,7 @@ import MatchsPage from './pages/MatchsPage';
 import MatchDetailPage from './pages/MatchDetailPage';
 import EquipesPage from './pages/EquipesPage';
 import EquipeDetailPage from './pages/EquipeDetailPage';
-import JouerPage from './pages/JouerPage';
+import JouerPage from './pages/JouerPage';  
 import ActualitesPage from './pages/ActualitesPage';
 import ActualiteDetailPage from './pages/ActualiteDetailPage';
 import LoginPage from './pages/LoginPage';
