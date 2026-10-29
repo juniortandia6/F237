@@ -47,7 +47,7 @@ const Navbar = () => {
         >
             {/* Logo */}
             <Link to="/" style={{ paddingLeft: '80px', display: 'flex', alignItems: 'center', minWidth: '120px' }}>
-                <LogoF237 size={32} />
+                <LogoF237 size={40} />
             </Link>
 
             {/* Navigation centrée */}

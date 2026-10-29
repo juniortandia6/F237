@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { ArrowDownRight, ArrowRight, Check } from 'lucide-react';
 import { FaYoutube, FaInstagram, FaFacebookF, FaXTwitter, FaTiktok, FaWhatsapp } from 'react-icons/fa6';
 import LogoF237 from './LogoF237';
+import logo from '../../assets/logof.png';
 import theme from '../../theme';
 
 // Remplace les "#" par tes vrais comptes quand ils existeront
@@ -107,22 +108,20 @@ function Footer() {
         <div style={{ flex: 1, backgroundColor: theme.yellow }} />
       </div>
 
-      {/* "F237" géant en filigrane */}
-      <span aria-hidden="true" style={{
-        position: 'absolute', right: '-30px', bottom: '40px',
-        fontFamily: '"Barlow Condensed", Arial, sans-serif', fontWeight: 800,
-        fontSize: '260px', lineHeight: 1, letterSpacing: '-6px',
-        color: 'rgba(255,255,255,0.025)', userSelect: 'none', pointerEvents: 'none',
-      }}>
-        F237
-      </span>
+      {/* Logo géant en filigrane (très discret, en niveaux de gris) */}
+      <img src={logo} alt="" aria-hidden="true" draggable={false} style={{
+        position: 'absolute', right: '-40px', bottom: '40px',
+        height: '230px', width: 'auto',
+        opacity: 0.04, filter: 'grayscale(1) brightness(2)',
+        userSelect: 'none', pointerEvents: 'none',
+      }} />
 
       <div style={{ position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '64px 60px 0', boxSizing: 'content-box' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.1fr) minmax(0, 1.6fr) minmax(0, 1fr)', gap: '56px' }}>
 
           {/* ── Colonne marque ── */}
           <div>
-            <Link to="/" aria-label="Accueil F237"><LogoF237 size={44} /></Link>
+            <Link to="/" aria-label="Accueil F237"><LogoF237 size={56} /></Link>
             <p style={{ marginTop: '14px', color: theme.textMuted, fontSize: '15px', lineHeight: 1.55, maxWidth: '280px' }}>
               Le pouls du football camerounais : scores en direct, classements et actualités de la MTN Elite One et Elite Two.
             </p>
@@ -198,7 +197,7 @@ function Footer() {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <LogoF237 size={22} />
+            <LogoF237 size={26} />
             <span style={{ fontSize: '13px', color: theme.textFaint }}>© {new Date().getFullYear()} F237 · Tous droits réservés</span>
           </div>
           <nav style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
