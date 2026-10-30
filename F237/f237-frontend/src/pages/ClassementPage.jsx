@@ -9,7 +9,7 @@ import { Goal, CalendarClock } from 'lucide-react';
 import { classementService } from '../services/classementService';
 import { matchService } from '../services/matchService';
 import { useLiveScores } from '../hooks/useLiveScores';
-import { COMPETITIONS, ANNEE_ACTUELLE, SAISONS_DB } from '../data/saisons';
+import { COMPETITIONS, ANNEE_ACTUELLE, SAISONS_DB, libelleSaison } from '../data/saisons';
 import SelecteurSaison from '../components/SelecteurSaison';
 import theme from '../theme';
 
@@ -352,7 +352,7 @@ function ClassementPage() {
                 Classement
               </h1>
               <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '15px', marginBottom: '24px', maxWidth: '420px', lineHeight: 1.5 }}>
-                MTN {competition}, saison {annee}. Mis à jour automatiquement après chaque match.
+                MTN {competition}, saison {libelleSaison(annee)}. Mis à jour automatiquement après chaque match.
               </p>
 
               <div style={{ display: 'inline-flex', padding: '4px', borderRadius: '999px', backgroundColor: 'rgba(0,0,0,0.28)', border: '1px solid rgba(255,255,255,0.12)', marginBottom: '24px' }}>
@@ -398,13 +398,13 @@ function ClassementPage() {
               <span style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#e8f3ec', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CalendarClock size={26} color={CLAIR.vert} />
               </span>
-              <div style={{ fontSize: '20px', fontWeight: 800, color: CLAIR.texte }}>MTN {competition} · Saison {annee}</div>
+              <div style={{ fontSize: '20px', fontWeight: 800, color: CLAIR.texte }}>MTN {competition} · Saison {libelleSaison(annee)}</div>
               <p style={{ fontSize: '15px', color: CLAIR.doux, maxWidth: '440px', lineHeight: 1.5 }}>
                 Le classement de cette saison n'est pas encore disponible sur F237. Il arrive bientôt !
               </p>
               <button onClick={() => setAnnee(ANNEE_ACTUELLE)}
                 style={{ marginTop: '6px', padding: '10px 20px', borderRadius: '999px', border: 'none', cursor: 'pointer', backgroundColor: CLAIR.vert, color: '#fff', fontSize: '14px', fontWeight: 700 }}>
-                Revenir à la saison {ANNEE_ACTUELLE}
+                Revenir à la saison {libelleSaison(ANNEE_ACTUELLE)}
               </button>
             </div>
           ) : chargement ? (

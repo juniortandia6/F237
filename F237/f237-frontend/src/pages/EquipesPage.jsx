@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import { Search, MapPin, ArrowRight, X, CalendarClock } from 'lucide-react';
 import { equipeService } from '../services/equipeService';
 import { classementService } from '../services/classementService';
-import { COMPETITIONS, SAISONS_DB, ANNEE_ACTUELLE } from '../data/saisons';
+import { COMPETITIONS, SAISONS_DB, ANNEE_ACTUELLE, libelleSaison } from '../data/saisons';
 import SelecteurSaison from '../components/SelecteurSaison';
 import theme from '../theme';
 
@@ -284,13 +284,13 @@ function EquipesPage() {
               <span style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#e8f3ec', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CalendarClock size={26} color={CLAIR.vert} />
               </span>
-              <div style={{ fontSize: '20px', fontWeight: 800, color: CLAIR.texte }}>MTN {competition} · Saison {annee}</div>
+              <div style={{ fontSize: '20px', fontWeight: 800, color: CLAIR.texte }}>MTN {competition} · Saison {libelleSaison(annee)}</div>
               <p style={{ fontSize: '15px', color: CLAIR.doux, maxWidth: '440px', lineHeight: 1.5 }}>
                 Les clubs de cette saison ne sont pas encore disponibles sur F237. Ils arrivent bientôt !
               </p>
               <button onClick={() => setAnnee(ANNEE_ACTUELLE)}
                 style={{ marginTop: '6px', padding: '10px 20px', borderRadius: '999px', border: 'none', cursor: 'pointer', backgroundColor: CLAIR.vert, color: '#fff', fontSize: '14px', fontWeight: 700 }}>
-                Revenir à la saison {ANNEE_ACTUELLE}
+                Revenir à la saison {libelleSaison(ANNEE_ACTUELLE)}
               </button>
             </div>
           ) : loading ? (

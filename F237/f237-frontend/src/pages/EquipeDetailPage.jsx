@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { equipeService } from '../services/equipeService';
 import { matchService } from '../services/matchService';
-import { SAISONS_DB, ANNEE_ACTUELLE } from '../data/saisons';
+import { SAISONS_DB, ANNEE_ACTUELLE, libelleSaison } from '../data/saisons';
 import theme from '../theme';
 
 // ── Couleurs de la zone claire (mêmes que les autres pages) ─────────────
@@ -181,7 +181,7 @@ function CarteJoueur({ j }) {
 function OngletApercu({ classement, derniersMatchs }) {
   return (
     <>
-      <Carte titre={`Saison ${ANNEE_ACTUELLE}`}>
+      <Carte titre={`Saison ${libelleSaison(ANNEE_ACTUELLE)}`}>
         {classement ? (
           <div className="grid grid-cols-4 gap-3 sm:grid-cols-8" style={{ padding: '18px 20px' }}>
             <Tuile label="POS." valeur={`#${classement.position}`} fort />

@@ -9,7 +9,7 @@ import { Link, useParams, useLocation } from 'react-router-dom';
 import { ChevronRight, ArrowLeft, CalendarDays, Clock, MapPin, Trophy, Hash } from 'lucide-react';
 import { matchService } from '../services/matchService';
 import { useLiveScores } from '../hooks/useLiveScores';
-import { TOUS_LES_SAISON_IDS, infosSaison } from '../data/saisons';
+import { TOUS_LES_SAISON_IDS, infosSaison, libelleSaison } from '../data/saisons';
 import theme from '../theme';
 
 // ── Couleurs de la zone claire (mêmes que MatchsPage) ───────────────────
@@ -407,7 +407,7 @@ function InfosMatch({ m, saison }) {
   const stade = stadeDe(m);
   const lignes = [
     [Trophy, 'Compétition', saison ? `MTN ${saison.label}` : '—'],
-    [CalendarDays, 'Saison', saison?.annee ?? '—'],
+    [CalendarDays, 'Saison', saison ? libelleSaison(saison.annee) : '—'],
     journee && [Hash, 'Journée', journee],
     [CalendarDays, 'Date', dateLongue(m.dateMatch)],
     [Clock, "Coup d'envoi", heure(m.dateMatch)],
