@@ -13,9 +13,19 @@ namespace F237.Domain.Entities
         public DateTime DateInscription { get; set; } = DateTime.Now;
         public bool EstActif { get; set; } = true;
 
+        // Rôle : "Utilisateur" (par défaut) ou "Admin" (accès aux routes /api/sync/*)
+        public string Role { get; set; } = Roles.Utilisateur;
+
         // Navigation
         public ICollection<Pari> Paris { get; set; } = new List<Pari>();
         public ICollection<PariGroupe> PariGroupes { get; set; } = new List<PariGroupe>();
         public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+    }
+
+    /// <summary>Noms des rôles, pour éviter les fautes de frappe dans [Authorize(Roles = ...)].</summary>
+    public static class Roles
+    {
+        public const string Utilisateur = "Utilisateur";
+        public const string Admin = "Admin";
     }
 }

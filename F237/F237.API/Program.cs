@@ -49,7 +49,11 @@ builder.Services.AddCors(options =>
 });
 
 // ── JWT Authentication 
-var jwtKey = builder.Configuration["Jwt:Key"]!;
+// La clé de signature vient des user-secrets (local) ou des variables d'environnement (production)
+var jwtKey = builder.Configuration["Jwt:Key"];
+if (string.IsNullOrWhiteSpace(jwtKey) || Encoding.UTF8.GetByteCount(jwtKey) < 32)
+    throw new InvalidOperationException(
+        "Jwt:Key manquante ou trop courte (32 octets minimum) : ajoute-la avec dotnet user-secrets.");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"]!;
 var jwtAudience = builder.Configuration["Jwt:Audience"]!;
 
@@ -93,11 +97,15 @@ builder.Services.AddScoped<IPariService, PariService>();
 builder.Services.AddHttpClient<IApiFootballService, ApiFootballService>();
 
 // HttpClient nommé pour EquipesController + LiveScoreService
+// La clé vient de la configuration (user-secrets en local, variables d'environnement en production)
+var apiFootballKey = builder.Configuration["ApiFootball:ApiKey"]
+    ?? throw new InvalidOperationException("ApiFootball:ApiKey manquante : ajoute-la avec dotnet user-secrets.");
+var apiFootballUrl = builder.Configuration["ApiFootball:BaseUrl"] ?? "https://v3.football.api-sports.io/";
+
 builder.Services.AddHttpClient("ApiFootball", client =>
 {
-    client.BaseAddress = new Uri("https://v3.football.api-sports.io/");
-    client.DefaultRequestHeaders.Add(
-        "x-apisports-key", "e728d2eec6983f078956a4d692a77d26");
+    client.BaseAddress = new Uri(apiFootballUrl);
+    client.DefaultRequestHeaders.Add("x-apisports-key", apiFootballKey);
     client.Timeout = TimeSpan.FromSeconds(15);
 });
 

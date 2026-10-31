@@ -31,6 +31,10 @@ namespace F237.API.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<AuthResponseDto>> Register([FromBody] RegisterDto dto)
         {
+            // Mot de passe : 8 caractères minimum
+            if (string.IsNullOrWhiteSpace(dto.MotDePasse) || dto.MotDePasse.Length < 8)
+                return BadRequest(new { message = "Le mot de passe doit contenir au moins 8 caractères." });
+
             // Vérifier si email déjà utilisé
             if (await _context.Utilisateurs.AnyAsync(u => u.Email == dto.Email))
                 return BadRequest(new { message = "Cet email est déjà utilisé." });
@@ -47,7 +51,8 @@ namespace F237.API.Controllers
                 MotDePasseHash = hash,
                 SoldePoints = 1000, // Bonus de bienvenue !
                 DateInscription = DateTime.UtcNow,
-                EstActif = true
+                EstActif = true,
+                Role = Roles.Utilisateur // jamais Admin à l'inscription
             };
 
             _context.Utilisateurs.Add(utilisateur);
@@ -93,6 +98,14 @@ namespace F237.API.Controllers
 
             if (!VerifierMotDePasse(dto.MotDePasse, utilisateur.MotDePasseHash))
                 return Unauthorized(new { message = "Email ou mot de passe incorrect." });
+
+            // Migration douce : un ancien hash SHA-256 est remplacé par un hash BCrypt
+            // dès que l'utilisateur se connecte avec le bon mot de passe
+            if (!EstHashBCrypt(utilisateur.MotDePasseHash))
+            {
+                utilisateur.MotDePasseHash = HashMotDePasse(dto.MotDePasse);
+                await _context.SaveChangesAsync();
+            }
 
             var token = GenererToken(utilisateur);
             var expiration = DateTime.UtcNow.AddHours(
@@ -162,6 +175,8 @@ namespace F237.API.Controllers
                 new Claim(JwtRegisteredClaimNames.Email, utilisateur.Email),
                 new Claim("nom", utilisateur.Nom),
                 new Claim("prenom", utilisateur.Prenom),
+                // Rôle -> permet [Authorize(Roles = "Admin")] côté API
+                new Claim(ClaimTypes.Role, string.IsNullOrEmpty(utilisateur.Role) ? Roles.Utilisateur : utilisateur.Role),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
@@ -179,16 +194,30 @@ namespace F237.API.Controllers
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        // BCrypt : sel aléatoire inclus dans le hash + coût réglable (12 = ~250 ms par essai)
+        private const int COUT_BCRYPT = 12;
+
         private static string HashMotDePasse(string motDePasse)
         {
-            using var sha256 = SHA256.Create();
-            var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(motDePasse));
-            return Convert.ToBase64String(bytes);
+            return BCrypt.Net.BCrypt.HashPassword(motDePasse, COUT_BCRYPT);
         }
+
+        // Un hash BCrypt commence par "$2a$", "$2b$" ou "$2y$"
+        private static bool EstHashBCrypt(string hash) =>
+            hash.StartsWith("$2a$") || hash.StartsWith("$2b$") || hash.StartsWith("$2y$");
 
         private static bool VerifierMotDePasse(string motDePasse, string hash)
         {
-            return HashMotDePasse(motDePasse) == hash;
+            if (string.IsNullOrEmpty(hash)) return false;
+
+            if (EstHashBCrypt(hash))
+                return BCrypt.Net.BCrypt.Verify(motDePasse, hash);
+
+            // Ancien format (SHA-256 sans sel) : accepté une dernière fois, puis converti au login
+            using var sha256 = SHA256.Create();
+            var ancien = Convert.ToBase64String(sha256.ComputeHash(Encoding.UTF8.GetBytes(motDePasse)));
+            return CryptographicOperations.FixedTimeEquals(
+                Encoding.UTF8.GetBytes(ancien), Encoding.UTF8.GetBytes(hash));
         }
 
         private int GetUserId()

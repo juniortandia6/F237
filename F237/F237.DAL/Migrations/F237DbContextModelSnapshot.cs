@@ -491,6 +491,10 @@ namespace F237.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("SoldePoints")
                         .HasColumnType("int");
 

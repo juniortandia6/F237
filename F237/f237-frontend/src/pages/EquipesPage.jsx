@@ -164,10 +164,10 @@ function EquipesPage() {
   const rangDe = (e) => rangs.get(`id:${e.id}`) ?? rangs.get(`nom:${e.nom}`) ?? null;
 
   const competition = COMPETITIONS.find(c => c.cle === comp)?.label ?? '';
-  const nbParComp = (cle) => equipes.filter(e => e.division === DIVISION[cle]).length;
+  const nbParComp = (cle) => equipes.filter(e => e.estActive !== false && e.division === DIVISION[cle]).length;
 
   const affichees = equipes
-    .filter(e => e.division === DIVISION[comp])
+    .filter(e => e.estActive !== false && e.division === DIVISION[comp]) // les clubs des anciennes saisons (estActive = false) sont masqués
     .filter(e => {
       const q = sansAccents(recherche.trim());
       return !q || sansAccents(e.nom).includes(q) || sansAccents(villeDe(e)).includes(q);

@@ -38,7 +38,10 @@ export const SAISON_EN_COURS = 2027;
 // Saisons déjà importées dans F237Db (season API → SaisonId par compétition).
 // Ajoute une ligne ici chaque fois que tu importes une nouvelle saison.
 export const SAISONS_DB = {
-  2026: { one: 3, two: 4 },
+  2026: { one: 3, two: 4 }, // 2026
+  2024: { one: 1, two: 2 }, // 2023-24 (Elite Two : classement calculé, l'API n'en fournit pas)
+  2023: { one: 5, two: 6 }, // 2022-23 (Elite Two : classement calculé, l'API n'en fournit pas)
+  2022: { one: 7 },         // 2022    (pas d'Elite Two cette année-là chez API-Football)
 };
 
 // Saison affichée par défaut : la plus récente qui a des données
