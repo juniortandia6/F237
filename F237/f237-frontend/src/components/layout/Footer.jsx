@@ -100,21 +100,28 @@ function Newsletter() {
 
 function Footer() {
   return (
-    <footer style={{ position: 'relative', backgroundColor: theme.bgDeep, overflow: 'hidden' }}>
-      {/* Liseré tricolore */}
-      <div style={{ display: 'flex', height: '4px' }}>
+    <footer style={{ position: 'relative', backgroundColor: theme.bgDeep }}>
+      {/* Liseré tricolore avec l'étoile jaune au centre du rouge, comme le drapeau du Cameroun */}
+      <div style={{ position: 'relative', display: 'flex', height: '9px' }}>
         <div style={{ flex: 1, backgroundColor: theme.green }} />
-        <div style={{ flex: 1, backgroundColor: theme.red }} />
+        <div style={{ flex: 1, backgroundColor: theme.red, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <svg viewBox="0 0 24 24" width="8" height="8" aria-hidden="true">
+            <polygon fill={theme.yellow}
+              points="12,1 14.8,8.6 22.9,8.9 16.5,13.9 18.8,21.7 12,17.1 5.2,21.7 7.5,13.9 1.1,8.9 9.2,8.6" />
+          </svg>
+        </div>
         <div style={{ flex: 1, backgroundColor: theme.yellow }} />
       </div>
 
       {/* Logo géant en filigrane (très discret, en niveaux de gris) */}
-      <img src={logo} alt="" aria-hidden="true" draggable={false} style={{
-        position: 'absolute', right: '-40px', bottom: '40px',
-        height: '230px', width: 'auto',
-        opacity: 0.04, filter: 'grayscale(1) brightness(2)',
-        userSelect: 'none', pointerEvents: 'none',
-      }} />
+      <div aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+        <img src={logo} alt="" draggable={false} style={{
+          position: 'absolute', right: '-40px', bottom: '40px',
+          height: '230px', width: 'auto',
+          opacity: 0.04, filter: 'grayscale(1) brightness(2)',
+          userSelect: 'none',
+        }} />
+      </div>
 
       <div style={{ position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '64px 60px 0', boxSizing: 'content-box' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.1fr) minmax(0, 1.6fr) minmax(0, 1fr)', gap: '56px' }}>
@@ -179,16 +186,14 @@ function Footer() {
               ))}
             </div>
 
-            <p style={{ ...TITRE_COLONNE, marginTop: '28px' }}></p>
+            <p style={{ ...TITRE_COLONNE, marginTop: '28px' }}>Le projet</p>
             <p style={{ color: theme.textMuted, fontSize: '14px', lineHeight: 1.6 }}>
-              Plateforme indépendante créée par :  {' '}
-              <br />
+              Plateforme indépendante créée par{' '}
               <a href="https://cyrjunior-tandia.com" target="_blank" rel="noopener noreferrer"
                 style={{ color: theme.text, fontWeight: 700, textDecoration: 'underline', textUnderlineOffset: '3px' }}>
-                Cyr Junior Tandia Mouafou
-                <br />
-              </a>
-              <br />Données fournies par API-Football , plateforme de données sur le football.
+                Cyr Junior Tandia
+              </a>.
+              <br />Données fournies par API-Football.
             </p>
           </div>
         </div>

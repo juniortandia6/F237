@@ -80,6 +80,35 @@ function statsDepuisMatchs(matchs, nom) {
   return { bp, bc, forme: joues.slice(-5) }; // les 5 derniers, du plus ancien au plus récent
 }
 
+// Classement recalculé à partir des matchs terminés (3 pts victoire, 1 pt nul).
+// Sert quand API-Football ne fournit pas de classement (ex. Elite Two 2023 et 2024).
+function classementDepuisMatchs(matchs) {
+  const table = new Map();
+  const ligne = (eq) => {
+    if (!table.has(eq.nom)) {
+      table.set(eq.nom, { equipe: eq, equipeId: eq.id, matchsJoues: 0, victoires: 0, nuls: 0, defaites: 0, butsPour: 0, butsContre: 0, points: 0 });
+    }
+    return table.get(eq.nom);
+  };
+  for (const m of matchs) {
+    if (m.statut !== 2 || !m.equipeDomicile || !m.equipeExterieur) continue;
+    const dom = ligne(m.equipeDomicile), ext = ligne(m.equipeExterieur);
+    const sd = m.scoreDomicile ?? 0, se = m.scoreExterieur ?? 0;
+    dom.matchsJoues++; ext.matchsJoues++;
+    dom.butsPour += sd; dom.butsContre += se;
+    ext.butsPour += se; ext.butsContre += sd;
+    if (sd > se) { dom.victoires++; dom.points += 3; ext.defaites++; }
+    else if (sd < se) { ext.victoires++; ext.points += 3; dom.defaites++; }
+    else { dom.nuls++; ext.nuls++; dom.points++; ext.points++; }
+  }
+  return [...table.values()]
+    .sort((a, b) => b.points - a.points
+      || (b.butsPour - b.butsContre) - (a.butsPour - a.butsContre)
+      || b.butsPour - a.butsPour
+      || a.equipe.nom.localeCompare(b.equipe.nom, 'fr'))
+    .map((l, i) => ({ ...l, position: i + 1, differenceDesButs: l.butsPour - l.butsContre }));
+}
+
 // Meilleurs buteurs à partir des buts des matchs (sans CSC ni buteurs inconnus)
 function calculerButeurs(matchs) {
   const parJoueur = new Map();
@@ -303,9 +332,13 @@ function ClassementPage() {
   const matchs = useMemo(() => (donnees?.cle === cle ? donnees.matchs : []), [donnees, cle]);
 
   // Lignes du tableau : stats du classement, complétées par les matchs si besoin
+  // Pas de classement fourni par l'API -> on le calcule à partir des matchs
+  const classementCalcule = donnees?.cle === cle && donnees.classement.length === 0 && donnees.matchs.some(m => m.statut === 2);
+
   const lignes = useMemo(() => {
     if (donnees?.cle !== cle) return [];
-    return [...donnees.classement]
+    const source = donnees.classement.length > 0 ? donnees.classement : classementDepuisMatchs(donnees.matchs);
+    return [...source]
       .sort((a, b) => (a.position ?? 999) - (b.position ?? 999) || (b.points ?? 0) - (a.points ?? 0))
       .map(e => {
         const nom = nomEquipe(e);
@@ -319,7 +352,7 @@ function ClassementPage() {
           n: stat(e, 'nuls', 'egalites', 'draw'),
           d: stat(e, 'defaites', 'perdus', 'lose'),
           bp, bc,
-          db: stat(e, 'differenceButs', 'diffButs', 'goalDifference') ?? bp - bc,
+          db: stat(e, 'differenceDesButs', 'differenceButs', 'diffButs', 'goalDifference') ?? bp - bc,
           pts: e.points ?? 0,
           forme: calc.forme,
         };
@@ -415,6 +448,11 @@ function ClassementPage() {
             </div>
           ) : (
             <>
+              {classementCalcule && (
+                <div style={{ marginBottom: '12px', padding: '10px 14px', borderRadius: '10px', backgroundColor: '#fdf6dc', border: '1px solid #f1e2a6', color: '#6b5510', fontSize: '13px' }}>
+                  Classement officiel indisponible pour cette saison : il est calculé à partir des résultats des matchs (3 pts la victoire, 1 pt le nul).
+                </div>
+              )}
               <TableauClassement lignes={lignes} zones={zones} />
               <p style={{ marginTop: '12px', fontSize: '12px', color: CLAIR.doux }}>
                 J : joués · V : victoires · N : nuls · D : défaites · BP : buts pour · BC : buts contre · DB : différence de buts · Forme : 5 derniers matchs (clique pour voir le match)
