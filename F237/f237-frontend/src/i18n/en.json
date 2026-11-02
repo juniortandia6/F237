@@ -1,0 +1,456 @@
+{
+  "nav": {
+    "accueil": "Home",
+    "matchs": "Matches",
+    "classements": "Standings",
+    "equipes": "Teams",
+    "fantasy": "Fantasy",
+    "actualites": "News",
+    "connexion": "Log in",
+    "quitter": "Log out",
+    "pts": "{{n}} pts",
+    "langue": "Language"
+  },
+  "commun": {
+    "precedent": "Previous",
+    "suivant": "Next",
+    "chargement": "Loading...",
+    "enDirect": "Live",
+    "enDirectMaj": "LIVE",
+    "aVenir": "Upcoming",
+    "termine": "Full time",
+    "plus": "+ More",
+    "demo": "DEMO",
+    "pts": "pts",
+    "bilan": "{{v}}W · {{n}}D · {{d}}L",
+    "but_one": "goal",
+    "but_other": "goals",
+    "reporte": "Postponed"
+  },
+  "accueil": {
+    "enSavoirPlus": "Read more",
+    "lireArticle": "Read the article",
+    "matchs": "Matches",
+    "tousLesMatchs": "All matches",
+    "matchsPrecedents": "Previous matches",
+    "matchsSuivants": "Next matches",
+    "aucunMatch": "No matches yet.",
+    "direct": {
+      "titreLive": "Live",
+      "titreAvenir": "Upcoming matches",
+      "titreTermine": "Latest results",
+      "liveConnecte": "Live connected",
+      "connexion": "Connecting...",
+      "aucunEnCours": "No match in progress right now.",
+      "texteAvenir": "Here are the next fixtures: scores will appear here live from kick-off.",
+      "texteTermine": "Scores will be shown here in real time from kick-off.",
+      "aucunAfficher": "No matches to show.",
+      "suivre": "Follow the match",
+      "pronostic": "Make a prediction",
+      "resume": "See the summary"
+    },
+    "classements": {
+      "titre": "Standings",
+      "tousLesDetails": "Full standings",
+      "indisponible": "Standings are not available right now.",
+      "equipe": "Team",
+      "j": "P",
+      "pts": "Pts",
+      "rang1": "1st",
+      "rang2": "2nd",
+      "rang3": "3rd"
+    },
+    "buteurs": {
+      "titre": "Top scorers",
+      "afficherTout": "See all",
+      "meilleurButeur": "Top scorer",
+      "penaltys": "Penalties",
+      "matchsAvecBut": "Matches scored in",
+      "aucun": "No scorers recorded for this competition."
+    },
+    "nouvelles": {
+      "titre": "Latest news",
+      "toutes": "All news"
+    }
+  },
+  "footer": {
+    "accroche": "The heartbeat of Cameroonian football: live scores, standings and news from the MTN Elite One and Elite Two.",
+    "resteInforme": "Stay informed",
+    "emailPlaceholder": "Your email address",
+    "emailLabel": "Email address",
+    "inscrireNewsletter": "Subscribe to the newsletter",
+    "merci": "Thanks! You'll receive our next updates.",
+    "reseaux": "Social media",
+    "liens": "Links",
+    "calendrier": "Fixtures and results",
+    "classements": "Standings",
+    "equipes": "Teams",
+    "actualites": "News",
+    "fantasy": "Fantasy & predictions",
+    "profil": "My profile",
+    "competitions": "Competitions",
+    "projet": "The project",
+    "creePar": "Independent platform created by",
+    "donnees": "Data provided by API-Football.",
+    "droits": "All rights reserved",
+    "cgu": "Terms of use",
+    "confidentialite": "Privacy",
+    "cookies": "Cookies",
+    "contact": "Contact"
+  },
+  "bandeau": {
+    "aucunMatch": "No match in progress · Scores updated in real time",
+    "connexion": "Connecting to live scores...",
+    "enCours_one": "{{count}} match in progress",
+    "enCours_other": "{{count}} matches in progress",
+    "connecte": "Connected"
+  },
+  "saison": {
+    "saison": "Season {{s}}",
+    "bientot": "Soon"
+  },
+  "matchs": {
+    "nbMatchs_one": "{{count}} match",
+    "nbMatchs_other": "{{count}} matches",
+    "aujourdhui": "Today",
+    "journee": "Matchday {{n}}",
+    "pronostiquer": "Predict",
+    "chiffres": {
+      "matchs": "Matches",
+      "buts": "Goals",
+      "moyenne": "Avg / match"
+    },
+    "journeeEnChiffres": "The day in numbers",
+    "buteursDuJour": "Today's scorers",
+    "masqueSurprise": "Hidden so we don't spoil the surprise.",
+    "aucunBut": "No goals recorded that day.",
+    "titre": "Match schedule",
+    "datesPrecedentes": "Previous dates",
+    "datesSuivantes": "Next dates",
+    "chargementCalendrier": "Loading schedule...",
+    "calendrierBientot": "The {{s}} season schedule is coming soon.",
+    "aucunProgramme": "No matches scheduled.",
+    "masquerScores": "Hide scores",
+    "matchsEnDirect": "Live matches",
+    "saisonIndispo": "This season's matches are not available on F237 yet. They're coming soon!",
+    "revenirSaison": "Back to the {{s}} season",
+    "aucunEnDirect": "No live matches right now.",
+    "aucunCetteDate": "No matches on this date."
+  },
+  "matchDetail": {
+    "buteurInconnu": "Unknown scorer",
+    "pen": "pen.",
+    "csc": "OG",
+    "termineMaj": "FULL TIME",
+    "reporteMaj": "POSTPONED",
+    "aVenirMaj": "UPCOMING",
+    "mt": {
+      "equipe": "TEAM",
+      "mt1": "1ST HALF",
+      "mt2": "2ND HALF",
+      "final": "FINAL"
+    },
+    "formeRecente": "Recent form",
+    "pasEncoreDeMatch": "No matches yet",
+    "resultat": {
+      "V": "W",
+      "N": "D",
+      "D": "L"
+    },
+    "chronoBientot": "The timeline will be available at kick-off.",
+    "coupEnvoiMaj": "KICK-OFF",
+    "miTempsMaj": "HALF-TIME",
+    "finMaj": "FULL TIME",
+    "aucunBut": "No goals recorded for this match.",
+    "bilanConfrontations": "Head-to-head record",
+    "victoires": "{{e}} wins",
+    "nuls": "Draws",
+    "toutesRencontres": "All meetings",
+    "noteH2h": "Based on the seasons available on F237. The history will grow as earlier seasons are added.",
+    "infos": {
+      "competition": "Competition",
+      "saison": "Season",
+      "journee": "Matchday",
+      "date": "Date",
+      "coupEnvoi": "Kick-off",
+      "stade": "Stadium"
+    },
+    "infosDuMatch": "Match info",
+    "tonPronostic": "Your prediction?",
+    "miseTesPoints": "Stake your points on the result before kick-off.",
+    "retourCalendrier": "Back to the schedule",
+    "introuvable": "Match not found",
+    "chargement": "Loading match...",
+    "match": "Match",
+    "onglets": {
+      "apercu": "Overview",
+      "chrono": "Timeline",
+      "h2h": "Head-to-head"
+    }
+  },
+  "classement": {
+    "aucunBut": "No goals recorded yet.",
+    "butsMaj": "GOALS",
+    "voirMoins": "Show less",
+    "voirTop10": "See the top 10",
+    "col": {
+      "j": "P",
+      "v": "W",
+      "n": "D",
+      "d": "L",
+      "bp": "GF",
+      "bc": "GA",
+      "db": "GD",
+      "pts": "PTS"
+    },
+    "formeMaj": "FORM",
+    "titre": "Standings",
+    "sousTitre": "{{c}}, {{s}} season. Updated automatically after every match.",
+    "zones": {
+      "africaines": "African competitions",
+      "promotion": "Promotion to Elite One",
+      "relegation": "Relegation"
+    },
+    "saisonIndispo": "This season's standings are not available on F237 yet. They're coming soon!",
+    "chargement": "Loading standings...",
+    "aucun": "No standings available right now.",
+    "calcule": "Official standings are unavailable for this season: they are calculated from match results (3 pts for a win, 1 pt for a draw).",
+    "legende": "P: played · W: won · D: drawn · L: lost · GF: goals for · GA: goals against · GD: goal difference · Form: last 5 matches (click to see the match)"
+  },
+  "equipes": {
+    "tri": {
+      "classement": "Standing",
+      "alpha": "A → Z"
+    },
+    "voirClub": "View club",
+    "titre": "Teams",
+    "sousTitre": "Every club in the MTN Elite One and MTN Elite Two.",
+    "recherche": "Search for a club or a city...",
+    "rechercheLabel": "Search for a club",
+    "effacer": "Clear",
+    "nbClubs_one": "{{count}} club",
+    "nbClubs_other": "{{count}} clubs",
+    "saisonIndispo": "This season's clubs are not available on F237 yet. They're coming soon!",
+    "chargement": "Loading teams...",
+    "aucunResultat": "No club matches “{{q}}”.",
+    "aucun": "No clubs in this league."
+  },
+  "equipe": {
+    "postes": {
+      "Goalkeeper": "Goalkeepers",
+      "Defender": "Defenders",
+      "Midfielder": "Midfielders",
+      "Attacker": "Forwards",
+      "autres": "Others"
+    },
+    "postesCourts": {
+      "Goalkeeper": "GK",
+      "Defender": "DEF",
+      "Midfielder": "MID",
+      "Attacker": "FWD"
+    },
+    "ans": "{{n}} yrs",
+    "tuiles": {
+      "pos": "POS.",
+      "mj": "P"
+    },
+    "pasDeClassement": "No standings for this club this season yet.",
+    "derniersMatchs": "Latest matches",
+    "aucunJoue": "No matches played yet.",
+    "aucunProgramme": "No matches scheduled right now.",
+    "resultatsRecents": "Recent results",
+    "effectifIndispo": "Squad not available in the API for this season.",
+    "sources": "Sources:",
+    "licenceWiki": "texts from Wikipedia under the CC BY-SA 4.0 licence, summarised for F237.",
+    "histoireBientot": "This club's history is coming soon to F237.",
+    "fiche": {
+      "fondation": "Founded",
+      "ville": "City",
+      "couleurs": "Colours",
+      "surnom": "Nickname",
+      "stade": "Stadium",
+      "fondeEn": "Founded in",
+      "capacite": "Capacity"
+    },
+    "enBref": "The club at a glance",
+    "grandsJoueurs": "Great players",
+    "afrique": "AFRICA",
+    "vainqueur_one": "Winner",
+    "vainqueur_other": "{{count}}-time winner",
+    "finaliste_one": "Finalist",
+    "finaliste_other": "{{count}}-time finalist",
+    "aucunTitre": "No major titles recorded for this club.",
+    "titres": "Titles",
+    "trophees_one": "{{count}} trophy",
+    "trophees_other": "{{count}} trophies",
+    "finales": "Finals and runner-up places",
+    "selonApi": "According to API-Football",
+    "places": "{{n}} seats",
+    "pasEncoreJoue": "No matches played yet.",
+    "prochainMatch": "Next match",
+    "buteursClub": "Club scorers",
+    "aucunBut": "No goals recorded.",
+    "ficheClub": "Club profile",
+    "chargement": "Loading club...",
+    "introuvable": "Team not found",
+    "toutesEquipes": "All teams",
+    "fondeEnAnnee": "Founded in {{a}}",
+    "position": "Position",
+    "points": "Points",
+    "onglets": {
+      "apercu": "Overview",
+      "histoire": "History",
+      "matchs": "Matches",
+      "effectif": "Squad",
+      "palmares": "Honours"
+    }
+  },
+  "jouer": {
+    "cotes": {
+      "dom": "Home",
+      "nul": "Draw",
+      "ext": "Away"
+    },
+    "matchNul": "a draw",
+    "soldeInsuffisant": "Not enough points to bet ({{n}} pts minimum).",
+    "miseMaj": "STAKE",
+    "montantMise": "Stake amount",
+    "parier": "Bet {{n}} pts on {{choix}}",
+    "gainPotentiel": "Potential win {{n}} pts",
+    "avantages": {
+      "points": {
+        "titre": "1,000 free points",
+        "texte": "Your starting balance as soon as you sign up."
+      },
+      "parie": {
+        "titre": "Bet on every match",
+        "texte": "Every Elite One and Elite Two match."
+      },
+      "grimpe": {
+        "titre": "Climb the leaderboard",
+        "texte": "Challenge your friends and other fans."
+      },
+      "fcfa": {
+        "titre": "Convert to FCFA",
+        "texte": "Cash out your winnings via Mobile Money."
+      }
+    },
+    "slogan": "Predict, win, climb",
+    "intro": "Bet your points on MTN Elite One and MTN Elite Two matches, take on your friends and convert your winnings into FCFA.",
+    "inscrire": "Sign up for free",
+    "connecter": "Log in",
+    "moi": "Me",
+    "mesPoints": "My points",
+    "rangAmis": "Rank among friends",
+    "tauxReussite": "Success rate",
+    "salut": "Hi {{prenom}}!",
+    "sousTitre": "Bet on matches, climb your friends' leaderboard and convert your points.",
+    "parisDispo": "Available bets",
+    "chargement": "Loading matches...",
+    "aucunAVenir": "No upcoming matches right now",
+    "parisOuvriront": "Betting will open as soon as the next matches are scheduled.",
+    "voirCalendrier": "See the schedule",
+    "mesAmis": "My friends",
+    "toi": "you",
+    "inviter": "Invite a friend",
+    "convertir": "Convert my points",
+    "taux": "1,000 points = 500 FCFA · via Mobile Money",
+    "fcfaDispo": "FCFA available",
+    "retrait": "Request a withdrawal"
+  },
+  "auth": {
+    "email": "Email",
+    "motDePasse": "Password",
+    "masquerMdp": "Hide password",
+    "afficherMdp": "Show password",
+    "login": {
+      "surtitre": "Members area",
+      "titre": "Welcome back",
+      "intro": "Log in to bet on matches, track your predictions and challenge other fans.",
+      "avantages": {
+        "points": {
+          "titre": "1,000 free points",
+          "texte": "Your starting balance to bet with as soon as you sign up."
+        },
+        "pronostics": {
+          "titre": "Predictions on every match",
+          "texte": "Elite One and Elite Two, before kick-off."
+        },
+        "classement": {
+          "titre": "Climb the leaderboard",
+          "texte": "Take on other Cameroonian football fans."
+        }
+      },
+      "connexion": "Log in",
+      "consigne": "Enter your email and password.",
+      "enCours": "Logging in...",
+      "nouveau": "New to F237?",
+      "creerCompte": "Create an account · 1,000 free points"
+    },
+    "register": {
+      "erreurLongueur": "Your password must be at least {{n}} characters long.",
+      "erreurIdentiques": "The passwords don't match.",
+      "surtitre": "Join F237",
+      "titre": "Get in the game",
+      "intro": "Create your free account and start predicting Cameroonian football matches.",
+      "bonus": "1,000 points",
+      "bonusTexte": "free when you sign up",
+      "etapes": {
+        "compte": "Create your account in 30 seconds",
+        "points": "Get 1,000 welcome points",
+        "pronostique": "Predict Elite One and Elite Two matches"
+      },
+      "inscription": "Sign up",
+      "consigne": "A few details and you're in.",
+      "prenom": "First name",
+      "nom": "Last name",
+      "confirmer": "Confirm password",
+      "regleLongueur": "{{n}} characters minimum",
+      "regleChiffre": "At least one digit (recommended)",
+      "regleIdentiques": "Passwords match",
+      "enCours": "Signing up...",
+      "creer": "Create my account",
+      "dejaCompte": "Already have an account?"
+    }
+  },
+  "actualites": {
+    "titre": "News",
+    "toutes": "All",
+    "aucune": "No news in this category.",
+    "introuvable": "Article not found",
+    "retour": "Back to news",
+    "aLireAussi": "Read also",
+    "tags": {
+      "Elite One": "Elite One",
+      "Elite Two": "Elite Two",
+      "Transfert": "Transfer",
+      "Talents": "Talents",
+      "Compétition": "Competition"
+    }
+  },
+  "profil": {
+    "chargement": "Loading profile...",
+    "erreur": "Unable to load the profile.",
+    "surtitre": "My profile",
+    "membreDepuis": "Member since {{date}}",
+    "deconnexion": "Log out",
+    "stats": {
+      "points": "Points",
+      "classement": "Ranking",
+      "paris": "Bets",
+      "reussite": "Success rate"
+    },
+    "raccourcis": {
+      "parier": "Bet on matches",
+      "calendrier": "Match schedule",
+      "classement": "League standings"
+    },
+    "historique": "Betting history",
+    "aucunPari": "You haven't placed a bet yet",
+    "aucunPariTexte": "Head to the Fantasy page to stake your first points.",
+    "commencer": "Start betting",
+    "historiqueBientot_one": "{{count}} bet placed · details coming soon.",
+    "historiqueBientot_other": "{{count}} bets placed · details coming soon.",
+    "accesRapides": "Quick links"
+  }
+}

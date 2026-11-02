@@ -1,0 +1,456 @@
+{
+  "nav": {
+    "accueil": "Accueil",
+    "matchs": "Matchs",
+    "classements": "Classements",
+    "equipes": "Équipes",
+    "fantasy": "Fantasy",
+    "actualites": "Actualités",
+    "connexion": "Connexion",
+    "quitter": "Quitter",
+    "pts": "{{n}} pts",
+    "langue": "Langue"
+  },
+  "commun": {
+    "precedent": "Précédent",
+    "suivant": "Suivant",
+    "chargement": "Chargement...",
+    "enDirect": "En direct",
+    "enDirectMaj": "EN DIRECT",
+    "aVenir": "À venir",
+    "termine": "Terminé",
+    "plus": "+ Plus",
+    "demo": "DÉMO",
+    "pts": "pts",
+    "bilan": "{{v}}V · {{n}}N · {{d}}D",
+    "but_one": "but",
+    "but_other": "buts",
+    "reporte": "Reporté"
+  },
+  "accueil": {
+    "enSavoirPlus": "En savoir plus",
+    "lireArticle": "Lire l'article",
+    "matchs": "Matchs",
+    "tousLesMatchs": "Tous les matchs",
+    "matchsPrecedents": "Matchs précédents",
+    "matchsSuivants": "Matchs suivants",
+    "aucunMatch": "Aucun match pour le moment.",
+    "direct": {
+      "titreLive": "En direct",
+      "titreAvenir": "Prochains matchs",
+      "titreTermine": "Derniers résultats",
+      "liveConnecte": "Live connecté",
+      "connexion": "Connexion...",
+      "aucunEnCours": "Aucun match en cours pour le moment.",
+      "texteAvenir": "Voici les prochaines affiches : les scores apparaîtront ici en direct dès le coup d’envoi.",
+      "texteTermine": "Les scores s'afficheront ici en temps réel dès le coup d'envoi.",
+      "aucunAfficher": "Aucun match à afficher.",
+      "suivre": "Suivre le match",
+      "pronostic": "Faire un pronostic",
+      "resume": "Voir le résumé"
+    },
+    "classements": {
+      "titre": "Classements",
+      "tousLesDetails": "Tous les détails",
+      "indisponible": "Classement indisponible pour le moment.",
+      "equipe": "Équipe",
+      "j": "J",
+      "pts": "Pts",
+      "rang1": "1er",
+      "rang2": "2e",
+      "rang3": "3e"
+    },
+    "buteurs": {
+      "titre": "Meilleurs buteurs",
+      "afficherTout": "Afficher tout",
+      "meilleurButeur": "Meilleur buteur",
+      "penaltys": "Penaltys",
+      "matchsAvecBut": "Matchs avec but",
+      "aucun": "Aucun buteur enregistré pour cette compétition."
+    },
+    "nouvelles": {
+      "titre": "Dernières nouvelles",
+      "toutes": "Toutes les actualités"
+    }
+  },
+  "footer": {
+    "accroche": "Le pouls du football camerounais : scores en direct, classements et actualités de la MTN Elite One et Elite Two.",
+    "resteInforme": "Reste informé",
+    "emailPlaceholder": "Ton adresse e-mail",
+    "emailLabel": "Adresse e-mail",
+    "inscrireNewsletter": "S'inscrire à la newsletter",
+    "merci": "Merci ! Tu recevras les prochaines nouvelles.",
+    "reseaux": "Médias sociaux",
+    "liens": "Liens",
+    "calendrier": "Calendrier et résultats",
+    "classements": "Classements",
+    "equipes": "Équipes",
+    "actualites": "Actualités",
+    "fantasy": "Fantasy & pronostics",
+    "profil": "Mon profil",
+    "competitions": "Compétitions",
+    "projet": "Le projet",
+    "creePar": "Plateforme indépendante créée par",
+    "donnees": "Données fournies par API-Football.",
+    "droits": "Tous droits réservés",
+    "cgu": "Conditions générales",
+    "confidentialite": "Confidentialité",
+    "cookies": "Cookies",
+    "contact": "Contact"
+  },
+  "bandeau": {
+    "aucunMatch": "Aucun match en cours · Scores mis à jour en temps réel",
+    "connexion": "Connexion live en cours...",
+    "enCours_one": "{{count}} match en cours",
+    "enCours_other": "{{count}} matchs en cours",
+    "connecte": "Connecté"
+  },
+  "saison": {
+    "saison": "Saison {{s}}",
+    "bientot": "Bientôt"
+  },
+  "matchs": {
+    "nbMatchs_one": "{{count}} match",
+    "nbMatchs_other": "{{count}} matchs",
+    "aujourdhui": "Aujourd'hui",
+    "journee": "Journée {{n}}",
+    "pronostiquer": "Pronostiquer",
+    "chiffres": {
+      "matchs": "Matchs",
+      "buts": "Buts",
+      "moyenne": "Moy. / match"
+    },
+    "journeeEnChiffres": "La journée en chiffres",
+    "buteursDuJour": "Buteurs du jour",
+    "masqueSurprise": "Masqué pour ne pas gâcher la surprise.",
+    "aucunBut": "Aucun but enregistré ce jour-là.",
+    "titre": "Calendrier des matchs",
+    "datesPrecedentes": "Dates précédentes",
+    "datesSuivantes": "Dates suivantes",
+    "chargementCalendrier": "Chargement du calendrier...",
+    "calendrierBientot": "Le calendrier de la saison {{s}} arrive bientôt.",
+    "aucunProgramme": "Aucun match programmé.",
+    "masquerScores": "Masquer les scores",
+    "matchsEnDirect": "Matchs en direct",
+    "saisonIndispo": "Les matchs de cette saison ne sont pas encore disponibles sur F237. Ils arrivent bientôt !",
+    "revenirSaison": "Revenir à la saison {{s}}",
+    "aucunEnDirect": "Aucun match en direct pour le moment.",
+    "aucunCetteDate": "Aucun match pour cette date."
+  },
+  "matchDetail": {
+    "buteurInconnu": "Buteur inconnu",
+    "pen": "pen.",
+    "csc": "CSC",
+    "termineMaj": "TERMINÉ",
+    "reporteMaj": "REPORTÉ",
+    "aVenirMaj": "À VENIR",
+    "mt": {
+      "equipe": "ÉQUIPE",
+      "mt1": "1RE MT",
+      "mt2": "2E MT",
+      "final": "FINAL"
+    },
+    "formeRecente": "Forme récente",
+    "pasEncoreDeMatch": "Pas encore de match",
+    "resultat": {
+      "V": "V",
+      "N": "N",
+      "D": "D"
+    },
+    "chronoBientot": "La chronologie sera disponible au coup d'envoi.",
+    "coupEnvoiMaj": "COUP D'ENVOI",
+    "miTempsMaj": "MI-TEMPS",
+    "finMaj": "FIN DU MATCH",
+    "aucunBut": "Aucun but enregistré pour ce match.",
+    "bilanConfrontations": "Bilan des confrontations",
+    "victoires": "Victoires {{e}}",
+    "nuls": "Nuls",
+    "toutesRencontres": "Toutes les rencontres",
+    "noteH2h": "Basé sur les saisons disponibles sur F237. L'historique s'enrichira avec les saisons précédentes.",
+    "infos": {
+      "competition": "Compétition",
+      "saison": "Saison",
+      "journee": "Journée",
+      "date": "Date",
+      "coupEnvoi": "Coup d'envoi",
+      "stade": "Stade"
+    },
+    "infosDuMatch": "Infos du match",
+    "tonPronostic": "Ton pronostic ?",
+    "miseTesPoints": "Mise tes points sur le résultat avant le coup d'envoi.",
+    "retourCalendrier": "Retour au calendrier",
+    "introuvable": "Match introuvable",
+    "chargement": "Chargement du match...",
+    "match": "Match",
+    "onglets": {
+      "apercu": "Aperçu",
+      "chrono": "Chronologie",
+      "h2h": "Face-à-face"
+    }
+  },
+  "classement": {
+    "aucunBut": "Aucun but enregistré pour l'instant.",
+    "butsMaj": "BUTS",
+    "voirMoins": "Voir moins",
+    "voirTop10": "Voir le top 10",
+    "col": {
+      "j": "J",
+      "v": "V",
+      "n": "N",
+      "d": "D",
+      "bp": "BP",
+      "bc": "BC",
+      "db": "DB",
+      "pts": "PTS"
+    },
+    "formeMaj": "FORME",
+    "titre": "Classement",
+    "sousTitre": "{{c}}, saison {{s}}. Mis à jour automatiquement après chaque match.",
+    "zones": {
+      "africaines": "Compétitions africaines",
+      "promotion": "Promotion en Elite One",
+      "relegation": "Relégation"
+    },
+    "saisonIndispo": "Le classement de cette saison n'est pas encore disponible sur F237. Il arrive bientôt !",
+    "chargement": "Chargement du classement...",
+    "aucun": "Aucun classement disponible pour le moment.",
+    "calcule": "Classement officiel indisponible pour cette saison : il est calculé à partir des résultats des matchs (3 pts la victoire, 1 pt le nul).",
+    "legende": "J : joués · V : victoires · N : nuls · D : défaites · BP : buts pour · BC : buts contre · DB : différence de buts · Forme : 5 derniers matchs (clique pour voir le match)"
+  },
+  "equipes": {
+    "tri": {
+      "classement": "Classement",
+      "alpha": "A → Z"
+    },
+    "voirClub": "Voir le club",
+    "titre": "Équipes",
+    "sousTitre": "Tous les clubs de la MTN Elite One et de la MTN Elite Two.",
+    "recherche": "Rechercher un club ou une ville...",
+    "rechercheLabel": "Rechercher un club",
+    "effacer": "Effacer",
+    "nbClubs_one": "{{count}} club",
+    "nbClubs_other": "{{count}} clubs",
+    "saisonIndispo": "Les clubs de cette saison ne sont pas encore disponibles sur F237. Ils arrivent bientôt !",
+    "chargement": "Chargement des équipes...",
+    "aucunResultat": "Aucun club ne correspond à « {{q}} ».",
+    "aucun": "Aucun club pour ce championnat."
+  },
+  "equipe": {
+    "postes": {
+      "Goalkeeper": "Gardiens",
+      "Defender": "Défenseurs",
+      "Midfielder": "Milieux",
+      "Attacker": "Attaquants",
+      "autres": "Autres"
+    },
+    "postesCourts": {
+      "Goalkeeper": "GB",
+      "Defender": "DEF",
+      "Midfielder": "MIL",
+      "Attacker": "ATT"
+    },
+    "ans": "{{n}} ans",
+    "tuiles": {
+      "pos": "POS.",
+      "mj": "MJ"
+    },
+    "pasDeClassement": "Pas encore de classement pour ce club cette saison.",
+    "derniersMatchs": "Derniers matchs",
+    "aucunJoue": "Aucun match joué pour l'instant.",
+    "aucunProgramme": "Aucun match programmé pour le moment.",
+    "resultatsRecents": "Résultats récents",
+    "effectifIndispo": "Effectif non disponible dans l'API pour cette saison.",
+    "sources": "Sources :",
+    "licenceWiki": "textes de Wikipédia sous licence CC BY-SA 4.0, résumés pour F237.",
+    "histoireBientot": "L'histoire de ce club arrive bientôt sur F237.",
+    "fiche": {
+      "fondation": "Fondation",
+      "ville": "Ville",
+      "couleurs": "Couleurs",
+      "surnom": "Surnom",
+      "stade": "Stade",
+      "fondeEn": "Fondé en",
+      "capacite": "Capacité"
+    },
+    "enBref": "Le club en bref",
+    "grandsJoueurs": "Grands joueurs",
+    "afrique": "AFRIQUE",
+    "vainqueur_one": "Vainqueur",
+    "vainqueur_other": "{{count}} fois vainqueur",
+    "finaliste_one": "Finaliste",
+    "finaliste_other": "{{count}} fois finaliste",
+    "aucunTitre": "Aucun titre majeur enregistré pour ce club.",
+    "titres": "Titres",
+    "trophees_one": "{{count}} trophée",
+    "trophees_other": "{{count}} trophées",
+    "finales": "Finales et places d'honneur",
+    "selonApi": "Selon API-Football",
+    "places": "{{n}} places",
+    "pasEncoreJoue": "Pas encore de match joué.",
+    "prochainMatch": "Prochain match",
+    "buteursClub": "Buteurs du club",
+    "aucunBut": "Aucun but enregistré.",
+    "ficheClub": "Fiche du club",
+    "chargement": "Chargement du club...",
+    "introuvable": "Équipe introuvable",
+    "toutesEquipes": "Toutes les équipes",
+    "fondeEnAnnee": "Fondé en {{a}}",
+    "position": "Position",
+    "points": "Points",
+    "onglets": {
+      "apercu": "Aperçu",
+      "histoire": "Histoire",
+      "matchs": "Matchs",
+      "effectif": "Effectif",
+      "palmares": "Palmarès"
+    }
+  },
+  "jouer": {
+    "cotes": {
+      "dom": "Domicile",
+      "nul": "Nul",
+      "ext": "Extérieur"
+    },
+    "matchNul": "Match nul",
+    "soldeInsuffisant": "Solde insuffisant pour parier ({{n}} pts minimum).",
+    "miseMaj": "MISE",
+    "montantMise": "Montant de la mise",
+    "parier": "Parier {{n}} pts sur {{choix}}",
+    "gainPotentiel": "Gain potentiel {{n}} pts",
+    "avantages": {
+      "points": {
+        "titre": "1 000 points offerts",
+        "texte": "Ton capital de départ dès l'inscription."
+      },
+      "parie": {
+        "titre": "Parie sur chaque match",
+        "texte": "Tous les matchs d'Elite One et d'Elite Two."
+      },
+      "grimpe": {
+        "titre": "Grimpe au classement",
+        "texte": "Défie tes amis et les autres fans."
+      },
+      "fcfa": {
+        "titre": "Convertis en FCFA",
+        "texte": "Retire tes gains via Mobile Money."
+      }
+    },
+    "slogan": "Pronostique, gagne, grimpe",
+    "intro": "Parie tes points sur les matchs de la MTN Elite One et de la MTN Elite Two, affronte tes amis et convertis tes gains en FCFA.",
+    "inscrire": "S'inscrire gratuitement",
+    "connecter": "Se connecter",
+    "moi": "Moi",
+    "mesPoints": "Mes points",
+    "rangAmis": "Rang entre amis",
+    "tauxReussite": "Taux de réussite",
+    "salut": "Salut {{prenom}} !",
+    "sousTitre": "Parie sur les matchs, grimpe au classement de tes amis et convertis tes points.",
+    "parisDispo": "Paris disponibles",
+    "chargement": "Chargement des matchs...",
+    "aucunAVenir": "Aucun match à venir pour le moment",
+    "parisOuvriront": "Les paris ouvriront dès que les prochains matchs seront programmés.",
+    "voirCalendrier": "Voir le calendrier",
+    "mesAmis": "Mes amis",
+    "toi": "toi",
+    "inviter": "Inviter un ami",
+    "convertir": "Convertir mes points",
+    "taux": "1 000 points = 500 FCFA · via Mobile Money",
+    "fcfaDispo": "FCFA disponibles",
+    "retrait": "Demander un retrait"
+  },
+  "auth": {
+    "email": "Email",
+    "motDePasse": "Mot de passe",
+    "masquerMdp": "Masquer le mot de passe",
+    "afficherMdp": "Afficher le mot de passe",
+    "login": {
+      "surtitre": "Espace membre",
+      "titre": "Content de te revoir",
+      "intro": "Connecte-toi pour parier sur les matchs, suivre tes pronostics et défier les autres fans.",
+      "avantages": {
+        "points": {
+          "titre": "1 000 points offerts",
+          "texte": "Ton capital de départ pour parier dès l'inscription."
+        },
+        "pronostics": {
+          "titre": "Pronostics sur chaque match",
+          "texte": "Elite One et Elite Two, avant le coup d'envoi."
+        },
+        "classement": {
+          "titre": "Grimpe au classement",
+          "texte": "Affronte les autres fans de football camerounais."
+        }
+      },
+      "connexion": "Connexion",
+      "consigne": "Entre ton email et ton mot de passe.",
+      "enCours": "Connexion...",
+      "nouveau": "Nouveau sur F237 ?",
+      "creerCompte": "Créer un compte · 1 000 points offerts"
+    },
+    "register": {
+      "erreurLongueur": "Le mot de passe doit contenir au moins {{n}} caractères.",
+      "erreurIdentiques": "Les mots de passe ne correspondent pas.",
+      "surtitre": "Rejoins F237",
+      "titre": "Entre dans le jeu",
+      "intro": "Crée ton compte gratuitement et commence à pronostiquer les matchs du football camerounais.",
+      "bonus": "1 000 points",
+      "bonusTexte": "offerts dès ton inscription",
+      "etapes": {
+        "compte": "Crée ton compte en 30 secondes",
+        "points": "Reçois 1 000 points de bienvenue",
+        "pronostique": "Pronostique les matchs d'Elite One et d'Elite Two"
+      },
+      "inscription": "Inscription",
+      "consigne": "Quelques infos et c'est parti.",
+      "prenom": "Prénom",
+      "nom": "Nom",
+      "confirmer": "Confirmer le mot de passe",
+      "regleLongueur": "{{n}} caractères minimum",
+      "regleChiffre": "Au moins un chiffre (conseillé)",
+      "regleIdentiques": "Mots de passe identiques",
+      "enCours": "Inscription...",
+      "creer": "Créer mon compte",
+      "dejaCompte": "Déjà un compte ?"
+    }
+  },
+  "actualites": {
+    "titre": "Actualités",
+    "toutes": "Toutes",
+    "aucune": "Aucune actualité dans cette catégorie.",
+    "introuvable": "Article introuvable",
+    "retour": "Retour aux actualités",
+    "aLireAussi": "À lire aussi",
+    "tags": {
+      "Elite One": "Elite One",
+      "Elite Two": "Elite Two",
+      "Transfert": "Transfert",
+      "Talents": "Talents",
+      "Compétition": "Compétition"
+    }
+  },
+  "profil": {
+    "chargement": "Chargement du profil...",
+    "erreur": "Impossible de charger le profil.",
+    "surtitre": "Mon profil",
+    "membreDepuis": "Membre depuis le {{date}}",
+    "deconnexion": "Déconnexion",
+    "stats": {
+      "points": "Points",
+      "classement": "Classement",
+      "paris": "Paris",
+      "reussite": "Réussite"
+    },
+    "raccourcis": {
+      "parier": "Parier sur les matchs",
+      "calendrier": "Calendrier des matchs",
+      "classement": "Classement du championnat"
+    },
+    "historique": "Historique des paris",
+    "aucunPari": "Tu n'as pas encore placé de pari",
+    "aucunPariTexte": "Rends-toi sur la page Fantasy pour miser tes premiers points.",
+    "commencer": "Commencer à parier",
+    "historiqueBientot_one": "{{count}} pari placé · le détail arrive bientôt.",
+    "historiqueBientot_other": "{{count}} paris placés · le détail arrive bientôt.",
+    "accesRapides": "Accès rapides"
+  }
+}
