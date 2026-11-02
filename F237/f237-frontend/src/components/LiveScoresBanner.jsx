@@ -1,6 +1,7 @@
 // f237-frontend/src/components/LiveScoresBanner.jsx
 
 import { useLiveScores } from "../hooks/useLiveScores";
+import { useTranslation } from "react-i18next";
 import { Wifi, WifiOff, Radio } from "lucide-react";
 import theme from "../theme";
 
@@ -11,6 +12,7 @@ const BANDE = {
 
 function LiveScoresBanner() {
   const { matchsLive, isConnected, aucunMatchLive } = useLiveScores();
+  const { t } = useTranslation();
 
   if (aucunMatchLive || matchsLive.length === 0) {
     return (
@@ -21,9 +23,7 @@ function LiveScoresBanner() {
           <WifiOff size={14} className="flex-shrink-0" style={{ color: theme.textFaint }} />
         )}
         <span className="text-xs font-medium" style={{ color: theme.textMuted }}>
-          {isConnected
-            ? "Aucun match en cours · Scores mis à jour en temps réel"
-            : "Connexion live en cours..."}
+          {isConnected ? t("bandeau.aucunMatch") : t("bandeau.connexion")}
         </span>
       </div>
     );
@@ -36,12 +36,12 @@ function LiveScoresBanner() {
         Live
       </span>
       <span className="text-xs font-medium" style={{ color: theme.textMuted }}>
-        · {matchsLive.length} match{matchsLive.length > 1 ? "s" : ""} en cours
+        · {t("bandeau.enCours", { count: matchsLive.length })}
       </span>
       {isConnected && (
         <span className="ml-auto flex items-center gap-1 text-xs font-medium" style={{ color: theme.greenBright }}>
           <span className="w-1.5 h-1.5 rounded-full animate-pulse inline-block" style={{ backgroundColor: theme.greenBright }} />
-          Connecté
+          {t("bandeau.connecte")}
         </span>
       )}
     </div>

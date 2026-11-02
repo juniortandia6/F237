@@ -1,6 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, ArrowRight, Trophy, Medal } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { locale } from '../i18n';
 import { useLiveScores } from '../hooks/useLiveScores';
 import { classementService } from '../services/classementService';
 import { matchService } from '../services/matchService';
@@ -14,10 +16,10 @@ const ACTUS = ACTUS_HERO;
 const DUREE = 5000;
 
 function formatHeure(dateStr) {
-  return new Date(dateStr).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  return new Date(dateStr).toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
 }
 function formatDateCourte(dateStr) {
-  return new Date(dateStr).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  return new Date(dateStr).toLocaleDateString(locale(), { day: 'numeric', month: 'short' });
 }
 
 // ── Barre de matchs ─────────────────────────────────────────────────────
@@ -63,6 +65,7 @@ function LigneEquipe({ equipe, score, gagnant, perdant, aVenir }) {
 }
 
 function CarteMatch({ m }) {
+  const { t } = useTranslation();
   const termine = m.statut === 2;
   const live = m.statut === 1;
   const aVenir = m.statut === 0;
@@ -90,10 +93,10 @@ function CarteMatch({ m }) {
           {live ? (
             <span style={{ fontSize: '11px', fontWeight: 800, color: theme.red, display: 'flex', alignItems: 'center', gap: '5px' }}>
               <span className="animate-pulse" style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: theme.red }} />
-              EN DIRECT
+              {t('commun.enDirectMaj')}
             </span>
           ) : termine ? (
-            <span style={{ fontSize: '11px', fontWeight: 700, color: '#8e8e8e', textTransform: 'uppercase' }}>Terminé</span>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#8e8e8e', textTransform: 'uppercase' }}>{t('commun.termine')}</span>
           ) : (
             <span style={{ fontSize: '11px', fontWeight: 700, color: '#8e8e8e', textTransform: 'uppercase' }}>
               {formatDateCourte(m.dateMatch)}
@@ -123,7 +126,7 @@ function CarteMatch({ m }) {
               backgroundColor: '#efefef', color: '#333', fontWeight: 600, fontSize: '14px',
               padding: '8px 12px', borderRadius: '8px', textDecoration: 'none', whiteSpace: 'nowrap',
             }}>
-            + Plus
+            {t('commun.plus')}
           </Link>
         )}
       </div>
@@ -165,6 +168,7 @@ function LogoCarte({ src }) {
 
 // mode : 'live' | 'avenir' | 'termine'
 function CarteDirect({ m, mode }) {
+  const { t } = useTranslation();
   const live = mode === 'live';
   const avenir = mode === 'avenir';
   const dom = m.scoreDomicile, ext = m.scoreExterieur;
@@ -207,7 +211,7 @@ function CarteDirect({ m, mode }) {
           padding: '4px 10px', borderRadius: '20px',
         }}>
           {live && <span className="animate-pulse" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#fff' }} />}
-          {live ? (minute ? `En direct · ${minute}'` : 'En direct') : avenir ? 'À venir' : 'Terminé'}
+          {live ? (minute ? `${t('commun.enDirect')} · ${minute}'` : t('commun.enDirect')) : avenir ? t('commun.aVenir') : t('commun.termine')}
         </span>
 
         <LogoCarte src={m.equipeDomicile?.logoUrl} />
@@ -219,7 +223,7 @@ function CarteDirect({ m, mode }) {
               {formatHeure(m.dateMatch)}
             </span>
             <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', opacity: 0.8, marginTop: '4px' }}>
-              {new Date(m.dateMatch).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })}
+              {new Date(m.dateMatch).toLocaleDateString(locale(), { weekday: 'short', day: 'numeric', month: 'short' })}
             </span>
           </span>
         ) : (
@@ -237,7 +241,7 @@ function CarteDirect({ m, mode }) {
 
       {/* Infos */}
       <span style={{ marginTop: '14px', fontSize: '11px', fontWeight: 700, color: '#7a7a7a', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-        Elite One{m.dateMatch ? ` · ${new Date(m.dateMatch).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
+        Elite One{m.dateMatch ? ` · ${new Date(m.dateMatch).toLocaleDateString(locale(), { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
       </span>
       <span style={{
         marginTop: '6px', fontSize: '18px', fontWeight: 700, color: '#141414', lineHeight: 1.3,
@@ -252,7 +256,7 @@ function CarteDirect({ m, mode }) {
         marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #ececec',
         display: 'flex', alignItems: 'center', gap: '6px', color: '#6b6b6b', fontSize: '14px', fontWeight: 600,
       }}>
-        {live ? 'Suivre le match' : avenir ? 'Faire un pronostic' : 'Voir le résumé'}
+        {live ? t('accueil.direct.suivre') : avenir ? t('accueil.direct.pronostic') : t('accueil.direct.resume')}
         <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
       </div>
     </Link>
@@ -260,10 +264,11 @@ function CarteDirect({ m, mode }) {
 }
 
 function SectionDirect({ matchsLive, matchsAVenir, matchsTermines, isConnected, demo }) {
+  const { t } = useTranslation();
   const mode = matchsLive.length > 0 ? 'live' : matchsAVenir.length > 0 ? 'avenir' : 'termine';
   const live = mode === 'live';
   const liste = live ? matchsLive : mode === 'avenir' ? matchsAVenir.slice(0, 8) : matchsTermines.slice(0, 8);
-  const TITRES = { live: 'En direct', avenir: 'Prochains matchs', termine: 'Derniers résultats' };
+  const TITRES = { live: t('accueil.direct.titreLive'), avenir: t('accueil.direct.titreAvenir'), termine: t('accueil.direct.titreTermine') };
   const rangeeRef = useRef(null);
   const [gauche, setGauche] = useState(false);
   const [droite, setDroite] = useState(true);
@@ -304,25 +309,25 @@ function SectionDirect({ matchsLive, matchsAVenir, matchsTermines, isConnected, 
           <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, color: isConnected ? theme.greenBright : 'rgba(255,255,255,0.5)' }}>
               <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: isConnected ? theme.greenBright : 'rgba(255,255,255,0.5)' }} />
-              {isConnected ? 'Live connecté' : 'Connexion...'}
+              {isConnected ? t('accueil.direct.liveConnecte') : t('accueil.direct.connexion')}
             </span>
             <Link to="/matchs" className="flex items-center gap-1 transition-opacity hover:opacity-80"
               style={{ fontSize: '15px', color: '#fff', fontWeight: 600, textDecoration: 'none' }}>
-              Tous les matchs <ChevronRight size={18} />
+              {t('accueil.tousLesMatchs')} <ChevronRight size={18} />
             </Link>
           </div>
         </div>
         {!live && (
           <p style={{ marginTop: '-12px', marginBottom: '20px', fontSize: '14px', color: 'rgba(255,255,255,0.65)' }}>
-            Aucun match en cours pour le moment. {mode === 'avenir'
-              ? 'Voici les prochaines affiches : les scores apparaîtront ici en direct dès le coup d’envoi.'
-              : "Les scores s'afficheront ici en temps réel dès le coup d'envoi."}
+            {t('accueil.direct.aucunEnCours')} {mode === 'avenir'
+              ? t('accueil.direct.texteAvenir')
+              : t('accueil.direct.texteTermine')}
             {demo && (
               <span style={{
                 marginLeft: '10px', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 700,
                 backgroundColor: 'rgba(252,209,22,0.18)', color: theme.yellow, letterSpacing: '0.5px',
               }}>
-                DÉMO
+                {t('commun.demo')}
               </span>
             )}
           </p>
@@ -343,19 +348,19 @@ function SectionDirect({ matchsLive, matchsAVenir, matchsTermines, isConnected, 
           }}
         >
           {liste.length === 0 ? (
-            <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px' }}>Aucun match à afficher.</span>
+            <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px' }}>{t('accueil.direct.aucunAfficher')}</span>
           ) : liste.map((m, i) => (
             <CarteDirect key={m.apiFootballId ?? m.id ?? i} m={m} mode={mode} />
           ))}
         </div>
 
         {gauche && (
-          <button onClick={() => defiler(-1)} aria-label="Précédent" style={FLECHE('left')}>
+          <button onClick={() => defiler(-1)} aria-label={t('commun.precedent')} style={FLECHE('left')}>
             <ChevronLeft size={20} color="#222" />
           </button>
         )}
         {droite && liste.length > 0 && (
-          <button onClick={() => defiler(1)} aria-label="Suivant" style={FLECHE('right')}>
+          <button onClick={() => defiler(1)} aria-label={t('commun.suivant')} style={FLECHE('right')}>
             <ChevronRight size={20} color="#222" />
           </button>
         )}
@@ -387,11 +392,11 @@ const stat = (e, ...noms) => {
 const nomEquipe = (e) => e?.equipe?.nom ?? e?.nom ?? '—';
 const logoEquipe = (e) => e?.equipe?.logoUrl ?? e?.logoUrl;
 
-function bilan(e) {
+function bilan(e, t) {
   const v = stat(e, 'victoires', 'gagnes', 'win');
   const n = stat(e, 'nuls', 'egalites', 'draw');
   const d = stat(e, 'defaites', 'perdus', 'lose');
-  return v != null && n != null && d != null ? `${v}V · ${n}N · ${d}D` : null;
+  return v != null && n != null && d != null ? t('commun.bilan', { v, n, d }) : null;
 }
 
 // Palette des sections Classements + Meilleurs buteurs (posées sur la bande verte)
@@ -404,6 +409,7 @@ const CLAIRE = {
 };
 
 function CartePodium({ e, rang }) {
+  const { t } = useTranslation();
   const med = MEDAILLES[rang];
   const premier = rang === 1;
   return (
@@ -424,7 +430,7 @@ function CartePodium({ e, rang }) {
       {/* Médaille / trophée */}
       <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: med.couleur }}>
         {premier ? <Trophy size={26} fill={med.couleur} strokeWidth={1.5} /> : <Medal size={22} strokeWidth={2} />}
-        <span style={{ fontSize: '11px', fontWeight: 800, marginTop: '2px' }}>{med.label}</span>
+        <span style={{ fontSize: '11px', fontWeight: 800, marginTop: '2px' }}>{t(`accueil.classements.rang${rang}`)}</span>
       </span>
 
       {logoEquipe(e)
@@ -438,7 +444,7 @@ function CartePodium({ e, rang }) {
       </span>
       <span style={{ fontSize: '13px', color: CLAIRE.textMuted }}>
         <strong style={{ color: CLAIRE.text }}>{e.points ?? 0} pts</strong>
-        {bilan(e) && <> · {bilan(e)}</>}
+        {bilan(e, t) && <> · {bilan(e, t)}</>}
       </span>
     </div>
   );
@@ -517,10 +523,10 @@ function NomDeuxLignes({ nom, grand }) {
 
 const LARGEUR_LEADER = 320;
 
-const RANGS = ['1er', '2e', '3e'];
 
 // Une carte par buteur : 1er à gauche, puis 2e, 3e... (comme les cartes FIBA)
 function CarteButeur({ j, rang }) {
+  const { t } = useTranslation();
   const premier = rang === 1;
   return (
     <div className="group" style={{
@@ -535,10 +541,10 @@ function CarteButeur({ j, rang }) {
       {/* En-tête : rang */}
       <div style={{ backgroundColor: L.entete, padding: '14px 16px', textAlign: 'center' }}>
         <div style={{ color: premier ? CLAIRE.yellow : '#fff', fontWeight: 800, fontSize: '15px' }}>
-          {RANGS[rang - 1] ?? `${rang}e`}
+          {rang <= 3 ? t(`accueil.classements.rang${rang}`) : `${rang}e`}
         </div>
         <div style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 700, fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase', marginTop: '2px' }}>
-          Meilleur buteur
+          {t('accueil.buteurs.meilleurButeur')}
         </div>
       </div>
 
@@ -557,7 +563,7 @@ function CarteButeur({ j, rang }) {
             padding: '4px 12px', fontSize: '22px', fontWeight: 900, boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
             fontFamily: '"Barlow Condensed", Arial, sans-serif',
           }}>
-            {j.buts} <span style={{ fontSize: '13px', fontWeight: 700, color: L.doux }}>but{j.buts > 1 ? 's' : ''}</span>
+            {j.buts} <span style={{ fontSize: '13px', fontWeight: 700, color: L.doux }}>{t('commun.but', { count: j.buts })}</span>
           </span>
         </div>
       </div>
@@ -565,8 +571,8 @@ function CarteButeur({ j, rang }) {
       {/* Détail */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderTop: '1px solid #ececec' }}>
         {[
-          ['Penaltys', j.penaltys],
-          ['Matchs avec but', j.matchs],
+          [t('accueil.buteurs.penaltys'), j.penaltys],
+          [t('accueil.buteurs.matchsAvecBut'), j.matchs],
         ].map(([label, val], i) => (
           <div key={label} style={{ padding: '12px 14px', textAlign: 'center', borderLeft: i ? '1px solid #ececec' : 'none' }}>
             <div style={{ color: L.texte, fontSize: '17px', fontWeight: 800 }}>{val}</div>
@@ -579,6 +585,7 @@ function CarteButeur({ j, rang }) {
 }
 
 function BlocButeurs({ matchs, live }) {
+  const { t } = useTranslation();
   // Top 10, du 1er (à gauche) au 10e
   const buteurs = useMemo(() => classerButeurs(calculerJoueurs(matchs)).slice(0, 10), [matchs]);
   const rangeeRef = useRef(null);
@@ -605,7 +612,7 @@ function BlocButeurs({ matchs, live }) {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <h3 style={{ color: CLAIRE.text, fontSize: '28px', fontWeight: 400, fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
-            Meilleurs buteurs
+            {t('accueil.buteurs.titre')}
           </h3>
           {live && (
             <span style={{
@@ -613,13 +620,13 @@ function BlocButeurs({ matchs, live }) {
               backgroundColor: 'rgba(225,37,43,0.15)', color: CLAIRE.red, fontSize: '11px', fontWeight: 800, letterSpacing: '0.6px',
             }}>
               <span className="animate-pulse" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: CLAIRE.red }} />
-              EN DIRECT
+              {t('commun.enDirectMaj')}
             </span>
           )}
         </div>
         <Link to="/classement" className="flex items-center gap-1 transition-opacity hover:opacity-80"
           style={{ fontSize: '15px', fontWeight: 600, color: CLAIRE.text, textDecoration: 'none' }}>
-          Afficher tout <ChevronRight size={18} />
+          {t('accueil.buteurs.afficherTout')} <ChevronRight size={18} />
         </Link>
       </div>
 
@@ -627,18 +634,18 @@ function BlocButeurs({ matchs, live }) {
         <div ref={rangeeRef} onScroll={maj}
           style={{ display: 'flex', gap: '16px', overflowX: 'auto', scrollbarWidth: 'none', scrollSnapType: 'x mandatory', paddingBottom: '4px' }}>
           {buteurs.length === 0 ? (
-            <div style={{ padding: '28px', color: CLAIRE.textMuted, fontSize: '14px' }}>Aucun buteur enregistré pour cette compétition.</div>
+            <div style={{ padding: '28px', color: CLAIRE.textMuted, fontSize: '14px' }}>{t('accueil.buteurs.aucun')}</div>
           ) : buteurs.map((j, i) => (
             <CarteButeur key={`${j.nom}|${j.equipe}`} j={j} rang={i + 1} />
           ))}
         </div>
         {gauche && (
-          <button onClick={() => defiler(-1)} aria-label="Précédent" style={FLECHE('left')}>
+          <button onClick={() => defiler(-1)} aria-label={t('commun.precedent')} style={FLECHE('left')}>
             <ChevronLeft size={20} color="#222" />
           </button>
         )}
         {droite && (
-          <button onClick={() => defiler(1)} aria-label="Suivant" style={FLECHE('right')}>
+          <button onClick={() => defiler(1)} aria-label={t('commun.suivant')} style={FLECHE('right')}>
             <ChevronRight size={20} color="#222" />
           </button>
         )}
@@ -650,6 +657,7 @@ function BlocButeurs({ matchs, live }) {
 // signatureLive change dès qu'un score évolue en direct -> on recharge
 // classement + buteurs, sans afficher de "Chargement..." (pas de clignotement)
 function SectionClassement({ signatureLive = '', live = false }) {
+  const { t } = useTranslation();
   const [ligue, setLigue] = useState(LIGUES[0].cle);
   const [donnees, setDonnees] = useState({});      // { 'elite-one': [...], 'elite-two': [...] }
   const [matchsParLigue, setMatchsParLigue] = useState({}); // pour calculer les buteurs
@@ -686,11 +694,11 @@ function SectionClassement({ signatureLive = '', live = false }) {
       {/* En-tête */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
         <h2 style={{ color: CLAIRE.text, fontSize: '28px', fontWeight: 400, fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
-          Classements
+          {t('accueil.classements.titre')}
         </h2>
         <Link to="/classement" className="flex items-center gap-1 transition-opacity hover:opacity-80"
           style={{ fontSize: '15px', fontWeight: 600, color: CLAIRE.text, textDecoration: 'none' }}>
-          Tous les détails <ChevronRight size={18} />
+          {t('accueil.classements.tousLesDetails')} <ChevronRight size={18} />
         </Link>
       </div>
 
@@ -715,10 +723,10 @@ function SectionClassement({ signatureLive = '', live = false }) {
       </div>
 
       {chargement ? (
-        <div className="text-center py-10" style={{ fontSize: '14px', color: CLAIRE.textFaint }}>Chargement...</div>
+        <div className="text-center py-10" style={{ fontSize: '14px', color: CLAIRE.textFaint }}>{t('commun.chargement')}</div>
       ) : top5.length === 0 ? (
         <div className="text-center py-10" style={{ fontSize: '14px', color: CLAIRE.textMuted }}>
-          Classement indisponible pour le moment.
+          {t('accueil.classements.indisponible')}
         </div>
       ) : (
         <>
@@ -738,9 +746,9 @@ function SectionClassement({ signatureLive = '', live = false }) {
                 textTransform: 'uppercase', color: '#fff',
                 background: `linear-gradient(90deg, ${CLAIRE.green} 0%, #14532f 100%)`,
               }}>
-                <span>#</span><span>Équipe</span>
-                <span style={{ textAlign: 'center' }}>J</span>
-                <span style={{ textAlign: 'right' }}>Pts</span>
+                <span>#</span><span>{t('accueil.classements.equipe')}</span>
+                <span style={{ textAlign: 'center' }}>{t('accueil.classements.j')}</span>
+                <span style={{ textAlign: 'right' }}>{t('accueil.classements.pts')}</span>
               </div>
               {suite.map((e, i) => (
                 <div key={e.equipeId ?? e.id ?? i}
@@ -782,6 +790,7 @@ function SectionClassement({ signatureLive = '', live = false }) {
 const LARGEUR_CARTE_NEWS = 220;
 
 function SectionNouvelles() {
+  const { t } = useTranslation();
   const rangeeRef = useRef(null);
   const [gauche, setGauche] = useState(false);
   const [droite, setDroite] = useState(true);
@@ -810,11 +819,11 @@ function SectionNouvelles() {
       <div style={{ position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '0 60px', boxSizing: 'content-box' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '22px' }}>
           <h2 style={{ color: '#141414', fontSize: '28px', fontWeight: 400, fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
-            Dernières nouvelles
+            {t('accueil.nouvelles.titre')}
           </h2>
           <Link to="/actualites" className="flex items-center gap-1 transition-opacity hover:opacity-80"
             style={{ fontSize: '15px', color: '#141414', fontWeight: 600, textDecoration: 'none' }}>
-            Toutes les actualités <ChevronRight size={18} />
+            {t('accueil.nouvelles.toutes')} <ChevronRight size={18} />
           </Link>
         </div>
       </div>
@@ -863,12 +872,12 @@ function SectionNouvelles() {
         </div>
 
         {gauche && (
-          <button onClick={() => defiler(-1)} aria-label="Précédent" style={FLECHE('left')}>
+          <button onClick={() => defiler(-1)} aria-label={t('commun.precedent')} style={FLECHE('left')}>
             <ChevronLeft size={20} color="#222" />
           </button>
         )}
         {droite && (
-          <button onClick={() => defiler(1)} aria-label="Suivant" style={FLECHE('right')}>
+          <button onClick={() => defiler(1)} aria-label={t('commun.suivant')} style={FLECHE('right')}>
             <ChevronRight size={20} color="#222" />
           </button>
         )}
@@ -878,6 +887,7 @@ function SectionNouvelles() {
 }
 
 const AccueilPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { matchsLive, isConnected } = useLiveScores();
   const [matchs, setMatchs] = useState([]);
@@ -1043,7 +1053,7 @@ const AccueilPage = () => {
                 fontWeight: 700, fontSize: '13px', textDecoration: 'none',
                 textTransform: 'uppercase', marginBottom: '22px',
               }}>
-              En savoir plus →
+              {t('accueil.enSavoirPlus')} →
             </Link>
 
             {/* ── TICKER D'ACTUS ─────────────────────────────────────────── */}
@@ -1075,7 +1085,7 @@ const AccueilPage = () => {
                       key={i}
                       // 1er clic : affiche l'actu dans le hero ; clic sur l'actu déjà active : ouvre l'article
                       onClick={() => (active ? navigate(`/actualites/${a.slug}`) : goTo(i))}
-                      title={active ? "Lire l'article" : a.titre}
+                      title={active ? t('accueil.lireArticle') : a.titre}
                       style={{
                         flex: '0 0 185px', textAlign: 'left',
                         padding: 0, margin: 0,
@@ -1115,12 +1125,12 @@ const AccueilPage = () => {
           <div style={{ maxWidth: '1150px', margin: '0 auto', padding: '0 60px', boxSizing: 'content-box' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <span style={{ fontSize: '19px', fontWeight: 800, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Matchs
+                {t('accueil.matchs')}
               </span>
               <Link to="/matchs"
                 className="flex items-center gap-1 transition-opacity hover:opacity-80"
                 style={{ fontSize: '15px', color: '#fff', fontWeight: 600, textDecoration: 'none' }}>
-                Tous les matchs <ChevronRight size={18} />
+                {t('accueil.tousLesMatchs')} <ChevronRight size={18} />
               </Link>
             </div>
           </div>
@@ -1139,21 +1149,21 @@ const AccueilPage = () => {
               }}
             >
               {loadingMatchs ? (
-                <span style={{ fontSize: '14px', color: theme.textMuted }}>Chargement...</span>
+                <span style={{ fontSize: '14px', color: theme.textMuted }}>{t('commun.chargement')}</span>
               ) : matchs.length === 0 ? (
-                <span style={{ fontSize: '14px', color: theme.textMuted }}>Aucun match pour le moment.</span>
+                <span style={{ fontSize: '14px', color: theme.textMuted }}>{t('accueil.aucunMatch')}</span>
               ) : matchs.map((m, i) => (
                 <CarteMatch key={m.id ?? i} m={m} />
               ))}
             </div>
 
             {peutGauche && (
-              <button onClick={() => scrollBarre(-1)} aria-label="Matchs précédents" style={FLECHE('left')}>
+              <button onClick={() => scrollBarre(-1)} aria-label={t('accueil.matchsPrecedents')} style={FLECHE('left')}>
                 <ChevronLeft size={20} color="#222" />
               </button>
             )}
             {peutDroite && (
-              <button onClick={() => scrollBarre(1)} aria-label="Matchs suivants" style={FLECHE('right')}>
+              <button onClick={() => scrollBarre(1)} aria-label={t('accueil.matchsSuivants')} style={FLECHE('right')}>
                 <ChevronRight size={20} color="#222" />
               </button>
             )}

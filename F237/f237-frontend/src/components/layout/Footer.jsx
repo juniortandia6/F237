@@ -3,6 +3,7 @@
 // puis barre légale. Icônes réseaux : react-icons (npm install react-icons).
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { ArrowDownRight, ArrowRight, Check } from 'lucide-react';
 import { FaYoutube, FaInstagram, FaFacebookF, FaXTwitter, FaTiktok, FaWhatsapp } from 'react-icons/fa6';
@@ -20,13 +21,14 @@ const RESEAUX = [
   { label: 'WhatsApp', Icon: FaWhatsapp, href: '#' },
 ];
 
+// cle = clé de traduction dans i18n/fr.json et en.json (section "footer")
 const LIENS = [
-  { label: 'Calendrier et résultats', to: '/matchs' },
-  { label: 'Classements', to: '/classement' },
-  { label: 'Équipes', to: '/equipes' },
-  { label: 'Actualités', to: '/actualites' },
-  { label: 'Fantasy & pronostics', to: '/jouer' },
-  { label: 'Mon profil', to: '/profil' },
+  { cle: 'calendrier', to: '/matchs' },
+  { cle: 'classements', to: '/classement' },
+  { cle: 'equipes', to: '/equipes' },
+  { cle: 'actualites', to: '/actualites' },
+  { cle: 'fantasy', to: '/jouer' },
+  { cle: 'profil', to: '/profil' },
 ];
 
 const COMPETITIONS = [
@@ -55,6 +57,7 @@ function LigneLien({ to, children }) {
 }
 
 function Newsletter() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [envoye, setEnvoye] = useState(false);
 
@@ -69,7 +72,7 @@ function Newsletter() {
   if (envoye) {
     return (
       <p className="flex items-center gap-2" style={{ color: theme.greenBright, fontSize: '14px', fontWeight: 600 }}>
-        <Check size={16} /> Merci ! Tu recevras les prochaines nouvelles.
+        <Check size={16} /> {t('footer.merci')}
       </p>
     );
   }
@@ -83,10 +86,10 @@ function Newsletter() {
       }}>
       <input
         type="email" value={email} onChange={e => setEmail(e.target.value)}
-        placeholder="Ton adresse e-mail" aria-label="Adresse e-mail"
+        placeholder={t('footer.emailPlaceholder')} aria-label={t('footer.emailLabel')}
         style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', color: theme.text, fontSize: '14px' }}
       />
-      <button type="submit" aria-label="S'inscrire à la newsletter"
+      <button type="submit" aria-label={t('footer.inscrireNewsletter')}
         className="transition-all hover:brightness-110"
         style={{
           width: '36px', height: '36px', borderRadius: '50%', border: 'none', cursor: 'pointer',
@@ -99,6 +102,7 @@ function Newsletter() {
 }
 
 function Footer() {
+  const { t } = useTranslation();
   return (
     <footer style={{ position: 'relative', backgroundColor: theme.bgDeep }}>
       {/* Liseré tricolore avec l'étoile jaune au centre du rouge, comme le drapeau du Cameroun */}
@@ -130,13 +134,13 @@ function Footer() {
           <div>
             <Link to="/" aria-label="Accueil F237"><LogoF237 size={56} /></Link>
             <p style={{ marginTop: '14px', color: theme.textMuted, fontSize: '15px', lineHeight: 1.55, maxWidth: '280px' }}>
-              Le pouls du football camerounais : scores en direct, classements et actualités de la MTN Elite One et Elite Two.
+              {t('footer.accroche')}
             </p>
 
-            <p style={{ ...TITRE_COLONNE, marginTop: '28px', marginBottom: '12px' }}>Reste informé</p>
+            <p style={{ ...TITRE_COLONNE, marginTop: '28px', marginBottom: '12px' }}>{t('footer.resteInforme')}</p>
             <Newsletter />
 
-            <p style={{ ...TITRE_COLONNE, marginTop: '28px', marginBottom: '12px' }}>Médias sociaux</p>
+            <p style={{ ...TITRE_COLONNE, marginTop: '28px', marginBottom: '12px' }}>{t('footer.reseaux')}</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
               {RESEAUX.map(({ label, Icon, href }) => (
                 <a key={label} href={href} aria-label={label} title={label}
@@ -158,15 +162,15 @@ function Footer() {
 
           {/* ── Colonne liens ── */}
           <div>
-            <p style={TITRE_COLONNE}>Liens</p>
+            <p style={TITRE_COLONNE}>{t('footer.liens')}</p>
             <div style={{ borderBottom: `1px solid ${theme.border}` }}>
-              {LIENS.map(l => <LigneLien key={l.label} to={l.to}>{l.label}</LigneLien>)}
+              {LIENS.map(l => <LigneLien key={l.cle} to={l.to}>{t(`footer.${l.cle}`)}</LigneLien>)}
             </div>
           </div>
 
           {/* ── Colonne compétitions + infos ── */}
           <div>
-            <p style={TITRE_COLONNE}>Compétitions</p>
+            <p style={TITRE_COLONNE}>{t('footer.competitions')}</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {COMPETITIONS.map(c => (
                 <Link key={c.label} to={c.to} className="group"
@@ -186,14 +190,14 @@ function Footer() {
               ))}
             </div>
 
-            <p style={{ ...TITRE_COLONNE, marginTop: '28px' }}>Le projet</p>
+            <p style={{ ...TITRE_COLONNE, marginTop: '28px' }}>{t('footer.projet')}</p>
             <p style={{ color: theme.textMuted, fontSize: '14px', lineHeight: 1.6 }}>
-              Plateforme indépendante créée par{' '}
+              {t('footer.creePar')}{' '}
               <a href="https://cyrjunior-tandia.com" target="_blank" rel="noopener noreferrer"
                 style={{ color: theme.text, fontWeight: 700, textDecoration: 'underline', textUnderlineOffset: '3px' }}>
                 Cyr Junior Tandia
               </a>.
-              <br />Données fournies par API-Football.
+              <br />{t('footer.donnees')}
             </p>
           </div>
         </div>
@@ -205,10 +209,10 @@ function Footer() {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <LogoF237 size={26} />
-            <span style={{ fontSize: '13px', color: theme.textFaint }}>© {new Date().getFullYear()} F237 · Tous droits réservés</span>
+            <span style={{ fontSize: '13px', color: theme.textFaint }}>© {new Date().getFullYear()} F237 · {t('footer.droits')}</span>
           </div>
           <nav style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-            {['Conditions générales', 'Confidentialité', 'Cookies', 'Contact'].map((l, i) => (
+            {['cgu', 'confidentialite', 'cookies', 'contact'].map(c => t(`footer.${c}`)).map((l, i) => (
               <span key={l} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 {i > 0 && <span style={{ color: theme.border }}>|</span>}
                 <a href="#" className="transition-colors" style={{ fontSize: '13px', color: theme.textMuted, textDecoration: 'none' }}

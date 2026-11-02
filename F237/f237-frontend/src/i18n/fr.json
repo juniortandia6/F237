@@ -1,0 +1,107 @@
+{
+  "nav": {
+    "accueil": "Accueil",
+    "matchs": "Matchs",
+    "classements": "Classements",
+    "equipes": "Équipes",
+    "fantasy": "Fantasy",
+    "actualites": "Actualités",
+    "connexion": "Connexion",
+    "quitter": "Quitter",
+    "pts": "{{n}} pts",
+    "langue": "Langue"
+  },
+  "commun": {
+    "precedent": "Précédent",
+    "suivant": "Suivant",
+    "chargement": "Chargement...",
+    "enDirect": "En direct",
+    "enDirectMaj": "EN DIRECT",
+    "aVenir": "À venir",
+    "termine": "Terminé",
+    "plus": "+ Plus",
+    "demo": "DÉMO",
+    "pts": "pts",
+    "bilan": "{{v}}V · {{n}}N · {{d}}D",
+    "but_one": "but",
+    "but_other": "buts"
+  },
+  "accueil": {
+    "enSavoirPlus": "En savoir plus",
+    "lireArticle": "Lire l'article",
+    "matchs": "Matchs",
+    "tousLesMatchs": "Tous les matchs",
+    "matchsPrecedents": "Matchs précédents",
+    "matchsSuivants": "Matchs suivants",
+    "aucunMatch": "Aucun match pour le moment.",
+    "direct": {
+      "titreLive": "En direct",
+      "titreAvenir": "Prochains matchs",
+      "titreTermine": "Derniers résultats",
+      "liveConnecte": "Live connecté",
+      "connexion": "Connexion...",
+      "aucunEnCours": "Aucun match en cours pour le moment.",
+      "texteAvenir": "Voici les prochaines affiches : les scores apparaîtront ici en direct dès le coup d’envoi.",
+      "texteTermine": "Les scores s'afficheront ici en temps réel dès le coup d'envoi.",
+      "aucunAfficher": "Aucun match à afficher.",
+      "suivre": "Suivre le match",
+      "pronostic": "Faire un pronostic",
+      "resume": "Voir le résumé"
+    },
+    "classements": {
+      "titre": "Classements",
+      "tousLesDetails": "Tous les détails",
+      "indisponible": "Classement indisponible pour le moment.",
+      "equipe": "Équipe",
+      "j": "J",
+      "pts": "Pts",
+      "rang1": "1er",
+      "rang2": "2e",
+      "rang3": "3e"
+    },
+    "buteurs": {
+      "titre": "Meilleurs buteurs",
+      "afficherTout": "Afficher tout",
+      "meilleurButeur": "Meilleur buteur",
+      "penaltys": "Penaltys",
+      "matchsAvecBut": "Matchs avec but",
+      "aucun": "Aucun buteur enregistré pour cette compétition."
+    },
+    "nouvelles": {
+      "titre": "Dernières nouvelles",
+      "toutes": "Toutes les actualités"
+    }
+  },
+  "footer": {
+    "accroche": "Le pouls du football camerounais : scores en direct, classements et actualités de la MTN Elite One et Elite Two.",
+    "resteInforme": "Reste informé",
+    "emailPlaceholder": "Ton adresse e-mail",
+    "emailLabel": "Adresse e-mail",
+    "inscrireNewsletter": "S'inscrire à la newsletter",
+    "merci": "Merci ! Tu recevras les prochaines nouvelles.",
+    "reseaux": "Médias sociaux",
+    "liens": "Liens",
+    "calendrier": "Calendrier et résultats",
+    "classements": "Classements",
+    "equipes": "Équipes",
+    "actualites": "Actualités",
+    "fantasy": "Fantasy & pronostics",
+    "profil": "Mon profil",
+    "competitions": "Compétitions",
+    "projet": "Le projet",
+    "creePar": "Plateforme indépendante créée par",
+    "donnees": "Données fournies par API-Football.",
+    "droits": "Tous droits réservés",
+    "cgu": "Conditions générales",
+    "confidentialite": "Confidentialité",
+    "cookies": "Cookies",
+    "contact": "Contact"
+  },
+  "bandeau": {
+    "aucunMatch": "Aucun match en cours · Scores mis à jour en temps réel",
+    "connexion": "Connexion live en cours...",
+    "enCours_one": "{{count}} match en cours",
+    "enCours_other": "{{count}} matchs en cours",
+    "connecte": "Connecté"
+  }
+}

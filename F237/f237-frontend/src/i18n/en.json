@@ -1,0 +1,107 @@
+{
+  "nav": {
+    "accueil": "Home",
+    "matchs": "Matches",
+    "classements": "Standings",
+    "equipes": "Teams",
+    "fantasy": "Fantasy",
+    "actualites": "News",
+    "connexion": "Log in",
+    "quitter": "Log out",
+    "pts": "{{n}} pts",
+    "langue": "Language"
+  },
+  "commun": {
+    "precedent": "Previous",
+    "suivant": "Next",
+    "chargement": "Loading...",
+    "enDirect": "Live",
+    "enDirectMaj": "LIVE",
+    "aVenir": "Upcoming",
+    "termine": "Full time",
+    "plus": "+ More",
+    "demo": "DEMO",
+    "pts": "pts",
+    "bilan": "{{v}}W · {{n}}D · {{d}}L",
+    "but_one": "goal",
+    "but_other": "goals"
+  },
+  "accueil": {
+    "enSavoirPlus": "Read more",
+    "lireArticle": "Read the article",
+    "matchs": "Matches",
+    "tousLesMatchs": "All matches",
+    "matchsPrecedents": "Previous matches",
+    "matchsSuivants": "Next matches",
+    "aucunMatch": "No matches yet.",
+    "direct": {
+      "titreLive": "Live",
+      "titreAvenir": "Upcoming matches",
+      "titreTermine": "Latest results",
+      "liveConnecte": "Live connected",
+      "connexion": "Connecting...",
+      "aucunEnCours": "No match in progress right now.",
+      "texteAvenir": "Here are the next fixtures: scores will appear here live from kick-off.",
+      "texteTermine": "Scores will be shown here in real time from kick-off.",
+      "aucunAfficher": "No matches to show.",
+      "suivre": "Follow the match",
+      "pronostic": "Make a prediction",
+      "resume": "See the summary"
+    },
+    "classements": {
+      "titre": "Standings",
+      "tousLesDetails": "Full standings",
+      "indisponible": "Standings are not available right now.",
+      "equipe": "Team",
+      "j": "P",
+      "pts": "Pts",
+      "rang1": "1st",
+      "rang2": "2nd",
+      "rang3": "3rd"
+    },
+    "buteurs": {
+      "titre": "Top scorers",
+      "afficherTout": "See all",
+      "meilleurButeur": "Top scorer",
+      "penaltys": "Penalties",
+      "matchsAvecBut": "Matches scored in",
+      "aucun": "No scorers recorded for this competition."
+    },
+    "nouvelles": {
+      "titre": "Latest news",
+      "toutes": "All news"
+    }
+  },
+  "footer": {
+    "accroche": "The heartbeat of Cameroonian football: live scores, standings and news from the MTN Elite One and Elite Two.",
+    "resteInforme": "Stay informed",
+    "emailPlaceholder": "Your email address",
+    "emailLabel": "Email address",
+    "inscrireNewsletter": "Subscribe to the newsletter",
+    "merci": "Thanks! You'll receive our next updates.",
+    "reseaux": "Social media",
+    "liens": "Links",
+    "calendrier": "Fixtures and results",
+    "classements": "Standings",
+    "equipes": "Teams",
+    "actualites": "News",
+    "fantasy": "Fantasy & predictions",
+    "profil": "My profile",
+    "competitions": "Competitions",
+    "projet": "The project",
+    "creePar": "Independent platform created by",
+    "donnees": "Data provided by API-Football.",
+    "droits": "All rights reserved",
+    "cgu": "Terms of use",
+    "confidentialite": "Privacy",
+    "cookies": "Cookies",
+    "contact": "Contact"
+  },
+  "bandeau": {
+    "aucunMatch": "No match in progress · Scores updated in real time",
+    "connexion": "Connecting to live scores...",
+    "enCours_one": "{{count}} match in progress",
+    "enCours_other": "{{count}} matches in progress",
+    "connecte": "Connected"
+  }
+}
