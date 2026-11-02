@@ -7,7 +7,7 @@ import { useLiveScores } from '../hooks/useLiveScores';
 import { classementService } from '../services/classementService';
 import { matchService } from '../services/matchService';
 import theme from '../theme';
-import { ACTUALITES, ACTUS_HERO } from '../data/actualites';
+import { ACTUALITES, ACTUS_HERO, texteActu } from '../data/actualites';
 import { UTILISER_DEMO, construireMatchsDemo } from '../data/matchsDemo';
 
 // Les 5 actus du hero viennent de la source partagée (src/data/actualites.js)
@@ -859,13 +859,13 @@ function SectionNouvelles() {
                 position: 'absolute', top: '12px', left: '12px',
                 backgroundColor: theme.red, color: '#fff', padding: '3px 10px', borderRadius: '20px',
                 fontSize: '10px', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase',
-              }}>{a.tag}</span>
+              }}>{t(`actualites.tags.${a.tag}`, { defaultValue: a.tag })}</span>
               <span style={{
                 position: 'absolute', left: '12px', right: '12px', bottom: '14px',
                 color: '#fff', fontSize: '17px', fontWeight: 800, lineHeight: 1.25,
                 display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden',
               }}>
-                {a.titre}
+                {texteActu(a, 'titre')}
               </span>
             </Link>
           ))}
@@ -1032,7 +1032,7 @@ const AccueilPage = () => {
               fontSize: '11px', fontWeight: 700, letterSpacing: '1.5px',
               textTransform: 'uppercase', marginBottom: '16px',
             }}>
-              {ACTUS[actuActive].tag}
+              {t(`actualites.tags.${ACTUS[actuActive].tag}`, { defaultValue: ACTUS[actuActive].tag })}
             </span>
 
             <h2 style={{
@@ -1041,7 +1041,7 @@ const AccueilPage = () => {
               fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif',
               textShadow: '0 2px 12px rgba(0,0,0,0.45)',
             }}>
-              {ACTUS[actuActive].titre}
+              {texteActu(ACTUS[actuActive], 'titre')}
             </h2>
 
             <Link to={`/actualites/${ACTUS[actuActive].slug}`}
@@ -1085,7 +1085,7 @@ const AccueilPage = () => {
                       key={i}
                       // 1er clic : affiche l'actu dans le hero ; clic sur l'actu déjà active : ouvre l'article
                       onClick={() => (active ? navigate(`/actualites/${a.slug}`) : goTo(i))}
-                      title={active ? t('accueil.lireArticle') : a.titre}
+                      title={active ? t('accueil.lireArticle') : texteActu(a, 'titre')}
                       style={{
                         flex: '0 0 185px', textAlign: 'left',
                         padding: 0, margin: 0,
@@ -1106,7 +1106,7 @@ const AccueilPage = () => {
                         textShadow: '0 1px 3px rgba(0,0,0,0.6)',
                         transition: 'color 0.3s ease',
                       }}>
-                        {a.titre}
+                        {texteActu(a, 'titre')}
                       </span>
                     </button>
                   );

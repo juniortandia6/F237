@@ -3,21 +3,24 @@
 
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ArrowRight } from 'lucide-react';
 import theme from '../theme';
-import { ACTUALITES, formatDateActu } from '../data/actualites';
+import { ACTUALITES, formatDateActu, texteActu } from '../data/actualites';
 
 function Tag({ children }) {
+  const { t } = useTranslation();
   return (
     <span style={{
       display: 'inline-block', backgroundColor: theme.red, color: '#fff',
       padding: '3px 12px', borderRadius: '20px',
       fontSize: '10px', fontWeight: 800, letterSpacing: '1.2px', textTransform: 'uppercase',
-    }}>{children}</span>
+    }}>{t(`actualites.tags.${children}`, { defaultValue: children })}</span>
   );
 }
 
 function CarteActu({ a }) {
+  const { t } = useTranslation();
   return (
     <Link to={`/actualites/${a.slug}`} className="group"
       style={{
@@ -38,10 +41,10 @@ function CarteActu({ a }) {
           <Tag>{a.tag}</Tag>
           <span style={{ fontSize: '12px', color: theme.textFaint }}>{formatDateActu(a.date)}</span>
         </div>
-        <h3 style={{ color: theme.text, fontSize: '18px', fontWeight: 800, lineHeight: 1.3 }}>{a.titre}</h3>
-        <p style={{ color: theme.textMuted, fontSize: '14px', lineHeight: 1.5, flex: 1 }}>{a.resume}</p>
+        <h3 style={{ color: theme.text, fontSize: '18px', fontWeight: 800, lineHeight: 1.3 }}>{texteActu(a, 'titre')}</h3>
+        <p style={{ color: theme.textMuted, fontSize: '14px', lineHeight: 1.5, flex: 1 }}>{texteActu(a, 'resume')}</p>
         <span className="flex items-center gap-1" style={{ color: theme.greenBright, fontSize: '14px', fontWeight: 700 }}>
-          Lire l'article <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
+          {t('accueil.lireArticle')} <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
         </span>
       </div>
     </Link>
@@ -49,15 +52,17 @@ function CarteActu({ a }) {
 }
 
 function ActualitesPage() {
-  const categories = useMemo(() => ['Toutes', ...new Set(ACTUALITES.map(a => a.tag))], []);
-  const [filtre, setFiltre] = useState('Toutes');
-  const liste = filtre === 'Toutes' ? ACTUALITES : ACTUALITES.filter(a => a.tag === filtre);
+  const { t } = useTranslation();
+  // null = toutes les catégories
+  const categories = useMemo(() => [null, ...new Set(ACTUALITES.map(a => a.tag))], []);
+  const [filtre, setFiltre] = useState(null);
+  const liste = filtre === null ? ACTUALITES : ACTUALITES.filter(a => a.tag === filtre);
   const [une, ...reste] = liste;
 
   return (
     <div style={{ maxWidth: '1150px', margin: '0 auto', padding: '48px 60px 72px', boxSizing: 'content-box' }}>
       <h1 style={{ color: theme.text, fontSize: '40px', fontWeight: 400, fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif', marginBottom: '20px' }}>
-        Actualités
+        {t('actualites.titre')}
       </h1>
 
       {/* Filtres */}
@@ -65,7 +70,7 @@ function ActualitesPage() {
         {categories.map(c => {
           const actif = c === filtre;
           return (
-            <button key={c} onClick={() => setFiltre(c)}
+            <button key={c ?? 'toutes'} onClick={() => setFiltre(c)}
               style={{
                 padding: '7px 16px', borderRadius: '20px', cursor: 'pointer',
                 fontSize: '13px', fontWeight: 700,
@@ -74,7 +79,7 @@ function ActualitesPage() {
                 border: `1px solid ${actif ? theme.green : theme.borderStrong}`,
                 transition: 'all 0.2s ease',
               }}>
-              {c}
+              {c === null ? t('actualites.toutes') : t(`actualites.tags.${c}`, { defaultValue: c })}
             </button>
           );
         })}
@@ -93,9 +98,9 @@ function ActualitesPage() {
               <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.75)' }}>{formatDateActu(une.date)}</span>
             </div>
             <h2 style={{ color: '#fff', fontSize: '34px', fontWeight: 400, lineHeight: 1.2, maxWidth: '780px', fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
-              {une.titre}
+              {texteActu(une, 'titre')}
             </h2>
-            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '15px', marginTop: '10px', maxWidth: '640px' }}>{une.resume}</p>
+            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '15px', marginTop: '10px', maxWidth: '640px' }}>{texteActu(une, 'resume')}</p>
           </div>
         </Link>
       )}
@@ -106,7 +111,7 @@ function ActualitesPage() {
       </div>
 
       {liste.length === 0 && (
-        <p style={{ color: theme.textMuted, textAlign: 'center', padding: '40px 0' }}>Aucune actualité dans cette catégorie.</p>
+        <p style={{ color: theme.textMuted, textAlign: 'center', padding: '40px 0' }}>{t('actualites.aucune')}</p>
       )}
     </div>
   );

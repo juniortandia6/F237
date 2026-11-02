@@ -6,12 +6,16 @@
 // ⚠️ CONTENU DE DÉMONSTRATION : les textes ci-dessous sont des exemples
 // rédigés pour la maquette, pas des faits vérifiés. Remplace-les par de vraies
 // actualités (ou, plus tard, par un endpoint /api/actualites côté .NET).
+//
+// Version anglaise : le bloc `en` de chaque article (titre, resume, contenu).
+// S'il manque, le texte français est affiché.
 
 import img1 from '../assets/accueil1.jpg';
 import img2 from '../assets/accueil2.jpg';
 import img3 from '../assets/accueil3.jpg';
 import img4 from '../assets/accueil4.jpg';
 import img5 from '../assets/accueil5.jpg';
+import i18n, { locale } from '../i18n';
 
 export const ACTUALITES = [
   {
@@ -25,6 +29,14 @@ export const ACTUALITES = [
       "Texte de démonstration — remplace ce paragraphe par le contenu réel de l'article.",
       "Tu peux ajouter autant de paragraphes que nécessaire : chaque élément du tableau devient un paragraphe sur la page article.",
     ],
+    en: {
+      titre: "Colombe soar to the top of the table after an exceptional season",
+      resume: "A look back at the consistency that carried Colombe to the top of the MTN Elite One table.",
+      contenu: [
+        "Demo text — replace this paragraph with the article's real content.",
+        "You can add as many paragraphs as you need: each item in the array becomes a paragraph on the article page.",
+      ],
+    },
   },
   {
     slug: 'dynamo-douala-serie-de-victoires',
@@ -36,6 +48,13 @@ export const ACTUALITES = [
     contenu: [
       "Texte de démonstration — remplace ce paragraphe par le contenu réel de l'article.",
     ],
+    en: {
+      titre: "Dynamo de Douala confirm their ambitions with a winning streak",
+      resume: "Dynamo keep piling up good results and are settling into the top of the table.",
+      contenu: [
+        "Demo text — replace this paragraph with the article's real content.",
+      ],
+    },
   },
   {
     slug: 'apejes-domine-le-groupe-a',
@@ -47,6 +66,13 @@ export const ACTUALITES = [
     contenu: [
       "Texte de démonstration — remplace ce paragraphe par le contenu réel de l'article.",
     ],
+    en: {
+      titre: "APEJES Academy dominate Group A and aim for promotion to Elite One",
+      resume: "In Elite Two, APEJES Academy are setting the pace in their group.",
+      contenu: [
+        "Demo text — replace this paragraph with the article's real content.",
+      ],
+    },
   },
   {
     slug: 'unisport-bafang-dans-la-course',
@@ -58,6 +84,13 @@ export const ACTUALITES = [
     contenu: [
       "Texte de démonstration — remplace ce paragraphe par le contenu réel de l'article.",
     ],
+    en: {
+      titre: "Unisport Bafang stay in the title race despite the competition",
+      resume: "Unisport Bafang are hanging on to the leading pack right up to the final matchdays.",
+      contenu: [
+        "Demo text — replace this paragraph with the article's real content.",
+      ],
+    },
   },
   {
     slug: 'mercato-clubs-camerounais',
@@ -69,6 +102,13 @@ export const ACTUALITES = [
     contenu: [
       "Texte de démonstration — remplace ce paragraphe par le contenu réel de l'article.",
     ],
+    en: {
+      titre: "The transfer window heats up at Cameroonian clubs ahead of next season",
+      resume: "Arrivals, departures, contract extensions: a roundup of the moves to watch.",
+      contenu: [
+        "Demo text — replace this paragraph with the article's real content.",
+      ],
+    },
   },
   {
     slug: 'cotonsport-bilan-de-saison',
@@ -80,6 +120,13 @@ export const ACTUALITES = [
     contenu: [
       "Texte de démonstration — remplace ce paragraphe par le contenu réel de l'article.",
     ],
+    en: {
+      titre: "Cotonsport: looking back on an up-and-down season",
+      resume: "An analysis of the Garoua club's season, between moments of brilliance and regrets.",
+      contenu: [
+        "Demo text — replace this paragraph with the article's real content.",
+      ],
+    },
   },
   {
     slug: 'jeunes-talents-a-suivre',
@@ -91,6 +138,13 @@ export const ACTUALITES = [
     contenu: [
       "Texte de démonstration — remplace ce paragraphe par le contenu réel de l'article.",
     ],
+    en: {
+      titre: "Five young talents to watch next season",
+      resume: "They made their mark this season: profiles of promising players.",
+      contenu: [
+        "Demo text — replace this paragraph with the article's real content.",
+      ],
+    },
   },
   {
     slug: 'calendrier-saison-prochaine',
@@ -102,13 +156,24 @@ export const ACTUALITES = [
     contenu: [
       "Texte de démonstration — remplace ce paragraphe par le contenu réel de l'article.",
     ],
+    en: {
+      titre: "What we know about next season's schedule",
+      resume: "Restart dates, format, number of matchdays: the first details.",
+      contenu: [
+        "Demo text — replace this paragraph with the article's real content.",
+      ],
+    },
   },
 ];
 
 // Les 5 premières alimentent le hero et ses barres de progression
 export const ACTUS_HERO = ACTUALITES.slice(0, 5);
 
+/** Texte d'un article dans la langue active (repli sur le français). champ : 'titre' | 'resume' | 'contenu' */
+export const texteActu = (a, champ) =>
+  (i18n.resolvedLanguage === 'en' && a?.en?.[champ]) || a?.[champ];
+
 export const getActualite = (slug) => ACTUALITES.find(a => a.slug === slug);
 
 export const formatDateActu = (iso) =>
-  new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  new Date(iso).toLocaleDateString(locale(), { day: 'numeric', month: 'long', year: 'numeric' });

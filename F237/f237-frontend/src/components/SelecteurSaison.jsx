@@ -2,11 +2,13 @@
 // Bouton "SAISON 2026 ▾" avec menu déroulant des saisons (pour les zones sombres).
 
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronDown, Check } from 'lucide-react';
 import { SAISONS, SAISONS_DB, libelleSaison } from '../data/saisons';
 import theme from '../theme';
 
 function SelecteurSaison({ annee, onChange }) {
+  const { t } = useTranslation();
   const [ouvert, setOuvert] = useState(false);
   const ref = useRef(null);
 
@@ -40,7 +42,7 @@ function SelecteurSaison({ annee, onChange }) {
         onMouseEnter={e => { e.currentTarget.style.borderColor = theme.yellow; }}
         onMouseLeave={e => { if (!ouvert) e.currentTarget.style.borderColor = 'rgba(252,209,22,0.45)'; }}
       >
-        Saison {libelleSaison(annee)}
+        {t('saison.saison', { s: libelleSaison(annee) })}
         <ChevronDown size={15} style={{ transition: 'transform 0.2s ease', transform: ouvert ? 'rotate(180deg)' : 'none' }} />
       </button>
 
@@ -68,10 +70,10 @@ function SelecteurSaison({ annee, onChange }) {
                   onMouseEnter={e => { if (!actif) e.currentTarget.style.backgroundColor = '#f2f4f3'; }}
                   onMouseLeave={e => { if (!actif) e.currentTarget.style.backgroundColor = 'transparent'; }}
                 >
-                  <span>Saison {libelleSaison(a)}</span>
+                  <span>{t('saison.saison', { s: libelleSaison(a) })}</span>
                   {actif
                     ? <Check size={16} color="#14532f" />
-                    : !dispo && <span style={{ fontSize: '11px', fontWeight: 700, color: '#6b7470', backgroundColor: '#f2f4f3', padding: '2px 8px', borderRadius: '999px' }}>Bientôt</span>}
+                    : !dispo && <span style={{ fontSize: '11px', fontWeight: 700, color: '#6b7470', backgroundColor: '#f2f4f3', padding: '2px 8px', borderRadius: '999px' }}>{t('saison.bientot')}</span>}
                 </button>
               </li>
             );

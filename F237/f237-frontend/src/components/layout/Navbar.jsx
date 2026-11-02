@@ -8,7 +8,7 @@ import {
     UserCircle, Globe, ChevronDown, Shield, Check
 } from 'lucide-react';
 import LogoF237 from './LogoF237';
-import { LANGUES } from '../../i18n';
+import { LANGUES, locale } from '../../i18n';
 import theme from '../../theme';
 
 // ── Menu de choix de la langue (FR / EN) ────────────────────────────────
@@ -163,7 +163,7 @@ const Navbar = () => {
                             style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}` }}>
                             <Trophy size={13} style={{ color: theme.yellow }} />
                             <span className="font-bold text-sm" style={{ color: theme.yellow }}>
-                                {t('nav.pts', { n: (user.soldePoints ?? 0).toLocaleString() })}
+                                {t('nav.pts', { n: (user.soldePoints ?? 0).toLocaleString(locale()) })}
                             </span>
                         </div>
 

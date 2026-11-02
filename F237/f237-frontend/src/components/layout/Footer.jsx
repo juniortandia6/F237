@@ -132,7 +132,7 @@ function Footer() {
 
           {/* ── Colonne marque ── */}
           <div>
-            <Link to="/" aria-label="Accueil F237"><LogoF237 size={56} /></Link>
+            <Link to="/" aria-label={`${t('nav.accueil')} F237`}><LogoF237 size={56} /></Link>
             <p style={{ marginTop: '14px', color: theme.textMuted, fontSize: '15px', lineHeight: 1.55, maxWidth: '280px' }}>
               {t('footer.accroche')}
             </p>

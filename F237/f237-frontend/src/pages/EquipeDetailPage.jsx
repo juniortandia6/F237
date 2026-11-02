@@ -6,6 +6,8 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { locale } from '../i18n';
 import {
   ChevronRight, MapPin, Calendar, Building2, Users, Trophy, AlertCircle, Goal, ArrowRight,
   Palette, Star, BookOpen, ExternalLink, Medal, Globe,
@@ -46,13 +48,12 @@ function EclatsBande() {
 
 // ── Données ─────────────────────────────────────────────────────────────
 const POSTES_ORDRE = ['Goalkeeper', 'Defender', 'Midfielder', 'Attacker'];
-const POSTE_FR = { Goalkeeper: 'Gardiens', Defender: 'Défenseurs', Midfielder: 'Milieux', Attacker: 'Attaquants' };
-const POSTE_COURT = { Goalkeeper: 'GB', Defender: 'DEF', Midfielder: 'MIL', Attacker: 'ATT' };
+// Libellés des postes : equipe.postes.<poste> et equipe.postesCourts.<poste>
 const COULEUR_RESULTAT = { V: theme.green, N: '#a3aaa6', D: theme.red, '?': '#c9cfcc' };
 
-const dateCourte = (d) => new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
-const dateLongue = (d) => new Date(d).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-const heure = (d) => new Date(d).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+const dateCourte = (d) => new Date(d).toLocaleDateString(locale(), { day: '2-digit', month: 'short' });
+const dateLongue = (d) => new Date(d).toLocaleDateString(locale(), { weekday: 'long', day: 'numeric', month: 'long' });
+const heure = (d) => new Date(d).toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
 
 // ── Petits composants ───────────────────────────────────────────────────
 function Carte({ titre, icone: Icone, droite, children, style }) {
@@ -77,12 +78,13 @@ function Vide({ children }) {
 }
 
 function PastilleResultat({ r, taille = 26 }) {
+  const { t } = useTranslation();
   return (
     <span style={{
       width: taille, height: taille, borderRadius: '6px', flexShrink: 0,
       backgroundColor: COULEUR_RESULTAT[r] ?? COULEUR_RESULTAT['?'], color: '#fff',
       fontSize: taille * 0.46, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center',
-    }}>{r ?? '?'}</span>
+    }}>{r ? t(`matchDetail.resultat.${r}`, { defaultValue: r }) : '?'}</span>
   );
 }
 
@@ -155,6 +157,7 @@ function LigneAVenir({ m, premier }) {
 
 // Carte d'un joueur de l'effectif
 function CarteJoueur({ j }) {
+  const { t } = useTranslation();
   const [photoOk, setPhotoOk] = useState(true);
   return (
     <div style={{
@@ -169,7 +172,7 @@ function CarteJoueur({ j }) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: '15px', fontWeight: 700, color: CLAIR.texte, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{j.nom}</div>
         <div style={{ fontSize: '12px', color: CLAIR.doux }}>
-          {[POSTE_COURT[j.poste], j.age && `${j.age} ans`, j.nationalite].filter(Boolean).join(' · ')}
+          {[POSTES_ORDRE.includes(j.poste) && t(`equipe.postesCourts.${j.poste}`), j.age && t('equipe.ans', { n: j.age }), j.nationalite].filter(Boolean).join(' · ')}
         </div>
       </div>
       {j.numero != null && (
@@ -181,56 +184,59 @@ function CarteJoueur({ j }) {
 
 // ── Contenu des onglets ─────────────────────────────────────────────────
 function OngletApercu({ classement, derniersMatchs }) {
+  const { t } = useTranslation();
   return (
     <>
-      <Carte titre={`Saison ${libelleSaison(ANNEE_ACTUELLE)}`}>
+      <Carte titre={t('saison.saison', { s: libelleSaison(ANNEE_ACTUELLE) })}>
         {classement ? (
           <div className="grid grid-cols-4 gap-3 sm:grid-cols-8" style={{ padding: '18px 20px' }}>
-            <Tuile label="POS." valeur={`#${classement.position}`} fort />
-            <Tuile label="PTS" valeur={classement.points} fort />
-            <Tuile label="MJ" valeur={classement.matchsJoues} />
-            <Tuile label="V" valeur={classement.victoires} />
-            <Tuile label="N" valeur={classement.nuls} />
-            <Tuile label="D" valeur={classement.defaites} />
-            <Tuile label="BP" valeur={classement.butsPour} />
-            <Tuile label="BC" valeur={classement.butsContre} />
+            <Tuile label={t('equipe.tuiles.pos')} valeur={`#${classement.position}`} fort />
+            <Tuile label={t('classement.col.pts')} valeur={classement.points} fort />
+            <Tuile label={t('equipe.tuiles.mj')} valeur={classement.matchsJoues} />
+            <Tuile label={t('classement.col.v')} valeur={classement.victoires} />
+            <Tuile label={t('classement.col.n')} valeur={classement.nuls} />
+            <Tuile label={t('classement.col.d')} valeur={classement.defaites} />
+            <Tuile label={t('classement.col.bp')} valeur={classement.butsPour} />
+            <Tuile label={t('classement.col.bc')} valeur={classement.butsContre} />
           </div>
-        ) : <Vide>Pas encore de classement pour ce club cette saison.</Vide>}
+        ) : <Vide>{t('equipe.pasDeClassement')}</Vide>}
       </Carte>
 
-      <Carte titre="Derniers matchs">
+      <Carte titre={t('equipe.derniersMatchs')}>
         {derniersMatchs.length
           ? derniersMatchs.map((m, i) => <LigneMatch key={m.matchId} m={m} premier={i === 0} />)
-          : <Vide>Aucun match joué pour l'instant.</Vide>}
+          : <Vide>{t('equipe.aucunJoue')}</Vide>}
       </Carte>
     </>
   );
 }
 
 function OngletMatchs({ derniersMatchs, aVenir }) {
+  const { t } = useTranslation();
   return (
     <>
-      <Carte titre="À venir" droite={<span style={{ fontSize: '12px', fontWeight: 700, color: CLAIR.doux }}>{aVenir.length} match{aVenir.length > 1 ? 's' : ''}</span>}>
+      <Carte titre={t('commun.aVenir')} droite={<span style={{ fontSize: '12px', fontWeight: 700, color: CLAIR.doux }}>{t('matchs.nbMatchs', { count: aVenir.length })}</span>}>
         {aVenir.length
           ? aVenir.map((m, i) => <LigneAVenir key={m.id} m={m} premier={i === 0} />)
-          : <Vide>Aucun match programmé pour le moment.</Vide>}
+          : <Vide>{t('equipe.aucunProgramme')}</Vide>}
       </Carte>
-      <Carte titre="Résultats récents">
+      <Carte titre={t('equipe.resultatsRecents')}>
         {derniersMatchs.length
           ? derniersMatchs.map((m, i) => <LigneMatch key={m.matchId} m={m} premier={i === 0} />)
-          : <Vide>Aucun match joué pour l'instant.</Vide>}
+          : <Vide>{t('equipe.aucunJoue')}</Vide>}
       </Carte>
     </>
   );
 }
 
 function OngletEffectif({ effectif }) {
+  const { t } = useTranslation();
   if (effectif.length === 0) {
-    return <Carte><Vide>Effectif non disponible dans l'API pour cette saison.</Vide></Carte>;
+    return <Carte><Vide>{t('equipe.effectifIndispo')}</Vide></Carte>;
   }
   const groupes = [
-    ...POSTES_ORDRE.map(p => ({ titre: POSTE_FR[p], joueurs: effectif.filter(j => j.poste === p) })),
-    { titre: 'Autres', joueurs: effectif.filter(j => !POSTES_ORDRE.includes(j.poste)) },
+    ...POSTES_ORDRE.map(p => ({ titre: t(`equipe.postes.${p}`), joueurs: effectif.filter(j => j.poste === p) })),
+    { titre: t('equipe.postes.autres'), joueurs: effectif.filter(j => !POSTES_ORDRE.includes(j.poste)) },
   ].filter(g => g.joueurs.length > 0);
 
   return groupes.map(g => (
@@ -251,13 +257,14 @@ function OngletEffectif({ effectif }) {
 
 // Liens vers les sources (obligatoire pour les textes issus de Wikipédia, licence CC BY-SA)
 function Sources({ urls }) {
+  const { t } = useTranslation();
   if (!urls?.length) return null;
   const libelle = (u) => {
     try { return new URL(u).hostname.replace('www.', ''); } catch { return u; }
   };
   return (
     <p style={{ fontSize: '12px', color: CLAIR.doux, lineHeight: 1.6 }}>
-      Sources :{' '}
+      {t('equipe.sources')}{' '}
       {urls.map((u, i) => (
         <span key={u}>
           {i > 0 && ' · '}
@@ -266,21 +273,22 @@ function Sources({ urls }) {
           </a>
         </span>
       ))}
-      {urls.some(u => u.includes('wikipedia.org')) && ' — textes de Wikipédia sous licence CC BY-SA 4.0, résumés pour F237.'}
+      {urls.some(u => u.includes('wikipedia.org')) && ` — ${t('equipe.licenceWiki')}`}
     </p>
   );
 }
 
 function OngletHistoire({ club }) {
+  const { t } = useTranslation();
   if (!club) {
-    return <Carte><Vide>L'histoire de ce club arrive bientôt sur F237.</Vide></Carte>;
+    return <Carte><Vide>{t('equipe.histoireBientot')}</Vide></Carte>;
   }
   const enBref = [
-    [Calendar, 'Fondation', club.fondation],
-    [MapPin, 'Ville', club.ville],
-    [Palette, 'Couleurs', club.couleurs],
-    [Star, 'Surnom', club.surnom],
-    [Building2, 'Stade', club.stade],
+    [Calendar, t('equipe.fiche.fondation'), club.fondation],
+    [MapPin, t('equipe.fiche.ville'), club.ville],
+    [Palette, t('equipe.fiche.couleurs'), club.couleurs],
+    [Star, t('equipe.fiche.surnom'), club.surnom],
+    [Building2, t('equipe.fiche.stade'), club.stade],
   ].filter(([, , v]) => v);
 
   return (
@@ -294,7 +302,7 @@ function OngletHistoire({ club }) {
       </Carte>
 
       {enBref.length > 0 && (
-        <Carte titre="Le club en bref">
+        <Carte titre={t('equipe.enBref')}>
           <div className="grid grid-cols-1 sm:grid-cols-2">
             {enBref.map(([Icone, label, valeur], i) => (
               <div key={label} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '14px 20px', borderTop: i > 1 ? `1px solid ${CLAIR.bord}` : 'none' }}>
@@ -312,7 +320,7 @@ function OngletHistoire({ club }) {
       )}
 
       {club.grandsJoueurs?.length > 0 && (
-        <Carte titre="Grands joueurs" icone={Star}>
+        <Carte titre={t('equipe.grandsJoueurs')} icone={Star}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', padding: '16px 20px' }}>
             {club.grandsJoueurs.map(j => (
               <span key={j} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 14px', borderRadius: '999px', backgroundColor: CLAIR.tuile, fontSize: '14px', fontWeight: 700, color: CLAIR.texte }}>
@@ -335,6 +343,7 @@ function OngletHistoire({ club }) {
 
 // Une ligne de palmarès : trophée, compétition, nombre, années
 function LignePalmares({ p, premier }) {
+  const { t } = useTranslation();
   const titre = p.type === 'titre';
   const nombre = p.nombre ?? p.annees?.length ?? 0;
   const Icone = p.continental ? Globe : titre ? Trophy : Medal;
@@ -350,10 +359,10 @@ function LignePalmares({ p, premier }) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
           <span style={{ fontSize: '16px', fontWeight: 800, color: CLAIR.texte }}>{p.competition}</span>
-          {p.continental && <span style={{ fontSize: '10px', fontWeight: 800, color: '#1a3a7a', backgroundColor: '#e3eaf7', padding: '2px 8px', borderRadius: '999px', letterSpacing: '0.5px' }}>AFRIQUE</span>}
+          {p.continental && <span style={{ fontSize: '10px', fontWeight: 800, color: '#1a3a7a', backgroundColor: '#e3eaf7', padding: '2px 8px', borderRadius: '999px', letterSpacing: '0.5px' }}>{t('equipe.afrique')}</span>}
         </div>
         <div style={{ fontSize: '13px', color: CLAIR.doux, marginTop: '2px' }}>
-          {p.libelle ?? (titre ? (nombre > 1 ? `${nombre} fois vainqueur` : 'Vainqueur') : (nombre > 1 ? `${nombre} fois finaliste` : 'Finaliste'))}
+          {p.libelle ?? (titre ? t('equipe.vainqueur', { count: nombre }) : t('equipe.finaliste', { count: nombre }))}
         </div>
         {p.annees?.length > 0 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '10px' }}>
@@ -372,41 +381,42 @@ function LignePalmares({ p, premier }) {
 }
 
 function OngletPalmares({ palmares, club }) {
+  const { t } = useTranslation();
   const local = club?.palmares ?? [];
   const titres = local.filter(p => p.type === 'titre');
   const finales = local.filter(p => p.type !== 'titre');
   const totalTitres = titres.reduce((s, p) => s + (p.nombre ?? p.annees?.length ?? 0), 0);
 
   if (local.length === 0 && palmares.length === 0) {
-    return <Carte><Vide>Aucun titre majeur enregistré pour ce club.</Vide></Carte>;
+    return <Carte><Vide>{t('equipe.aucunTitre')}</Vide></Carte>;
   }
 
   return (
     <>
       {titres.length > 0 && (
-        <Carte titre="Titres" icone={Trophy}
-          droite={<span style={{ fontSize: '12px', fontWeight: 800, color: '#7a5a08', backgroundColor: '#fdf3d0', padding: '3px 10px', borderRadius: '999px' }}>{totalTitres} trophée{totalTitres > 1 ? 's' : ''}</span>}>
+        <Carte titre={t('equipe.titres')} icone={Trophy}
+          droite={<span style={{ fontSize: '12px', fontWeight: 800, color: '#7a5a08', backgroundColor: '#fdf3d0', padding: '3px 10px', borderRadius: '999px' }}>{t('equipe.trophees', { count: totalTitres })}</span>}>
           {titres.map((p, i) => <LignePalmares key={p.competition + i} p={p} premier={i === 0} />)}
         </Carte>
       )}
 
       {finales.length > 0 && (
-        <Carte titre="Finales et places d'honneur" icone={Medal}>
+        <Carte titre={t('equipe.finales')} icone={Medal}>
           {finales.map((p, i) => <LignePalmares key={p.competition + i} p={p} premier={i === 0} />)}
         </Carte>
       )}
 
       {/* Palmarès renvoyé par l'API (s'il y en a) */}
       {palmares.length > 0 && (
-        <Carte titre="Selon API-Football" icone={Trophy}>
-          {palmares.map((t, i) => (
+        <Carte titre={t('equipe.selonApi')} icone={Trophy}>
+          {palmares.map((x, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 20px', borderTop: i ? `1px solid ${CLAIR.bord}` : 'none' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: '15px', fontWeight: 700, color: CLAIR.texte }}>{t.ligue}</div>
-                <div style={{ fontSize: '12px', color: CLAIR.doux }}>{[t.saison, t.pays].filter(Boolean).join(' · ')}</div>
+                <div style={{ fontSize: '15px', fontWeight: 700, color: CLAIR.texte }}>{x.ligue}</div>
+                <div style={{ fontSize: '12px', color: CLAIR.doux }}>{[x.saison, x.pays].filter(Boolean).join(' · ')}</div>
               </div>
-              {t.place && (
-                <span style={{ fontSize: '12px', fontWeight: 800, color: '#8a6510', backgroundColor: '#fdf3d0', borderRadius: '999px', padding: '3px 10px' }}>{t.place}</span>
+              {x.place && (
+                <span style={{ fontSize: '12px', fontWeight: 800, color: '#8a6510', backgroundColor: '#fdf3d0', borderRadius: '999px', padding: '3px 10px' }}>{x.place}</span>
               )}
             </div>
           ))}
@@ -420,21 +430,22 @@ function OngletPalmares({ palmares, club }) {
 
 // ── Colonne de droite ───────────────────────────────────────────────────
 function ColonneDroite({ data, club, derniersMatchs, prochain, buteurs }) {
+  const { t } = useTranslation();
   const infos = data.infos ?? {};
   // L'API d'abord, nos fiches clubs (clubsInfos.js) en secours
   const fiche = [
-    [MapPin, 'Ville', infos.ville ?? club?.ville],
-    [Calendar, 'Fondé en', infos.anneeCreation ?? club?.fondation],
-    [Building2, 'Stade', infos.stadeNom ?? club?.stade],
-    [Users, 'Capacité', infos.stadeCapacite ? `${infos.stadeCapacite.toLocaleString('fr-FR')} places` : null],
-    [Palette, 'Couleurs', club?.couleurs],
-    [Star, 'Surnom', club?.surnom],
+    [MapPin, t('equipe.fiche.ville'), infos.ville ?? club?.ville],
+    [Calendar, t('equipe.fiche.fondeEn'), infos.anneeCreation ?? club?.fondation],
+    [Building2, t('equipe.fiche.stade'), infos.stadeNom ?? club?.stade],
+    [Users, t('equipe.fiche.capacite'), infos.stadeCapacite ? t('equipe.places', { n: infos.stadeCapacite.toLocaleString(locale()) }) : null],
+    [Palette, t('equipe.fiche.couleurs'), club?.couleurs],
+    [Star, t('equipe.fiche.surnom'), club?.surnom],
   ].filter(([, , v]) => v);
 
   return (
     <aside style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       {/* Forme récente (du plus ancien au plus récent) */}
-      <Carte titre="Forme récente">
+      <Carte titre={t('matchDetail.formeRecente')}>
         <div style={{ display: 'flex', gap: '8px', padding: '16px 20px' }}>
           {derniersMatchs.length
             ? [...derniersMatchs].reverse().map(m => (
@@ -443,14 +454,14 @@ function ColonneDroite({ data, club, derniersMatchs, prochain, buteurs }) {
                 <PastilleResultat r={m.resultat} taille={34} />
               </Link>
             ))
-            : <span style={{ fontSize: '13px', color: CLAIR.doux }}>Pas encore de match joué.</span>}
+            : <span style={{ fontSize: '13px', color: CLAIR.doux }}>{t('equipe.pasEncoreJoue')}</span>}
         </div>
       </Carte>
 
       {/* Prochain match */}
       {prochain && (
         <Link to={`/matchs/${prochain.id}`} state={{ match: prochain }} style={{ textDecoration: 'none' }}>
-          <Carte titre="Prochain match" droite={<ArrowRight size={16} color={CLAIR.doux} />}>
+          <Carte titre={t('equipe.prochainMatch')} droite={<ArrowRight size={16} color={CLAIR.doux} />}>
             <div style={{ padding: '18px 20px', textAlign: 'center' }}>
               <div style={{ fontSize: '12px', fontWeight: 700, color: CLAIR.doux, textTransform: 'capitalize', marginBottom: '14px' }}>
                 {dateLongue(prochain.dateMatch)} · {heure(prochain.dateMatch)}
@@ -473,8 +484,8 @@ function ColonneDroite({ data, club, derniersMatchs, prochain, buteurs }) {
       )}
 
       {/* Meilleurs buteurs du club cette saison */}
-      <Carte titre="Buteurs du club" icone={Goal}>
-        {buteurs.length === 0 ? <Vide>Aucun but enregistré.</Vide> : buteurs.map((j, i) => (
+      <Carte titre={t('equipe.buteursClub')} icone={Goal}>
+        {buteurs.length === 0 ? <Vide>{t('equipe.aucunBut')}</Vide> : buteurs.map((j, i) => (
           <div key={j.nom} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 20px', borderTop: i ? `1px solid ${CLAIR.bord}` : 'none' }}>
             <span style={{ width: '18px', fontSize: '13px', fontWeight: 800, color: CLAIR.doux }}>{i + 1}</span>
             <span style={{ flex: 1, minWidth: 0, fontSize: '14px', fontWeight: 700, color: CLAIR.texte, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{j.nom}</span>
@@ -485,7 +496,7 @@ function ColonneDroite({ data, club, derniersMatchs, prochain, buteurs }) {
 
       {/* Fiche du club */}
       {fiche.length > 0 && (
-        <Carte titre="Fiche du club">
+        <Carte titre={t('equipe.ficheClub')}>
           {fiche.map(([Icone, label, valeur], i) => (
             <div key={label} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '12px 20px', borderTop: i ? `1px solid ${CLAIR.bord}` : 'none' }}>
               <Icone size={16} color={CLAIR.doux} style={{ marginTop: '2px', flexShrink: 0 }} />
@@ -503,6 +514,7 @@ function ColonneDroite({ data, club, derniersMatchs, prochain, buteurs }) {
 
 // ── Page ────────────────────────────────────────────────────────────────
 function EquipeDetailPage() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const [etat, setEtat] = useState(null); // { id, data, matchsSaison, erreur }
   const [ongletChoisi, setOngletChoisi] = useState({ id: null, cle: 'apercu' });
@@ -521,7 +533,7 @@ function EquipeDetailPage() {
         const matchsSaison = saisonId != null ? await matchService.getBySaison(saisonId).catch(() => []) : [];
         if (!ignore) setEtat({ id, data, matchsSaison, erreur: null });
       })
-      .catch(() => { if (!ignore) setEtat({ id, data: null, matchsSaison: [], erreur: 'Équipe introuvable' }); });
+      .catch(() => { if (!ignore) setEtat({ id, data: null, matchsSaison: [], erreur: 'introuvable' }); });
     return () => { ignore = true; };
   }, [id]);
 
@@ -549,7 +561,7 @@ function EquipeDetailPage() {
   if (chargement) {
     return (
       <div style={{ backgroundColor: CLAIR.fond, minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: CLAIR.doux }}>Chargement du club...</p>
+        <p style={{ color: CLAIR.doux }}>{t('equipe.chargement')}</p>
       </div>
     );
   }
@@ -559,8 +571,8 @@ function EquipeDetailPage() {
       <div style={{ backgroundColor: CLAIR.fond, minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }}>
         <div style={{ textAlign: 'center' }}>
           <AlertCircle size={40} color={theme.red} style={{ margin: '0 auto 12px' }} />
-          <p style={{ fontSize: '18px', fontWeight: 800, color: CLAIR.texte, marginBottom: '10px' }}>{etat.erreur ?? 'Équipe introuvable'}</p>
-          <Link to="/equipes" style={{ color: CLAIR.vert, fontWeight: 700 }}>← Toutes les équipes</Link>
+          <p style={{ fontSize: '18px', fontWeight: 800, color: CLAIR.texte, marginBottom: '10px' }}>{t('equipe.introuvable')}</p>
+          <Link to="/equipes" style={{ color: CLAIR.vert, fontWeight: 700 }}>← {t('equipe.toutesEquipes')}</Link>
         </div>
       </div>
     );
@@ -578,11 +590,11 @@ function EquipeDetailPage() {
     .reduce((s, p) => s + (p.nombre ?? p.annees?.length ?? 0), 0) + palmares.length;
 
   const ONGLETS = [
-    { cle: 'apercu', label: 'Aperçu' },
-    { cle: 'histoire', label: 'Histoire' },
-    { cle: 'matchs', label: 'Matchs' },
-    { cle: 'effectif', label: 'Effectif', nb: effectif.length },
-    { cle: 'palmares', label: 'Palmarès', nb: nbTitres },
+    { cle: 'apercu' },
+    { cle: 'histoire' },
+    { cle: 'matchs' },
+    { cle: 'effectif', nb: effectif.length },
+    { cle: 'palmares', nb: nbTitres },
   ];
 
   const infoHero = (Icone, texte) => (
@@ -610,7 +622,7 @@ function EquipeDetailPage() {
         <div style={CONTENEUR}>
           {/* Fil d'Ariane */}
           <nav style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', marginBottom: '30px' }}>
-            {[['Accueil', '/'], ['Équipes', '/equipes']].map(([label, to]) => (
+            {[[t('nav.accueil'), '/'], [t('nav.equipes'), '/equipes']].map(([label, to]) => (
               <span key={to} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Link to={to} style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none' }}
                   onMouseEnter={e => { e.currentTarget.style.color = '#fff'; }}
@@ -646,7 +658,7 @@ function EquipeDetailPage() {
                 </h1>
                 <div style={{ display: 'flex', gap: '18px', flexWrap: 'wrap' }}>
                   {(infos.ville ?? club?.ville) && infoHero(MapPin, infos.ville ?? club.ville)}
-                  {(infos.anneeCreation ?? club?.fondation) && infoHero(Calendar, `Fondé en ${infos.anneeCreation ?? club.fondation}`)}
+                  {(infos.anneeCreation ?? club?.fondation) && infoHero(Calendar, t('equipe.fondeEnAnnee', { a: infos.anneeCreation ?? club.fondation }))}
                   {(infos.stadeNom ?? club?.stade) && infoHero(Building2, infos.stadeNom ?? club.stade)}
                 </div>
               </div>
@@ -658,7 +670,7 @@ function EquipeDetailPage() {
                 display: 'flex', borderRadius: '16px', overflow: 'hidden',
                 backgroundColor: 'rgba(0,0,0,0.28)', border: '1px solid rgba(255,255,255,0.14)', backdropFilter: 'blur(6px)',
               }}>
-                {[['Position', `#${classement.position}`], ['Points', classement.points]].map(([label, val], i) => (
+                {[[t('equipe.position'), `#${classement.position}`], [t('equipe.points'), classement.points]].map(([label, val], i) => (
                   <div key={label} style={{ padding: '16px 26px', textAlign: 'center', borderLeft: i ? '1px solid rgba(255,255,255,0.14)' : 'none' }}>
                     <div style={{ fontFamily: CHIFFRES, fontSize: '44px', fontWeight: 800, color: '#fff', lineHeight: 1 }}>{val}</div>
                     <div style={{ marginTop: '4px', fontSize: '11px', fontWeight: 800, color: 'rgba(255,255,255,0.65)', letterSpacing: '1px', textTransform: 'uppercase' }}>{label}</div>
@@ -683,7 +695,7 @@ function EquipeDetailPage() {
                   fontSize: '15px', fontWeight: actif ? 700 : 500, color: actif ? CLAIR.vert : '#4a514d',
                   borderBottom: `3px solid ${actif ? CLAIR.vert : 'transparent'}`,
                 }}>
-                {o.label}
+                {t(`equipe.onglets.${o.cle}`)}
                 {o.nb > 0 && (
                   <span style={{ fontSize: '11px', fontWeight: 800, padding: '1px 7px', borderRadius: '999px', backgroundColor: actif ? '#e8f3ec' : CLAIR.tuile, color: actif ? CLAIR.vert : CLAIR.doux }}>{o.nb}</span>
                 )}

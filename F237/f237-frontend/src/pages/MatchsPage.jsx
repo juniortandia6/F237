@@ -5,6 +5,8 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { locale } from '../i18n';
 import { ChevronLeft, ChevronRight, EyeOff, Radio, CalendarClock } from 'lucide-react';
 import { matchService } from '../services/matchService';
 import { COMPETITIONS, ANNEE_ACTUELLE, SAISONS_DB, libelleSaison } from '../data/saisons';
@@ -37,7 +39,7 @@ const depuisCle = (cle) => {
   const [a, m, j] = cle.split('-').map(Number);
   return new Date(a, m - 1, j);
 };
-const heure = (date) => new Date(date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+const heure = (date) => new Date(date).toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
 
 // Fond de la zone haute : même dégradé + éclats que les bandes de l'accueil
 const FOND_BANDE = `linear-gradient(120deg, ${theme.greenDeep} 0%, #12462c 45%, #0f3a25 100%)`;
@@ -85,9 +87,10 @@ function Interrupteur({ actif, onChange, icone: Icone, children }) {
 
 // ── Une tuile du calendrier ─────────────────────────────────────────────
 function TuileDate({ cle, active, aujourdhui, nbMatchs, onClick }) {
+  const { t } = useTranslation();
   const d = depuisCle(cle);
-  const jourSemaine = d.toLocaleDateString('fr-FR', { weekday: 'short' }).replace('.', '');
-  const mois = d.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '').toUpperCase();
+  const jourSemaine = d.toLocaleDateString(locale(), { weekday: 'short' }).replace('.', '');
+  const mois = d.toLocaleDateString(locale(), { month: 'short' }).replace('.', '').toUpperCase();
 
   return (
     <button
@@ -118,14 +121,14 @@ function TuileDate({ cle, active, aujourdhui, nbMatchs, onClick }) {
         </div>
         <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.5px', opacity: active ? 0.9 : 0.7 }}>{mois}</div>
         <div style={{ fontSize: '10px', marginTop: '4px', color: active ? theme.yellow : CLAIR.doux, fontWeight: 700 }}>
-          {nbMatchs} match{nbMatchs > 1 ? 's' : ''}
+          {t('matchs.nbMatchs', { count: nbMatchs })}
         </div>
       </div>
       {aujourdhui && (
         <span style={{
           position: 'absolute', top: '26px', right: '6px',
           width: '8px', height: '8px', borderRadius: '50%', backgroundColor: theme.red,
-        }} title="Aujourd'hui" />
+        }} title={t('matchs.aujourdhui')} />
       )}
     </button>
   );
@@ -167,6 +170,7 @@ function LigneEquipe({ equipe, score, gagnant, perdant, masquer, aVenir }) {
 // ── Carte d'un match (style FIBA) — cliquable, ouvre la page du match ───
 function CarteMatch({ m, competition, masquer }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const termine = m.statut === 2;
   const live = m.statut === 1;
   const aVenir = m.statut === 0;
@@ -196,16 +200,16 @@ function CarteMatch({ m, competition, masquer }) {
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '10px', paddingRight: '20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
             <span style={{ fontSize: '12px', fontWeight: 700, color: '#2c312e', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-              {journee ? `Journée ${journee} · ` : ''}MTN {competition}
+              {journee ? `${t('matchs.journee', { n: journee })} · ` : ''}MTN {competition}
             </span>
             {live ? (
               <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 800, color: theme.red }}>
                 <span className="animate-pulse" style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: theme.red }} />
-                EN DIRECT{m.minute ? ` · ${m.minute}'` : ''}
+                {t('commun.enDirectMaj')}{m.minute ? ` · ${m.minute}'` : ''}
               </span>
             ) : (
               <span style={{ fontSize: '12px', fontWeight: 700, color: CLAIR.doux, textTransform: 'uppercase' }}>
-                {termine ? 'Terminé' : reporte ? 'Reporté' : 'À venir'}
+                {termine ? t('commun.termine') : reporte ? t('commun.reporte') : t('commun.aVenir')}
               </span>
             )}
           </div>
@@ -226,7 +230,7 @@ function CarteMatch({ m, competition, masquer }) {
               {aVenir && (
                 <Link to="/jouer" onClick={e => e.stopPropagation()}
                   style={{ fontSize: '12px', fontWeight: 700, color: theme.green, textDecoration: 'none' }}>
-                  Pronostiquer →
+                  {t('matchs.pronostiquer')} →
                 </Link>
               )}
             </>
@@ -240,7 +244,7 @@ function CarteMatch({ m, competition, masquer }) {
               onMouseEnter={e => { e.currentTarget.style.backgroundColor = CLAIR.vert; e.currentTarget.style.color = '#fff'; }}
               onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#eceeed'; e.currentTarget.style.color = '#2c312e'; }}
             >
-              + Plus
+              {t('commun.plus')}
             </span>
           )}
         </div>
@@ -251,6 +255,7 @@ function CarteMatch({ m, competition, masquer }) {
 
 // ── Colonne de droite : la journée en chiffres ──────────────────────────
 function ResumeJournee({ matchs, masquer }) {
+  const { t } = useTranslation();
   const joues = matchs.filter(m => m.statut === 2 || m.statut === 1);
   const totalButs = joues.reduce((s, m) => s + (m.scoreDomicile ?? 0) + (m.scoreExterieur ?? 0), 0);
   const buteurs = {};
@@ -262,16 +267,16 @@ function ResumeJournee({ matchs, masquer }) {
   const topButeurs = Object.values(buteurs).sort((a, b) => b.buts - a.buts).slice(0, 5);
 
   const chiffres = [
-    ['Matchs', matchs.length],
-    ['Buts', masquer ? '–' : totalButs],
-    ['Moy. / match', masquer || !joues.length ? '–' : (totalButs / joues.length).toFixed(1)],
+    [t('matchs.chiffres.matchs'), matchs.length],
+    [t('matchs.chiffres.buts'), masquer ? '–' : totalButs],
+    [t('matchs.chiffres.moyenne'), masquer || !joues.length ? '–' : (totalButs / joues.length).toFixed(1)],
   ];
 
   return (
     <aside style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <div style={{ backgroundColor: CLAIR.carte, border: `1px solid ${CLAIR.bord}`, borderRadius: '14px', overflow: 'hidden' }}>
         <div style={{ backgroundColor: CLAIR.vert, color: '#fff', padding: '12px 18px', fontWeight: 800, fontSize: '15px' }}>
-          La journée en chiffres
+          {t('matchs.journeeEnChiffres')}
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)' }}>
           {chiffres.map(([label, val], i) => (
@@ -284,11 +289,11 @@ function ResumeJournee({ matchs, masquer }) {
       </div>
 
       <div style={{ backgroundColor: CLAIR.carte, border: `1px solid ${CLAIR.bord}`, borderRadius: '14px', padding: '16px 18px' }}>
-        <div style={{ fontWeight: 800, fontSize: '15px', color: CLAIR.texte, marginBottom: '10px' }}>Buteurs du jour</div>
+        <div style={{ fontWeight: 800, fontSize: '15px', color: CLAIR.texte, marginBottom: '10px' }}>{t('matchs.buteursDuJour')}</div>
         {masquer ? (
-          <p style={{ fontSize: '13px', color: CLAIR.doux }}>Masqué pour ne pas gâcher la surprise.</p>
+          <p style={{ fontSize: '13px', color: CLAIR.doux }}>{t('matchs.masqueSurprise')}</p>
         ) : topButeurs.length === 0 ? (
-          <p style={{ fontSize: '13px', color: CLAIR.doux }}>Aucun but enregistré ce jour-là.</p>
+          <p style={{ fontSize: '13px', color: CLAIR.doux }}>{t('matchs.aucunBut')}</p>
         ) : topButeurs.map((j, i) => (
           <div key={`${j.nom}|${j.equipe}`} style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px',
@@ -308,6 +313,7 @@ function ResumeJournee({ matchs, masquer }) {
 
 // ── Page ────────────────────────────────────────────────────────────────
 const MatchsPage = () => {
+  const { t } = useTranslation();
   const [matchs, setMatchs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [annee, setAnnee] = useState(ANNEE_ACTUELLE);
@@ -411,7 +417,7 @@ const MatchsPage = () => {
             <div>
               <SelecteurSaison annee={annee} onChange={a => changerSelection(a, comp)} />
               <h1 style={{ color: '#fff', fontSize: '42px', fontWeight: 400, lineHeight: 1.1, fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
-                Calendrier des matchs
+                {t('matchs.titre')}
               </h1>
             </div>
 
@@ -438,16 +444,16 @@ const MatchsPage = () => {
           {/* Carte blanche du calendrier */}
           <div style={{ backgroundColor: '#fff', borderRadius: '16px', boxShadow: '0 16px 40px rgba(0,0,0,0.25)', overflow: 'hidden' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '20px 20px' }}>
-              <button onClick={() => scrollCal(-1)} aria-label="Dates précédentes" style={FLECHE}>
+              <button onClick={() => scrollCal(-1)} aria-label={t('matchs.datesPrecedentes')} style={FLECHE}>
                 <ChevronLeft size={20} color="#222" />
               </button>
 
               <div ref={calRef} style={{ display: 'flex', gap: '10px', overflowX: 'auto', scrollbarWidth: 'none', flex: 1, padding: '2px' }}>
                 {loading ? (
-                  <span style={{ padding: '30px 10px', color: CLAIR.doux, fontSize: '14px' }}>Chargement du calendrier...</span>
+                  <span style={{ padding: '30px 10px', color: CLAIR.doux, fontSize: '14px' }}>{t('matchs.chargementCalendrier')}</span>
                 ) : datesUniques.length === 0 ? (
                   <span style={{ padding: '30px 10px', color: CLAIR.doux, fontSize: '14px' }}>
-                    {pasDeDonnees ? `Le calendrier de la saison ${libelleSaison(annee)} arrive bientôt.` : 'Aucun match programmé.'}
+                    {pasDeDonnees ? t('matchs.calendrierBientot', { s: libelleSaison(annee) }) : t('matchs.aucunProgramme')}
                   </span>
                 ) : datesUniques.map(cle => (
                   <TuileDate
@@ -461,7 +467,7 @@ const MatchsPage = () => {
                 ))}
               </div>
 
-              <button onClick={() => scrollCal(1)} aria-label="Dates suivantes" style={FLECHE}>
+              <button onClick={() => scrollCal(1)} aria-label={t('matchs.datesSuivantes')} style={FLECHE}>
                 <ChevronRight size={20} color="#222" />
               </button>
             </div>
@@ -469,11 +475,11 @@ const MatchsPage = () => {
             {/* Barre du bas : interrupteurs */}
             <div style={{ display: 'flex', borderTop: `1px solid ${CLAIR.bord}` }}>
               <Interrupteur actif={masquerScores} onChange={setMasquerScores} icone={EyeOff}>
-                Masquer les scores
+                {t('matchs.masquerScores')}
               </Interrupteur>
               <div style={{ width: '1px', backgroundColor: CLAIR.bord }} />
               <Interrupteur actif={directSeulement} onChange={setDirectSeulement} icone={Radio}>
-                En direct ({nbLive})
+                {t('commun.enDirect')} ({nbLive})
               </Interrupteur>
             </div>
           </div>
@@ -486,9 +492,9 @@ const MatchsPage = () => {
           {/* Date affichée */}
           <h2 style={{ fontSize: '22px', fontWeight: 800, color: CLAIR.texte, marginBottom: '18px', textTransform: 'capitalize' }}>
             {directSeulement
-              ? 'Matchs en direct'
+              ? t('matchs.matchsEnDirect')
               : dateSelectionnee
-                ? depuisCle(dateSelectionnee).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+                ? depuisCle(dateSelectionnee).toLocaleDateString(locale(), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
                 : ''}
           </h2>
 
@@ -502,10 +508,10 @@ const MatchsPage = () => {
                 <CalendarClock size={26} color={CLAIR.vert} />
               </span>
               <div style={{ fontSize: '20px', fontWeight: 800, color: CLAIR.texte }}>
-                MTN {competition} · Saison {libelleSaison(annee)}
+                MTN {competition} · {t('saison.saison', { s: libelleSaison(annee) })}
               </div>
               <p style={{ fontSize: '15px', color: CLAIR.doux, maxWidth: '440px', lineHeight: 1.5 }}>
-                Les matchs de cette saison ne sont pas encore disponibles sur F237. Ils arrivent bientôt !
+                {t('matchs.saisonIndispo')}
               </p>
               <button
                 onClick={() => changerSelection(ANNEE_ACTUELLE, comp)}
@@ -513,20 +519,20 @@ const MatchsPage = () => {
                   marginTop: '6px', padding: '10px 20px', borderRadius: '999px', border: 'none', cursor: 'pointer',
                   backgroundColor: CLAIR.vert, color: '#fff', fontSize: '14px', fontWeight: 700,
                 }}>
-                Revenir à la saison {libelleSaison(ANNEE_ACTUELLE)}
+                {t('matchs.revenirSaison', { s: libelleSaison(ANNEE_ACTUELLE) })}
               </button>
             </div>
           ) : (
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]" style={{ alignItems: 'start' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {loading ? (
-                <div style={{ textAlign: 'center', padding: '48px 0', color: CLAIR.doux }}>Chargement...</div>
+                <div style={{ textAlign: 'center', padding: '48px 0', color: CLAIR.doux }}>{t('commun.chargement')}</div>
               ) : matchsAffiches.length === 0 ? (
                 <div style={{
                   textAlign: 'center', padding: '48px 20px', color: CLAIR.doux,
                   backgroundColor: CLAIR.carte, border: `1px dashed ${CLAIR.bord}`, borderRadius: '14px',
                 }}>
-                  {directSeulement ? 'Aucun match en direct pour le moment.' : 'Aucun match pour cette date.'}
+                  {directSeulement ? t('matchs.aucunEnDirect') : t('matchs.aucunCetteDate')}
                 </div>
               ) : matchsAffiches.map(m => (
                 <CarteMatch key={m.id} m={m} competition={competition} masquer={masquerScores} />

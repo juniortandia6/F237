@@ -4,6 +4,7 @@
 
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../contexts/AuthContext";
 import { Loader2, AlertCircle, Eye, EyeOff, Mail, Lock, User, Coins, Check, ArrowRight } from "lucide-react";
 import theme from "../theme";
@@ -79,13 +80,11 @@ function Regle({ ok, children }) {
   );
 }
 
-const ETAPES = [
-  "Crée ton compte en 30 secondes",
-  "Reçois 1 000 points de bienvenue",
-  "Pronostique les matchs d'Elite One et d'Elite Two",
-];
+// Textes : auth.register.etapes.<cle>
+const ETAPES = ["compte", "points", "pronostique"];
 
 function RegisterPage() {
+  const { t } = useTranslation();
   const [form, setForm] = useState({ nom: "", prenom: "", email: "", motDePasse: "", confirmer: "" });
   const [voirMdp, setVoirMdp] = useState(false);
   const [erreur, setErreur] = useState("");
@@ -104,11 +103,11 @@ function RegisterPage() {
     setErreur("");
 
     if (!assezLong) {
-      setErreur(`Le mot de passe doit contenir au moins ${LONGUEUR_MIN} caractères.`);
+      setErreur(t('auth.register.erreurLongueur', { n: LONGUEUR_MIN }));
       return;
     }
     if (form.motDePasse !== form.confirmer) {
-      setErreur("Les mots de passe ne correspondent pas.");
+      setErreur(t('auth.register.erreurIdentiques'));
       return;
     }
 
@@ -125,7 +124,7 @@ function RegisterPage() {
 
   const boutonOeil = (
     <button type="button" onClick={() => setVoirMdp(v => !v)}
-      aria-label={voirMdp ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+      aria-label={voirMdp ? t('auth.masquerMdp') : t('auth.afficherMdp')}
       style={{ border: "none", background: "none", cursor: "pointer", padding: "4px", display: "flex", color: CLAIR.doux }}>
       {voirMdp ? <EyeOff size={17} /> : <Eye size={17} />}
     </button>
@@ -141,13 +140,13 @@ function RegisterPage() {
         {/* ── Gauche : message + bonus ─────────────────────────────────── */}
         <div>
           <p style={{ color: theme.yellow, fontSize: "13px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", marginBottom: "10px" }}>
-            Rejoins F237
+            {t('auth.register.surtitre')}
           </p>
           <h1 style={{ color: "#fff", fontSize: "60px", fontWeight: 400, lineHeight: 1.05, marginBottom: "14px", fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
-            Entre dans le jeu
+            {t('auth.register.titre')}
           </h1>
           <p style={{ color: "rgba(255,255,255,0.72)", fontSize: "17px", lineHeight: 1.55, maxWidth: "460px", marginBottom: "28px" }}>
-            Crée ton compte gratuitement et commence à pronostiquer les matchs du football camerounais.
+            {t('auth.register.intro')}
           </p>
 
           {/* Carte bonus */}
@@ -159,20 +158,20 @@ function RegisterPage() {
               <Coins size={26} color="#3a2c00" />
             </span>
             <div>
-              <div style={{ color: theme.yellow, fontFamily: '"Barlow Condensed", Arial, sans-serif', fontSize: "30px", fontWeight: 800, lineHeight: 1 }}>1 000 points</div>
-              <div style={{ color: "rgba(255,255,255,0.75)", fontSize: "14px", marginTop: "3px" }}>offerts dès ton inscription</div>
+              <div style={{ color: theme.yellow, fontFamily: '"Barlow Condensed", Arial, sans-serif', fontSize: "30px", fontWeight: 800, lineHeight: 1 }}>{t('auth.register.bonus')}</div>
+              <div style={{ color: "rgba(255,255,255,0.75)", fontSize: "14px", marginTop: "3px" }}>{t('auth.register.bonusTexte')}</div>
             </div>
           </div>
 
           <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "12px" }}>
-            {ETAPES.map((texte, i) => (
-              <li key={texte} style={{ display: "flex", alignItems: "center", gap: "12px", color: "rgba(255,255,255,0.85)", fontSize: "15px" }}>
+            {ETAPES.map((cle, i) => (
+              <li key={cle} style={{ display: "flex", alignItems: "center", gap: "12px", color: "rgba(255,255,255,0.85)", fontSize: "15px" }}>
                 <span style={{
                   width: "28px", height: "28px", borderRadius: "50%", flexShrink: 0,
                   border: `1.5px solid ${theme.greenBright}`, color: theme.greenBright,
                   display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px", fontWeight: 800,
                 }}>{i + 1}</span>
-                {texte}
+                {t(`auth.register.etapes.${cle}`)}
               </li>
             ))}
           </ol>
@@ -180,8 +179,8 @@ function RegisterPage() {
 
         {/* ── Droite : carte du formulaire ─────────────────────────────── */}
         <div style={{ backgroundColor: "#fff", borderRadius: "20px", padding: "34px 32px 28px", boxShadow: "0 24px 60px rgba(0,0,0,0.35)" }}>
-          <h2 style={{ fontSize: "26px", fontWeight: 800, color: CLAIR.texte, marginBottom: "4px" }}>Inscription</h2>
-          <p style={{ fontSize: "14px", color: CLAIR.doux, marginBottom: "22px" }}>Quelques infos et c'est parti.</p>
+          <h2 style={{ fontSize: "26px", fontWeight: 800, color: CLAIR.texte, marginBottom: "4px" }}>{t('auth.register.inscription')}</h2>
+          <p style={{ fontSize: "14px", color: CLAIR.doux, marginBottom: "22px" }}>{t('auth.register.consigne')}</p>
 
           {erreur && (
             <div role="alert" style={{
@@ -194,23 +193,23 @@ function RegisterPage() {
 
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-              <Champ label="Prénom" icone={User} type="text" name="prenom" value={form.prenom} onChange={handleChange} placeholder="Junior" autoComplete="given-name" />
-              <Champ label="Nom" icone={User} type="text" name="nom" value={form.nom} onChange={handleChange} placeholder="Tandia" autoComplete="family-name" />
+              <Champ label={t('auth.register.prenom')} icone={User} type="text" name="prenom" value={form.prenom} onChange={handleChange} placeholder="Junior" autoComplete="given-name" />
+              <Champ label={t('auth.register.nom')} icone={User} type="text" name="nom" value={form.nom} onChange={handleChange} placeholder="Tandia" autoComplete="family-name" />
             </div>
 
-            <Champ label="Email" icone={Mail} type="email" name="email" value={form.email} onChange={handleChange} placeholder="junior@example.com" autoComplete="email" />
+            <Champ label={t('auth.email')} icone={Mail} type="email" name="email" value={form.email} onChange={handleChange} placeholder="junior@example.com" autoComplete="email" />
 
-            <Champ label="Mot de passe" icone={Lock} type={voirMdp ? "text" : "password"} name="motDePasse"
+            <Champ label={t('auth.motDePasse')} icone={Lock} type={voirMdp ? "text" : "password"} name="motDePasse"
               value={form.motDePasse} onChange={handleChange} placeholder="••••••••" autoComplete="new-password" droite={boutonOeil} />
 
-            <Champ label="Confirmer le mot de passe" icone={Lock} type={voirMdp ? "text" : "password"} name="confirmer"
+            <Champ label={t('auth.register.confirmer')} icone={Lock} type={voirMdp ? "text" : "password"} name="confirmer"
               value={form.confirmer} onChange={handleChange} placeholder="••••••••" autoComplete="new-password" />
 
             {/* Règles du mot de passe, mises à jour en direct */}
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 16px", marginTop: "-2px" }}>
-              <Regle ok={assezLong}>{LONGUEUR_MIN} caractères minimum</Regle>
-              <Regle ok={aChiffre}>Au moins un chiffre (conseillé)</Regle>
-              <Regle ok={identiques}>Mots de passe identiques</Regle>
+              <Regle ok={assezLong}>{t('auth.register.regleLongueur', { n: LONGUEUR_MIN })}</Regle>
+              <Regle ok={aChiffre}>{t('auth.register.regleChiffre')}</Regle>
+              <Regle ok={identiques}>{t('auth.register.regleIdentiques')}</Regle>
             </div>
 
             <button
@@ -226,14 +225,14 @@ function RegisterPage() {
               }}
             >
               {loading
-                ? <><Loader2 size={18} className="animate-spin" /> Inscription...</>
-                : <>Créer mon compte <ArrowRight size={18} /></>}
+                ? <><Loader2 size={18} className="animate-spin" /> {t('auth.register.enCours')}</>
+                : <>{t('auth.register.creer')} <ArrowRight size={18} /></>}
             </button>
           </form>
 
           <p style={{ textAlign: "center", marginTop: "20px", fontSize: "14px", color: CLAIR.doux }}>
-            Déjà un compte ?{" "}
-            <Link to="/login" style={{ color: CLAIR.vert, fontWeight: 800 }}>Se connecter</Link>
+            {t('auth.register.dejaCompte')}{" "}
+            <Link to="/login" style={{ color: CLAIR.vert, fontWeight: 800 }}>{t('jouer.connecter')}</Link>
           </p>
         </div>
       </div>

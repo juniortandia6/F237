@@ -5,6 +5,7 @@
 
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../contexts/AuthContext";
 import { Loader2, AlertCircle, Eye, EyeOff, Mail, Lock, Trophy, Target, Coins, ArrowRight } from "lucide-react";
 import theme from "../theme";
@@ -65,13 +66,15 @@ function Champ({ label, icone: Icone, type, value, onChange, placeholder, autoCo
   );
 }
 
+// Textes : auth.login.avantages.<cle>.titre / .texte
 const AVANTAGES = [
-  { icone: Coins, titre: "1 000 points offerts", texte: "Ton capital de départ pour parier dès l'inscription." },
-  { icone: Target, titre: "Pronostics sur chaque match", texte: "Elite One et Elite Two, avant le coup d'envoi." },
-  { icone: Trophy, titre: "Grimpe au classement", texte: "Affronte les autres fans de football camerounais." },
+  { icone: Coins, cle: "points" },
+  { icone: Target, cle: "pronostics" },
+  { icone: Trophy, cle: "classement" },
 ];
 
 function LoginPage() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [motDePasse, setMotDePasse] = useState("");
   const [voirMdp, setVoirMdp] = useState(false);
@@ -105,18 +108,18 @@ function LoginPage() {
         {/* ── Gauche : message + avantages ─────────────────────────────── */}
         <div>
           <p style={{ color: theme.yellow, fontSize: "13px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", marginBottom: "10px" }}>
-            Espace membre
+            {t('auth.login.surtitre')}
           </p>
           <h1 style={{ color: "#fff", fontSize: "60px", fontWeight: 400, lineHeight: 1.05, marginBottom: "14px", fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
-            Content de te revoir
+            {t('auth.login.titre')}
           </h1>
           <p style={{ color: "rgba(255,255,255,0.72)", fontSize: "17px", lineHeight: 1.55, maxWidth: "460px", marginBottom: "32px" }}>
-            Connecte-toi pour parier sur les matchs, suivre tes pronostics et défier les autres fans.
+            {t('auth.login.intro')}
           </p>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            {AVANTAGES.map(({ icone: Icone, titre, texte }) => (
-              <div key={titre} style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+            {AVANTAGES.map(({ icone: Icone, cle }) => (
+              <div key={cle} style={{ display: "flex", alignItems: "center", gap: "14px" }}>
                 <span style={{
                   width: "44px", height: "44px", borderRadius: "12px", flexShrink: 0,
                   backgroundColor: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)",
@@ -125,8 +128,8 @@ function LoginPage() {
                   <Icone size={20} color={theme.greenBright} />
                 </span>
                 <div>
-                  <div style={{ color: "#fff", fontWeight: 800, fontSize: "15px" }}>{titre}</div>
-                  <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px" }}>{texte}</div>
+                  <div style={{ color: "#fff", fontWeight: 800, fontSize: "15px" }}>{t(`auth.login.avantages.${cle}.titre`)}</div>
+                  <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px" }}>{t(`auth.login.avantages.${cle}.texte`)}</div>
                 </div>
               </div>
             ))}
@@ -135,8 +138,8 @@ function LoginPage() {
 
         {/* ── Droite : carte du formulaire ─────────────────────────────── */}
         <div style={{ backgroundColor: "#fff", borderRadius: "20px", padding: "34px 32px 28px", boxShadow: "0 24px 60px rgba(0,0,0,0.35)" }}>
-          <h2 style={{ fontSize: "26px", fontWeight: 800, color: CLAIR.texte, marginBottom: "4px" }}>Connexion</h2>
-          <p style={{ fontSize: "14px", color: CLAIR.doux, marginBottom: "24px" }}>Entre ton email et ton mot de passe.</p>
+          <h2 style={{ fontSize: "26px", fontWeight: 800, color: CLAIR.texte, marginBottom: "4px" }}>{t('auth.login.connexion')}</h2>
+          <p style={{ fontSize: "14px", color: CLAIR.doux, marginBottom: "24px" }}>{t('auth.login.consigne')}</p>
 
           {erreur && (
             <div role="alert" style={{
@@ -149,17 +152,17 @@ function LoginPage() {
 
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <Champ
-              label="Email" icone={Mail} type="email" value={email}
+              label={t('auth.email')} icone={Mail} type="email" value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="junior@example.com" autoComplete="email"
             />
             <Champ
-              label="Mot de passe" icone={Lock} type={voirMdp ? "text" : "password"} value={motDePasse}
+              label={t('auth.motDePasse')} icone={Lock} type={voirMdp ? "text" : "password"} value={motDePasse}
               onChange={(e) => setMotDePasse(e.target.value)}
               placeholder="••••••••" autoComplete="current-password"
               droite={
                 <button type="button" onClick={() => setVoirMdp(v => !v)}
-                  aria-label={voirMdp ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                  aria-label={voirMdp ? t('auth.masquerMdp') : t('auth.afficherMdp')}
                   style={{ border: "none", background: "none", cursor: "pointer", padding: "4px", display: "flex", color: CLAIR.doux }}>
                   {voirMdp ? <EyeOff size={17} /> : <Eye size={17} />}
                 </button>
@@ -179,15 +182,15 @@ function LoginPage() {
               }}
             >
               {loading
-                ? <><Loader2 size={18} className="animate-spin" /> Connexion...</>
-                : <>Se connecter <ArrowRight size={18} /></>}
+                ? <><Loader2 size={18} className="animate-spin" /> {t('auth.login.enCours')}</>
+                : <>{t('jouer.connecter')} <ArrowRight size={18} /></>}
             </button>
           </form>
 
           {/* Séparateur + lien d'inscription */}
           <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "24px 0 18px" }}>
             <span style={{ flex: 1, height: "1px", backgroundColor: CLAIR.bord }} />
-            <span style={{ fontSize: "12px", color: CLAIR.doux, fontWeight: 600 }}>Nouveau sur F237 ?</span>
+            <span style={{ fontSize: "12px", color: CLAIR.doux, fontWeight: 600 }}>{t('auth.login.nouveau')}</span>
             <span style={{ flex: 1, height: "1px", backgroundColor: CLAIR.bord }} />
           </div>
 
@@ -200,7 +203,7 @@ function LoginPage() {
             onMouseEnter={e => { e.currentTarget.style.backgroundColor = "#e8f3ec"; }}
             onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}
           >
-            Créer un compte · 1 000 points offerts
+            {t('auth.login.creerCompte')}
           </Link>
         </div>
       </div>

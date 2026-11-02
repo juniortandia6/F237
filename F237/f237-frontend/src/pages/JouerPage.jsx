@@ -5,6 +5,8 @@
 
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { locale } from '../i18n';
 import { Trophy, TrendingUp, Users, Plus, Loader2, Gift, Target, Coins, Smartphone, ArrowRight, CalendarDays } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { matchService } from '../services/matchService';
@@ -45,8 +47,8 @@ function EclatsBande() {
 
 function formatDate(dateStr) {
   const d = new Date(dateStr);
-  return d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })
-    + ' · ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleDateString(locale(), { weekday: 'short', day: 'numeric', month: 'short' })
+    + ' · ' + d.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
 }
 
 function Logo({ equipe, taille = 48 }) {
@@ -59,20 +61,22 @@ function Logo({ equipe, taille = 48 }) {
 }
 
 // Cotes de démonstration (à remplacer par les vraies cotes du backend)
+// detail = clé de traduction jouer.cotes.<type>
 const COTES = [
-  { label: '1', detail: 'Domicile', cote: 2.10, type: 'dom' },
-  { label: 'X', detail: 'Nul', cote: 3.20, type: 'nul' },
-  { label: '2', detail: 'Extérieur', cote: 2.80, type: 'ext' },
+  { label: '1', cote: 2.10, type: 'dom' },
+  { label: 'X', cote: 3.20, type: 'nul' },
+  { label: '2', cote: 2.80, type: 'ext' },
 ];
 
 // ── Carte d'un pari ─────────────────────────────────────────────────────
 function CartePari({ p, selection, onSelection, mise, onMise, solde }) {
+  const { t } = useTranslation();
   const miseMax = Math.max(MISE_MIN, Math.min(solde, MISE_MAX));
   const miseActuelle = Math.min(mise ?? MISE_DEFAUT, miseMax);
   const coteChoisie = COTES.find(c => c.type === selection);
   const gain = coteChoisie ? Math.floor(miseActuelle * coteChoisie.cote) : null;
   const pasAssez = solde < MISE_MIN;
-  const nomChoix = selection === 'dom' ? p.equipeDomicile?.nom : selection === 'ext' ? p.equipeExterieur?.nom : 'Match nul';
+  const nomChoix = selection === 'dom' ? p.equipeDomicile?.nom : selection === 'ext' ? p.equipeExterieur?.nom : t('jouer.matchNul');
 
   return (
     <div style={{ backgroundColor: CLAIR.carte, border: `1px solid ${CLAIR.bord}`, borderRadius: '16px', overflow: 'hidden' }}>
@@ -112,7 +116,7 @@ function CartePari({ p, selection, onSelection, mise, onMise, solde }) {
                   color: actif ? '#fff' : CLAIR.texte,
                 }}>
                 <div style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.5px', opacity: actif ? 0.85 : 0.6 }}>
-                  {c.label} · {c.detail.toUpperCase()}
+                  {c.label} · {t(`jouer.cotes.${c.type}`).toUpperCase()}
                 </div>
                 <div style={{ fontFamily: CHIFFRES, fontSize: '26px', fontWeight: 800, lineHeight: 1.1 }}>{c.cote.toFixed(2)}</div>
               </button>
@@ -122,19 +126,19 @@ function CartePari({ p, selection, onSelection, mise, onMise, solde }) {
 
         {/* Mise */}
         {pasAssez ? (
-          <p style={{ fontSize: '13px', color: theme.red, fontWeight: 600 }}>Solde insuffisant pour parier ({MISE_MIN} pts minimum).</p>
+          <p style={{ fontSize: '13px', color: theme.red, fontWeight: 600 }}>{t('jouer.soldeInsuffisant', { n: MISE_MIN })}</p>
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <span style={{ fontSize: '12px', fontWeight: 800, color: CLAIR.doux, letterSpacing: '0.5px' }}>MISE</span>
+            <span style={{ fontSize: '12px', fontWeight: 800, color: CLAIR.doux, letterSpacing: '0.5px' }}>{t('jouer.miseMaj')}</span>
             <input
               type="range" min={MISE_MIN} max={miseMax} step={10}
               value={miseActuelle}
               onChange={e => onMise(Number(e.target.value))}
               style={{ flex: 1, accentColor: theme.green }}
-              aria-label="Montant de la mise"
+              aria-label={t('jouer.montantMise')}
             />
             <span style={{ minWidth: '74px', textAlign: 'right', fontFamily: CHIFFRES, fontSize: '22px', fontWeight: 800, color: CLAIR.texte }}>
-              {miseActuelle} <span style={{ fontSize: '14px', color: CLAIR.doux }}>pts</span>
+              {miseActuelle} <span style={{ fontSize: '14px', color: CLAIR.doux }}>{t('commun.pts')}</span>
             </span>
           </div>
         )}
@@ -149,9 +153,9 @@ function CartePari({ p, selection, onSelection, mise, onMise, solde }) {
               display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
               boxShadow: '0 8px 20px rgba(31,157,85,0.3)',
             }}>
-            <span>Parier {miseActuelle} pts sur {nomChoix}</span>
+            <span>{t('jouer.parier', { n: miseActuelle, choix: nomChoix })}</span>
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', opacity: 0.9 }}>
-              Gain potentiel {gain} pts <ArrowRight size={16} />
+              {t('jouer.gainPotentiel', { n: gain })} <ArrowRight size={16} />
             </span>
           </button>
         )}
@@ -161,14 +165,16 @@ function CartePari({ p, selection, onSelection, mise, onMise, solde }) {
 }
 
 // ── Page non connecté ───────────────────────────────────────────────────
+// Textes : jouer.avantages.<cle>.titre / .texte
 const AVANTAGES = [
-  { icone: Gift, titre: '1 000 points offerts', texte: "Ton capital de départ dès l'inscription." },
-  { icone: Target, titre: 'Parie sur chaque match', texte: 'Tous les matchs d\'Elite One et d\'Elite Two.' },
-  { icone: Trophy, titre: 'Grimpe au classement', texte: 'Défie tes amis et les autres fans.' },
-  { icone: Smartphone, titre: 'Convertis en FCFA', texte: 'Retire tes gains via Mobile Money.' },
+  { icone: Gift, cle: 'points' },
+  { icone: Target, cle: 'parie' },
+  { icone: Trophy, cle: 'grimpe' },
+  { icone: Smartphone, cle: 'fcfa' },
 ];
 
 function Presentation() {
+  const { t } = useTranslation();
   return (
     <section style={{ position: 'relative', overflow: 'hidden', background: FOND_BANDE, minHeight: 'calc(100vh - 100px)', display: 'flex', alignItems: 'center', padding: '56px 0' }}>
       <EclatsBande />
@@ -178,10 +184,10 @@ function Presentation() {
             Fantasy F237
           </p>
           <h1 style={{ color: '#fff', fontSize: '60px', fontWeight: 400, lineHeight: 1.05, marginBottom: '16px', fontFamily: MARQUEUR }}>
-            Pronostique, gagne, grimpe
+            {t('jouer.slogan')}
           </h1>
           <p style={{ color: 'rgba(255,255,255,0.72)', fontSize: '17px', lineHeight: 1.55, maxWidth: '480px', marginBottom: '30px' }}>
-            Parie tes points sur les matchs de la MTN Elite One et de la MTN Elite Two, affronte tes amis et convertis tes gains en FCFA.
+            {t('jouer.intro')}
           </p>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <Link to="/register" className="transition-all hover:brightness-110"
@@ -190,7 +196,7 @@ function Presentation() {
                 backgroundColor: theme.green, color: '#fff', fontWeight: 800, fontSize: '16px', textDecoration: 'none',
                 boxShadow: '0 8px 20px rgba(31,157,85,0.35)',
               }}>
-              S'inscrire gratuitement <ArrowRight size={18} />
+              {t('jouer.inscrire')} <ArrowRight size={18} />
             </Link>
             <Link to="/login" className="transition-colors"
               style={{
@@ -199,22 +205,22 @@ function Presentation() {
               }}
               onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'; }}
               onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}>
-              Se connecter
+              {t('jouer.connecter')}
             </Link>
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {AVANTAGES.map(({ icone: Icone, titre, texte }) => (
-            <div key={titre} style={{
+          {AVANTAGES.map(({ icone: Icone, cle }) => (
+            <div key={cle} style={{
               padding: '22px', borderRadius: '16px',
               backgroundColor: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.13)', backdropFilter: 'blur(4px)',
             }}>
               <span style={{ width: '44px', height: '44px', borderRadius: '12px', backgroundColor: 'rgba(60,207,122,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px' }}>
                 <Icone size={22} color={theme.greenBright} />
               </span>
-              <div style={{ color: '#fff', fontWeight: 800, fontSize: '16px', marginBottom: '4px' }}>{titre}</div>
-              <div style={{ color: 'rgba(255,255,255,0.62)', fontSize: '14px', lineHeight: 1.45 }}>{texte}</div>
+              <div style={{ color: '#fff', fontWeight: 800, fontSize: '16px', marginBottom: '4px' }}>{t(`jouer.avantages.${cle}.titre`)}</div>
+              <div style={{ color: 'rgba(255,255,255,0.62)', fontSize: '14px', lineHeight: 1.45 }}>{t(`jouer.avantages.${cle}.texte`)}</div>
             </div>
           ))}
         </div>
@@ -225,6 +231,7 @@ function Presentation() {
 
 // ── Page ────────────────────────────────────────────────────────────────
 const JouerPage = () => {
+  const { t } = useTranslation();
   const [mises, setMises] = useState({});
   const [selectionnes, setSelectionnes] = useState({});
   const [matchsAvenir, setMatchsAvenir] = useState([]);
@@ -264,16 +271,16 @@ const JouerPage = () => {
     { nom: 'Eric N.', pts: 1840, initiales: 'EN', couleur: '#1a7a3c' },
     { nom: 'Aicha M.', pts: 1620, initiales: 'AM', couleur: '#CE1126' },
     { nom: 'Junior K.', pts: 1320, initiales: 'JK', couleur: '#b8960c' },
-    { nom: user.prenom ?? 'Moi', pts: solde, initiales: user.prenom?.[0] ?? 'M', couleur: '#141414', isMoi: true },
+    { nom: user.prenom ?? t('jouer.moi'), pts: solde, initiales: user.prenom?.[0] ?? 'M', couleur: '#141414', isMoi: true },
     { nom: 'Patrice D.', pts: 980, initiales: 'PD', couleur: '#1a3a7a' },
   ].sort((a, b) => b.pts - a.pts);
   const monRang = amis.findIndex(a => a.isMoi) + 1;
   const fcfa = Math.floor(solde / 1000) * 500;
 
   const stats = [
-    { icone: Coins, label: 'Mes points', valeur: solde.toLocaleString('fr-FR'), couleur: theme.yellow, texteIcone: '#3a2c00' },
-    { icone: Users, label: 'Rang entre amis', valeur: `#${monRang}`, couleur: theme.greenBright, texteIcone: '#0f3d26' },
-    { icone: TrendingUp, label: 'Taux de réussite', valeur: '—', couleur: '#ff6b6f', texteIcone: '#4a0b0d' },
+    { icone: Coins, label: t('jouer.mesPoints'), valeur: solde.toLocaleString(locale()), couleur: theme.yellow, texteIcone: '#3a2c00' },
+    { icone: Users, label: t('jouer.rangAmis'), valeur: `#${monRang}`, couleur: theme.greenBright, texteIcone: '#0f3d26' },
+    { icone: TrendingUp, label: t('jouer.tauxReussite'), valeur: '—', couleur: '#ff6b6f', texteIcone: '#4a0b0d' },
   ];
 
   return (
@@ -286,10 +293,10 @@ const JouerPage = () => {
             Fantasy F237
           </p>
           <h1 style={{ color: '#fff', fontSize: '56px', fontWeight: 400, lineHeight: 1.05, marginBottom: '8px', fontFamily: MARQUEUR }}>
-            Salut {user.prenom} !
+            {t('jouer.salut', { prenom: user.prenom })}
           </h1>
           <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '16px', marginBottom: '30px' }}>
-            Parie sur les matchs, grimpe au classement de tes amis et convertis tes points.
+            {t('jouer.sousTitre')}
           </p>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -319,22 +326,22 @@ const JouerPage = () => {
             {/* Paris disponibles */}
             <div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '16px' }}>
-                <h2 style={{ fontSize: '22px', fontWeight: 800, color: CLAIR.texte }}>Paris disponibles</h2>
-                {!loading && <span style={{ fontSize: '14px', fontWeight: 600, color: CLAIR.doux }}>{matchsAvenir.length} match{matchsAvenir.length > 1 ? 's' : ''}</span>}
+                <h2 style={{ fontSize: '22px', fontWeight: 800, color: CLAIR.texte }}>{t('jouer.parisDispo')}</h2>
+                {!loading && <span style={{ fontSize: '14px', fontWeight: 600, color: CLAIR.doux }}>{t('matchs.nbMatchs', { count: matchsAvenir.length })}</span>}
               </div>
 
               {loading ? (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '56px 0', color: CLAIR.doux }}>
-                  <Loader2 size={20} className="animate-spin" /> Chargement des matchs...
+                  <Loader2 size={20} className="animate-spin" /> {t('jouer.chargement')}
                 </div>
               ) : matchsAvenir.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '48px 24px', backgroundColor: CLAIR.carte, border: `1px dashed ${CLAIR.bord}`, borderRadius: '16px' }}>
                   <span style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#e8f3ec', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
                     <CalendarDays size={26} color={CLAIR.vert} />
                   </span>
-                  <p style={{ fontSize: '18px', fontWeight: 800, color: CLAIR.texte, marginBottom: '6px' }}>Aucun match à venir pour le moment</p>
-                  <p style={{ fontSize: '14px', color: CLAIR.doux, marginBottom: '16px' }}>Les paris ouvriront dès que les prochains matchs seront programmés.</p>
-                  <Link to="/matchs" style={{ color: CLAIR.vert, fontWeight: 800, fontSize: '14px' }}>Voir le calendrier →</Link>
+                  <p style={{ fontSize: '18px', fontWeight: 800, color: CLAIR.texte, marginBottom: '6px' }}>{t('jouer.aucunAVenir')}</p>
+                  <p style={{ fontSize: '14px', color: CLAIR.doux, marginBottom: '16px' }}>{t('jouer.parisOuvriront')}</p>
+                  <Link to="/matchs" style={{ color: CLAIR.vert, fontWeight: 800, fontSize: '14px' }}>{t('jouer.voirCalendrier')} →</Link>
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -355,7 +362,7 @@ const JouerPage = () => {
               {/* Classement entre amis */}
               <div style={{ backgroundColor: CLAIR.carte, border: `1px solid ${CLAIR.bord}`, borderRadius: '16px', overflow: 'hidden' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '14px 20px', borderBottom: `1px solid ${CLAIR.bord}`, fontSize: '16px', fontWeight: 800, color: CLAIR.texte }}>
-                  <Users size={17} color={CLAIR.vert} /> Mes amis
+                  <Users size={17} color={CLAIR.vert} /> {t('jouer.mesAmis')}
                 </div>
                 {amis.map((a, i) => (
                   <div key={a.nom + i} style={{
@@ -368,15 +375,15 @@ const JouerPage = () => {
                       {a.initiales}
                     </span>
                     <span style={{ flex: 1, minWidth: 0, fontSize: '15px', fontWeight: a.isMoi ? 800 : 600, color: a.isMoi ? CLAIR.vert : CLAIR.texte }}>
-                      {a.nom}{a.isMoi && <span style={{ fontSize: '11px', fontWeight: 700, color: CLAIR.doux }}> (toi)</span>}
+                      {a.nom}{a.isMoi && <span style={{ fontSize: '11px', fontWeight: 700, color: CLAIR.doux }}> ({t('jouer.toi')})</span>}
                     </span>
-                    <span style={{ fontFamily: CHIFFRES, fontSize: '19px', fontWeight: 800, color: a.isMoi ? CLAIR.vert : CLAIR.texte }}>{a.pts.toLocaleString('fr-FR')}</span>
+                    <span style={{ fontFamily: CHIFFRES, fontSize: '19px', fontWeight: 800, color: a.isMoi ? CLAIR.vert : CLAIR.texte }}>{a.pts.toLocaleString(locale())}</span>
                   </div>
                 ))}
                 <div style={{ padding: '14px 20px', borderTop: `1px solid ${CLAIR.bord}` }}>
                   <button className="transition-all hover:brightness-110"
                     style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', borderRadius: '999px', border: 'none', cursor: 'pointer', backgroundColor: theme.green, color: '#fff', fontWeight: 800, fontSize: '15px' }}>
-                    <Plus size={16} /> Inviter un ami
+                    <Plus size={16} /> {t('jouer.inviter')}
                   </button>
                 </div>
               </div>
@@ -385,12 +392,12 @@ const JouerPage = () => {
               <div style={{ borderRadius: '16px', overflow: 'hidden', background: 'linear-gradient(135deg, #fff8d6, #fdf0b0)', border: '1px solid #f1e2a6' }}>
                 <div style={{ padding: '18px 20px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 800, color: '#6b5510', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: '4px' }}>
-                    <Smartphone size={16} /> Convertir mes points
+                    <Smartphone size={16} /> {t('jouer.convertir')}
                   </div>
-                  <p style={{ fontSize: '13px', color: '#8a7330', marginBottom: '12px' }}>1 000 points = 500 FCFA · via Mobile Money</p>
+                  <p style={{ fontSize: '13px', color: '#8a7330', marginBottom: '12px' }}>{t('jouer.taux')}</p>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '16px' }}>
-                    <span style={{ fontFamily: CHIFFRES, fontSize: '44px', fontWeight: 800, color: '#2b2205', lineHeight: 1 }}>{fcfa.toLocaleString('fr-FR')}</span>
-                    <span style={{ fontSize: '14px', fontWeight: 700, color: '#6b5510' }}>FCFA disponibles</span>
+                    <span style={{ fontFamily: CHIFFRES, fontSize: '44px', fontWeight: 800, color: '#2b2205', lineHeight: 1 }}>{fcfa.toLocaleString(locale())}</span>
+                    <span style={{ fontSize: '14px', fontWeight: 700, color: '#6b5510' }}>{t('jouer.fcfaDispo')}</span>
                   </div>
                   <button disabled={fcfa === 0} className="transition-all hover:brightness-125"
                     style={{
@@ -398,7 +405,7 @@ const JouerPage = () => {
                       cursor: fcfa === 0 ? 'not-allowed' : 'pointer', opacity: fcfa === 0 ? 0.5 : 1,
                       backgroundColor: '#141414', color: '#fff', fontWeight: 800, fontSize: '15px',
                     }}>
-                    Demander un retrait
+                    {t('jouer.retrait')}
                   </button>
                 </div>
               </div>

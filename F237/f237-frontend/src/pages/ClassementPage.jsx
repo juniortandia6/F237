@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Goal, CalendarClock } from 'lucide-react';
 import { classementService } from '../services/classementService';
 import { matchService } from '../services/matchService';
@@ -26,10 +27,10 @@ const CLAIR = {
 const CHIFFRES = '"Barlow Condensed", Arial, sans-serif';
 const CONTENEUR = { position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '0 60px', boxSizing: 'content-box' };
 
-// Zones de fin de saison (nombre d'équipes en haut / en bas) — à ajuster selon le règlement
+// Zones de fin de saison (labelHaut / labelBas = clés de traduction classement.zones.*) (nombre d'équipes en haut / en bas) — à ajuster selon le règlement
 const ZONES = {
-  one: { haut: 3, labelHaut: 'Compétitions africaines', bas: 2, labelBas: 'Relégation' },
-  two: { haut: 2, labelHaut: 'Promotion en Elite One', bas: 2, labelBas: 'Relégation' },
+  one: { haut: 3, labelHaut: 'africaines', bas: 2, labelBas: 'relegation' },
+  two: { haut: 2, labelHaut: 'promotion', bas: 2, labelBas: 'relegation' },
 };
 
 const FOND_BANDE = `linear-gradient(120deg, ${theme.greenDeep} 0%, #12462c 45%, #0f3a25 100%)`;
@@ -130,6 +131,7 @@ function calculerButeurs(matchs) {
 
 // ── Carte "Meilleurs buteurs" (dans la zone haute) ──────────────────────
 function CarteButeurs({ buteurs, logos, chargement, competition }) {
+  const { t } = useTranslation();
   const [tout, setTout] = useState(false);
   const liste = buteurs.slice(0, tout ? 10 : 5);
   const leader = liste[0];
@@ -138,15 +140,15 @@ function CarteButeurs({ buteurs, logos, chargement, competition }) {
     <div style={{ backgroundColor: '#fff', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 16px 40px rgba(0,0,0,0.28)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderBottom: `1px solid ${CLAIR.bord}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '16px', color: CLAIR.texte }}>
-          <Goal size={18} color={CLAIR.vert} /> Meilleurs buteurs
+          <Goal size={18} color={CLAIR.vert} /> {t('accueil.buteurs.titre')}
         </div>
         <span style={{ fontSize: '11px', fontWeight: 800, color: CLAIR.doux, letterSpacing: '0.5px', textTransform: 'uppercase' }}>{competition}</span>
       </div>
 
       {chargement ? (
-        <p style={{ padding: '36px 18px', textAlign: 'center', color: CLAIR.doux, fontSize: '14px' }}>Chargement...</p>
+        <p style={{ padding: '36px 18px', textAlign: 'center', color: CLAIR.doux, fontSize: '14px' }}>{t('commun.chargement')}</p>
       ) : !leader ? (
-        <p style={{ padding: '36px 18px', textAlign: 'center', color: CLAIR.doux, fontSize: '14px' }}>Aucun but enregistré pour l'instant.</p>
+        <p style={{ padding: '36px 18px', textAlign: 'center', color: CLAIR.doux, fontSize: '14px' }}>{t('classement.aucunBut')}</p>
       ) : (
         <>
           {/* Le leader, mis en avant */}
@@ -161,12 +163,12 @@ function CarteButeurs({ buteurs, logos, chargement, competition }) {
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: '18px', fontWeight: 800, color: CLAIR.texte, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{leader.nom}</div>
               <div style={{ fontSize: '12px', color: CLAIR.doux }}>
-                {leader.equipe} · {leader.matchs} match{leader.matchs > 1 ? 's' : ''}{leader.penalties ? ` · ${leader.penalties} pen.` : ''}
+                {leader.equipe} · {t('matchs.nbMatchs', { count: leader.matchs })}{leader.penalties ? ` · ${leader.penalties} ${t('matchDetail.pen')}` : ''}
               </div>
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontFamily: CHIFFRES, fontSize: '40px', fontWeight: 800, color: CLAIR.vert, lineHeight: 1 }}>{leader.buts}</div>
-              <div style={{ fontSize: '10px', fontWeight: 800, color: CLAIR.doux, letterSpacing: '0.5px' }}>BUTS</div>
+              <div style={{ fontSize: '10px', fontWeight: 800, color: CLAIR.doux, letterSpacing: '0.5px' }}>{t('classement.butsMaj')}</div>
             </div>
           </div>
 
@@ -186,12 +188,12 @@ function CarteButeurs({ buteurs, logos, chargement, competition }) {
           ))}
 
           {buteurs.length > 5 && (
-            <button onClick={() => setTout(t => !t)}
+            <button onClick={() => setTout(x => !x)}
               style={{
                 width: '100%', padding: '11px', border: 'none', borderTop: `1px solid ${CLAIR.bord}`, cursor: 'pointer',
                 backgroundColor: CLAIR.tuile, color: CLAIR.vert, fontWeight: 700, fontSize: '13px',
               }}>
-              {tout ? 'Voir moins' : 'Voir le top 10'}
+              {tout ? t('classement.voirMoins') : t('classement.voirTop10')}
             </button>
           )}
         </>
@@ -202,6 +204,7 @@ function CarteButeurs({ buteurs, logos, chargement, competition }) {
 
 // ── Pastilles de forme (V / N / D), cliquables vers le match ────────────
 function Forme({ matchs, nom }) {
+  const { t } = useTranslation();
   if (matchs.length === 0) return <span style={{ color: CLAIR.doux, fontSize: '12px' }}>—</span>;
   return (
     <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end' }}>
@@ -216,7 +219,7 @@ function Forme({ matchs, nom }) {
               color: '#fff', fontSize: '11px', fontWeight: 800, textDecoration: 'none',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-            {r}
+            {t(`matchDetail.resultat.${r}`)}
           </Link>
         );
       })}
@@ -228,6 +231,7 @@ function Forme({ matchs, nom }) {
 const COLONNES = '56px minmax(200px, 1fr) repeat(4, 46px) repeat(3, 52px) 60px 140px';
 
 function TableauClassement({ lignes, zones }) {
+  const { t } = useTranslation();
   const total = lignes.length;
   const entete = { fontSize: '11px', fontWeight: 800, color: CLAIR.doux, letterSpacing: '0.5px', textAlign: 'center' };
 
@@ -236,9 +240,9 @@ function TableauClassement({ lignes, zones }) {
       <div style={{ minWidth: '900px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: COLONNES, alignItems: 'center', padding: '12px 16px', borderBottom: `1px solid ${CLAIR.bord}` }}>
           <span style={entete}>#</span>
-          <span style={{ ...entete, textAlign: 'left' }}>ÉQUIPE</span>
-          {['J', 'V', 'N', 'D', 'BP', 'BC', 'DB', 'PTS'].map(c => <span key={c} style={entete}>{c}</span>)}
-          <span style={{ ...entete, textAlign: 'right' }}>FORME</span>
+          <span style={{ ...entete, textAlign: 'left' }}>{t('matchDetail.mt.equipe')}</span>
+          {['j', 'v', 'n', 'd', 'bp', 'bc', 'db', 'pts'].map(c => <span key={c} style={entete}>{t(`classement.col.${c}`)}</span>)}
+          <span style={{ ...entete, textAlign: 'right' }}>{t('classement.formeMaj')}</span>
         </div>
 
         {lignes.map((l, i) => {
@@ -303,6 +307,7 @@ function Legende({ couleur, children }) {
 
 // ── Page ────────────────────────────────────────────────────────────────
 function ClassementPage() {
+  const { t } = useTranslation();
   const [annee, setAnnee] = useState(ANNEE_ACTUELLE);
   const [comp, setComp] = useState('one');
   const [donnees, setDonnees] = useState(null); // { cle, classement, matchs }
@@ -382,10 +387,10 @@ function ClassementPage() {
             <div>
               <SelecteurSaison annee={annee} onChange={setAnnee} />
               <h1 style={{ color: '#fff', fontSize: '56px', fontWeight: 400, lineHeight: 1.05, margin: '14px 0 10px', fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
-                Classement
+                {t('classement.titre')}
               </h1>
               <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '15px', marginBottom: '24px', maxWidth: '420px', lineHeight: 1.5 }}>
-                MTN {competition}, saison {libelleSaison(annee)}. Mis à jour automatiquement après chaque match.
+                {t('classement.sousTitre', { c: `MTN ${competition}`, s: libelleSaison(annee) })}
               </p>
 
               <div style={{ display: 'inline-flex', padding: '4px', borderRadius: '999px', backgroundColor: 'rgba(0,0,0,0.28)', border: '1px solid rgba(255,255,255,0.12)', marginBottom: '24px' }}>
@@ -407,8 +412,8 @@ function ClassementPage() {
               </div>
 
               <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-                <Legende couleur={theme.green}>{zones.labelHaut}</Legende>
-                <Legende couleur={theme.red}>{zones.labelBas}</Legende>
+                <Legende couleur={theme.green}>{t(`classement.zones.${zones.labelHaut}`)}</Legende>
+                <Legende couleur={theme.red}>{t(`classement.zones.${zones.labelBas}`)}</Legende>
               </div>
             </div>
 
@@ -431,31 +436,31 @@ function ClassementPage() {
               <span style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#e8f3ec', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CalendarClock size={26} color={CLAIR.vert} />
               </span>
-              <div style={{ fontSize: '20px', fontWeight: 800, color: CLAIR.texte }}>MTN {competition} · Saison {libelleSaison(annee)}</div>
+              <div style={{ fontSize: '20px', fontWeight: 800, color: CLAIR.texte }}>MTN {competition} · {t('saison.saison', { s: libelleSaison(annee) })}</div>
               <p style={{ fontSize: '15px', color: CLAIR.doux, maxWidth: '440px', lineHeight: 1.5 }}>
-                Le classement de cette saison n'est pas encore disponible sur F237. Il arrive bientôt !
+                {t('classement.saisonIndispo')}
               </p>
               <button onClick={() => setAnnee(ANNEE_ACTUELLE)}
                 style={{ marginTop: '6px', padding: '10px 20px', borderRadius: '999px', border: 'none', cursor: 'pointer', backgroundColor: CLAIR.vert, color: '#fff', fontSize: '14px', fontWeight: 700 }}>
-                Revenir à la saison {libelleSaison(ANNEE_ACTUELLE)}
+                {t('matchs.revenirSaison', { s: libelleSaison(ANNEE_ACTUELLE) })}
               </button>
             </div>
           ) : chargement ? (
-            <div style={{ textAlign: 'center', padding: '60px 0', color: CLAIR.doux }}>Chargement du classement...</div>
+            <div style={{ textAlign: 'center', padding: '60px 0', color: CLAIR.doux }}>{t('classement.chargement')}</div>
           ) : lignes.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px 20px', color: CLAIR.doux, backgroundColor: CLAIR.carte, border: `1px dashed ${CLAIR.bord}`, borderRadius: '14px' }}>
-              Aucun classement disponible pour le moment.
+              {t('classement.aucun')}
             </div>
           ) : (
             <>
               {classementCalcule && (
                 <div style={{ marginBottom: '12px', padding: '10px 14px', borderRadius: '10px', backgroundColor: '#fdf6dc', border: '1px solid #f1e2a6', color: '#6b5510', fontSize: '13px' }}>
-                  Classement officiel indisponible pour cette saison : il est calculé à partir des résultats des matchs (3 pts la victoire, 1 pt le nul).
+                  {t('classement.calcule')}
                 </div>
               )}
               <TableauClassement lignes={lignes} zones={zones} />
               <p style={{ marginTop: '12px', fontSize: '12px', color: CLAIR.doux }}>
-                J : joués · V : victoires · N : nuls · D : défaites · BP : buts pour · BC : buts contre · DB : différence de buts · Forme : 5 derniers matchs (clique pour voir le match)
+                {t('classement.legende')}
               </p>
             </>
           )}

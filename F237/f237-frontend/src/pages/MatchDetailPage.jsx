@@ -6,6 +6,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Link, useParams, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import i18n, { locale } from '../i18n';
 import { ChevronRight, ArrowLeft, CalendarDays, Clock, MapPin, Trophy, Hash } from 'lucide-react';
 import { matchService } from '../services/matchService';
 import { useLiveScores } from '../hooks/useLiveScores';
@@ -44,9 +46,9 @@ function EclatsBande() {
 
 // ── Petits utilitaires ──────────────────────────────────────────────────
 const abrev = (nom) => (nom ?? '???').replace(/[^A-Za-zÀ-ÿ]/g, '').substring(0, 3).toUpperCase();
-const dateLongue = (d) => new Date(d).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-const heure = (d) => new Date(d).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-const nomButeur = (b) => (b.nomJoueur && b.nomJoueur !== 'Inconnu' ? b.nomJoueur : 'Buteur inconnu');
+const dateLongue = (d) => new Date(d).toLocaleDateString(locale(), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+const heure = (d) => new Date(d).toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
+const nomButeur = (b) => (b.nomJoueur && b.nomJoueur !== 'Inconnu' ? b.nomJoueur : i18n.t('matchDetail.buteurInconnu'));
 const journeeDe = (m) => m.journee ?? m.numeroJournee ?? m.round ?? null;
 const stadeDe = (m) => m.stade ?? m.nomStade ?? m.lieu ?? m.venue ?? null;
 
@@ -81,6 +83,7 @@ function Logo({ equipe, taille }) {
 
 // ── Équipe dans la zone haute : logo, nom, buteurs ──────────────────────
 function EquipeHero({ equipe, buts, alignement }) {
+  const { t } = useTranslation();
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '14px', minWidth: 0 }}>
       <Logo equipe={equipe} taille={110} />
@@ -90,8 +93,8 @@ function EquipeHero({ equipe, buts, alignement }) {
           {buts.map((b, i) => (
             <span key={i} style={{ color: 'rgba(255,255,255,0.75)', fontSize: '13px' }}>
               ⚽ {nomButeur(b)} {b.minute}'
-              {b.estPenalty && <span style={{ color: theme.greenBright, fontWeight: 700 }}> (pen.)</span>}
-              {b.estButCSC && <span style={{ color: '#ff8a8d', fontWeight: 700 }}> (CSC)</span>}
+              {b.estPenalty && <span style={{ color: theme.greenBright, fontWeight: 700 }}> ({t('matchDetail.pen')})</span>}
+              {b.estButCSC && <span style={{ color: '#ff8a8d', fontWeight: 700 }}> ({t('matchDetail.csc')})</span>}
             </span>
           ))}
         </div>
@@ -102,16 +105,17 @@ function EquipeHero({ equipe, buts, alignement }) {
 
 // ── Boîte du score au centre ────────────────────────────────────────────
 function BoiteScore({ m }) {
+  const { t } = useTranslation();
   const termine = m.statut === 2, live = m.statut === 1, reporte = m.statut === 3;
   const joue = termine || live;
   const domGagne = joue && m.scoreDomicile > m.scoreExterieur;
   const extGagne = joue && m.scoreExterieur > m.scoreDomicile;
 
   const bandeau = live
-    ? { texte: `EN DIRECT${m.minute ? ` · ${m.minute}'` : ''}`, fond: theme.red, couleur: '#fff' }
-    : termine ? { texte: 'TERMINÉ', fond: '#d9dedb', couleur: '#5b625e' }
-    : reporte ? { texte: 'REPORTÉ', fond: theme.yellow, couleur: '#1a1a1a' }
-    : { texte: 'À VENIR', fond: '#d9dedb', couleur: '#5b625e' };
+    ? { texte: `${t('commun.enDirectMaj')}${m.minute ? ` · ${m.minute}'` : ''}`, fond: theme.red, couleur: '#fff' }
+    : termine ? { texte: t('matchDetail.termineMaj'), fond: '#d9dedb', couleur: '#5b625e' }
+    : reporte ? { texte: t('matchDetail.reporteMaj'), fond: theme.yellow, couleur: '#1a1a1a' }
+    : { texte: t('matchDetail.aVenirMaj'), fond: '#d9dedb', couleur: '#5b625e' };
 
   // Petit triangle rouge sur le côté du gagnant (comme chez FIBA)
   const triangle = (cote) => ({
@@ -153,6 +157,7 @@ function Carte({ titre, children, style }) {
 
 // ── Onglet Aperçu : score par mi-temps ──────────────────────────────────
 function TableauMiTemps({ m }) {
+  const { t } = useTranslation();
   const joue = m.statut === 1 || m.statut === 2;
   if (!joue) return null;
 
@@ -173,10 +178,10 @@ function TableauMiTemps({ m }) {
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr style={{ borderBottom: `1px solid ${CLAIR.bord}` }}>
-            <th style={{ ...entete, textAlign: 'left', borderLeft: 'none', paddingLeft: '20px' }}>ÉQUIPE</th>
-            <th style={entete}>1RE MT</th>
-            <th style={entete}>2E MT</th>
-            <th style={entete}>FINAL</th>
+            <th style={{ ...entete, textAlign: 'left', borderLeft: 'none', paddingLeft: '20px' }}>{t('matchDetail.mt.equipe')}</th>
+            <th style={entete}>{t('matchDetail.mt.mt1')}</th>
+            <th style={entete}>{t('matchDetail.mt.mt2')}</th>
+            <th style={entete}>{t('matchDetail.mt.final')}</th>
           </tr>
         </thead>
         <tbody>
@@ -203,6 +208,7 @@ function TableauMiTemps({ m }) {
 
 // ── Onglet Aperçu : forme récente (5 derniers matchs de la saison) ──────
 function FormeRecente({ m, tous }) {
+  const { t } = useTranslation();
   const forme = (equipe) => tous
     .filter(x => x.statut === 2 && x.id !== m.id && new Date(x.dateMatch) < new Date(m.dateMatch)
       && (x.equipeDomicile?.nom === equipe?.nom || x.equipeExterieur?.nom === equipe?.nom))
@@ -210,7 +216,7 @@ function FormeRecente({ m, tous }) {
     .slice(0, 5);
 
   return (
-    <Carte titre="Forme récente">
+    <Carte titre={t('matchDetail.formeRecente')}>
       {[m.equipeDomicile, m.equipeExterieur].map((equipe, i) => {
         const liste = forme(equipe);
         return (
@@ -221,7 +227,7 @@ function FormeRecente({ m, tous }) {
             </div>
             <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
               {liste.length === 0
-                ? <span style={{ fontSize: '13px', color: CLAIR.doux }}>Pas encore de match</span>
+                ? <span style={{ fontSize: '13px', color: CLAIR.doux }}>{t('matchDetail.pasEncoreDeMatch')}</span>
                 : liste.map(x => {
                   const r = resultatPour(x, equipe?.nom);
                   const adv = x.equipeDomicile?.nom === equipe?.nom ? x.equipeExterieur : x.equipeDomicile;
@@ -233,7 +239,7 @@ function FormeRecente({ m, tous }) {
                         color: '#fff', fontSize: '13px', fontWeight: 800, textDecoration: 'none',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}>
-                      {r}
+                      {t(`matchDetail.resultat.${r}`)}
                     </Link>
                   );
                 })}
@@ -257,13 +263,14 @@ function Jalon({ texte }) {
 }
 
 function Evenement({ ev }) {
+  const { t } = useTranslation();
   const gauche = ev.cote === 'dom';
   const bloc = (
     <div style={{ textAlign: gauche ? 'right' : 'left' }}>
       <div style={{ fontWeight: 700, color: CLAIR.texte, fontSize: '15px' }}>
         ⚽ {nomButeur(ev)}
-        {ev.estPenalty && <span style={{ color: theme.green, fontSize: '12px', fontWeight: 700 }}> (pen.)</span>}
-        {ev.estButCSC && <span style={{ color: theme.red, fontSize: '12px', fontWeight: 700 }}> (CSC)</span>}
+        {ev.estPenalty && <span style={{ color: theme.green, fontSize: '12px', fontWeight: 700 }}> ({t('matchDetail.pen')})</span>}
+        {ev.estButCSC && <span style={{ color: theme.red, fontSize: '12px', fontWeight: 700 }}> ({t('matchDetail.csc')})</span>}
       </div>
       <div style={{ fontSize: '12px', color: CLAIR.doux }}>{ev.nomEquipe} · {ev.score}</div>
     </div>
@@ -284,6 +291,7 @@ function Evenement({ ev }) {
 
 // ── Onglet Chronologie : frise des buts ─────────────────────────────────
 function Chronologie({ m }) {
+  const { t } = useTranslation();
   const joue = m.statut === 1 || m.statut === 2;
   const evenements = [
     ...butsDe(m, 'dom').map(b => ({ ...b, cote: 'dom' })),
@@ -291,7 +299,7 @@ function Chronologie({ m }) {
   ].sort((a, b) => a.minute - b.minute);
 
   if (!joue) {
-    return <Carte><p style={{ padding: '40px 20px', textAlign: 'center', color: CLAIR.doux }}>La chronologie sera disponible au coup d'envoi.</p></Carte>;
+    return <Carte><p style={{ padding: '40px 20px', textAlign: 'center', color: CLAIR.doux }}>{t('matchDetail.chronoBientot')}</p></Carte>;
   }
 
   // Score courant après chaque but
@@ -321,14 +329,14 @@ function Chronologie({ m }) {
       <div style={{ position: 'relative', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
         {/* Ligne verticale centrale */}
         <span style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', width: '2px', marginLeft: '-1px', backgroundColor: CLAIR.bord }} />
-        <Jalon texte="COUP D'ENVOI" />
+        <Jalon texte={t('matchDetail.coupEnvoiMaj')} />
         {premiereMT.map((ev, i) => <Evenement key={`a${i}`} ev={ev} />)}
-        {(m.statut === 2 || deuxiemeMT.length > 0) && <Jalon texte="MI-TEMPS" />}
+        {(m.statut === 2 || deuxiemeMT.length > 0) && <Jalon texte={t('matchDetail.miTempsMaj')} />}
         {deuxiemeMT.map((ev, i) => <Evenement key={`b${i}`} ev={ev} />)}
-        {m.statut === 2 && <Jalon texte={`FIN DU MATCH · ${m.scoreDomicile}-${m.scoreExterieur}`} />}
+        {m.statut === 2 && <Jalon texte={`${t('matchDetail.finMaj')} · ${m.scoreDomicile}-${m.scoreExterieur}`} />}
         {evenements.length === 0 && (
           <p style={{ textAlign: 'center', color: CLAIR.doux, position: 'relative', zIndex: 1, backgroundColor: '#fff', padding: '8px' }}>
-            Aucun but enregistré pour ce match.
+            {t('matchDetail.aucunBut')}
           </p>
         )}
       </div>
@@ -338,6 +346,7 @@ function Chronologie({ m }) {
 
 // ── Onglet Face-à-face ──────────────────────────────────────────────────
 function FaceAFace({ m, tous }) {
+  const { t } = useTranslation();
   const nomA = m.equipeDomicile?.nom, nomB = m.equipeExterieur?.nom;
   const confrontations = tous
     .filter(x => {
@@ -355,12 +364,12 @@ function FaceAFace({ m, tous }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <Carte titre="Bilan des confrontations">
+      <Carte titre={t('matchDetail.bilanConfrontations')}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', textAlign: 'center' }}>
           {[
-            [`Victoires ${abrev(nomA)}`, bilan.A, CLAIR.vert],
-            ['Nuls', bilan.N, CLAIR.doux],
-            [`Victoires ${abrev(nomB)}`, bilan.B, theme.red],
+            [t('matchDetail.victoires', { e: abrev(nomA) }), bilan.A, CLAIR.vert],
+            [t('matchDetail.nuls'), bilan.N, CLAIR.doux],
+            [t('matchDetail.victoires', { e: abrev(nomB) }), bilan.B, theme.red],
           ].map(([label, val, couleur], i) => (
             <div key={label} style={{ padding: '18px 8px', borderLeft: i ? `1px solid ${CLAIR.bord}` : 'none' }}>
               <div style={{ fontFamily: CHIFFRES, fontSize: '34px', fontWeight: 800, color: couleur }}>{val}</div>
@@ -370,7 +379,7 @@ function FaceAFace({ m, tous }) {
         </div>
       </Carte>
 
-      <Carte titre="Toutes les rencontres">
+      <Carte titre={t('matchDetail.toutesRencontres')}>
         {confrontations.map((x, i) => {
           const actuel = x.id === m.id;
           const joue = x.statut === 2 || x.statut === 1;
@@ -382,7 +391,7 @@ function FaceAFace({ m, tous }) {
                 backgroundColor: actuel ? '#e8f3ec' : 'transparent', color: CLAIR.texte,
               }}>
               <span style={{ fontSize: '12px', color: CLAIR.doux, fontWeight: 600 }}>
-                {new Date(x.dateMatch).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                {new Date(x.dateMatch).toLocaleDateString(locale(), { day: '2-digit', month: 'short', year: 'numeric' })}
               </span>
               <span style={{ textAlign: 'right', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{x.equipeDomicile?.nom}</span>
               <span style={{ fontFamily: CHIFFRES, fontWeight: 800, fontSize: '18px', backgroundColor: CLAIR.tuile, borderRadius: '6px', padding: '3px 12px', minWidth: '62px', textAlign: 'center' }}>
@@ -395,7 +404,7 @@ function FaceAFace({ m, tous }) {
       </Carte>
 
       <p style={{ fontSize: '12px', color: CLAIR.doux }}>
-        Basé sur les saisons disponibles sur F237. L'historique s'enrichira avec les saisons précédentes.
+        {t('matchDetail.noteH2h')}
       </p>
     </div>
   );
@@ -403,27 +412,28 @@ function FaceAFace({ m, tous }) {
 
 // ── Colonne de droite : infos du match ──────────────────────────────────
 function InfosMatch({ m, saison }) {
+  const { t } = useTranslation();
   const journee = journeeDe(m);
   const stade = stadeDe(m);
   const lignes = [
-    [Trophy, 'Compétition', saison ? `MTN ${saison.label}` : '—'],
-    [CalendarDays, 'Saison', saison ? libelleSaison(saison.annee) : '—'],
-    journee && [Hash, 'Journée', journee],
-    [CalendarDays, 'Date', dateLongue(m.dateMatch)],
-    [Clock, "Coup d'envoi", heure(m.dateMatch)],
-    stade && [MapPin, 'Stade', stade],
+    [Trophy, t('matchDetail.infos.competition'), saison ? `MTN ${saison.label}` : '—'],
+    [CalendarDays, t('matchDetail.infos.saison'), saison ? libelleSaison(saison.annee) : '—'],
+    journee && [Hash, t('matchDetail.infos.journee'), journee],
+    [CalendarDays, t('matchDetail.infos.date'), dateLongue(m.dateMatch), true],
+    [Clock, t('matchDetail.infos.coupEnvoi'), heure(m.dateMatch)],
+    stade && [MapPin, t('matchDetail.infos.stade'), stade],
   ].filter(Boolean);
 
   return (
     <aside style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <Carte>
-        <div style={{ backgroundColor: CLAIR.vert, color: '#fff', padding: '12px 18px', fontWeight: 800, fontSize: '15px' }}>Infos du match</div>
-        {lignes.map(([Icone, label, valeur], i) => (
+        <div style={{ backgroundColor: CLAIR.vert, color: '#fff', padding: '12px 18px', fontWeight: 800, fontSize: '15px' }}>{t('matchDetail.infosDuMatch')}</div>
+        {lignes.map(([Icone, label, valeur, majuscule], i) => (
           <div key={label} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '12px 18px', borderTop: i ? `1px solid ${CLAIR.bord}` : 'none' }}>
             <Icone size={16} color={CLAIR.doux} style={{ marginTop: '2px', flexShrink: 0 }} />
             <div>
               <div style={{ fontSize: '11px', fontWeight: 800, color: CLAIR.doux, textTransform: 'uppercase', letterSpacing: '0.4px' }}>{label}</div>
-              <div style={{ fontSize: '14px', fontWeight: 600, color: CLAIR.texte, textTransform: label === 'Date' ? 'capitalize' : 'none' }}>{valeur}</div>
+              <div style={{ fontSize: '14px', fontWeight: 600, color: CLAIR.texte, textTransform: majuscule ? 'capitalize' : 'none' }}>{valeur}</div>
             </div>
           </div>
         ))}
@@ -431,34 +441,32 @@ function InfosMatch({ m, saison }) {
 
       {m.statut === 0 && (
         <Carte style={{ padding: '18px' }}>
-          <div style={{ fontWeight: 800, fontSize: '16px', color: CLAIR.texte, marginBottom: '6px' }}>Ton pronostic ?</div>
+          <div style={{ fontWeight: 800, fontSize: '16px', color: CLAIR.texte, marginBottom: '6px' }}>{t('matchDetail.tonPronostic')}</div>
           <p style={{ fontSize: '13px', color: CLAIR.doux, marginBottom: '14px', lineHeight: 1.5 }}>
-            Mise tes points sur le résultat avant le coup d'envoi.
+            {t('matchDetail.miseTesPoints')}
           </p>
           <Link to="/jouer" style={{
             display: 'block', textAlign: 'center', backgroundColor: CLAIR.vert, color: '#fff',
             padding: '11px', borderRadius: '999px', fontWeight: 700, fontSize: '14px', textDecoration: 'none',
           }}>
-            Pronostiquer
+            {t('matchs.pronostiquer')}
           </Link>
         </Carte>
       )}
 
       <Link to="/matchs" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: CLAIR.vert, fontWeight: 700, fontSize: '14px', textDecoration: 'none' }}>
-        <ArrowLeft size={16} /> Retour au calendrier
+        <ArrowLeft size={16} /> {t('matchDetail.retourCalendrier')}
       </Link>
     </aside>
   );
 }
 
 // ── Page ────────────────────────────────────────────────────────────────
-const ONGLETS = [
-  { cle: 'apercu', label: 'Aperçu' },
-  { cle: 'chrono', label: 'Chronologie' },
-  { cle: 'h2h', label: 'Face-à-face' },
-];
+// Libellés traduits : matchDetail.onglets.<cle>
+const ONGLETS = ['apercu', 'chrono', 'h2h'];
 
 function MatchDetailPage() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const location = useLocation();
   const { matchsLive } = useLiveScores();
@@ -511,11 +519,11 @@ function MatchDetailPage() {
       <div style={{ backgroundColor: CLAIR.fond, minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 20px' }}>
         {donnees ? (
           <div style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: '20px', fontWeight: 800, color: CLAIR.texte, marginBottom: '12px' }}>Match introuvable</p>
-            <Link to="/matchs" style={{ color: CLAIR.vert, fontWeight: 700 }}>← Retour au calendrier</Link>
+            <p style={{ fontSize: '20px', fontWeight: 800, color: CLAIR.texte, marginBottom: '12px' }}>{t('matchDetail.introuvable')}</p>
+            <Link to="/matchs" style={{ color: CLAIR.vert, fontWeight: 700 }}>← {t('matchDetail.retourCalendrier')}</Link>
           </div>
         ) : (
-          <p style={{ color: CLAIR.doux }}>Chargement du match...</p>
+          <p style={{ color: CLAIR.doux }}>{t('matchDetail.chargement')}</p>
         )}
       </div>
     );
@@ -533,7 +541,7 @@ function MatchDetailPage() {
         <div style={CONTENEUR}>
           {/* Fil d'Ariane */}
           <nav style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', marginBottom: '28px' }}>
-            {[['Accueil', '/'], ['Matchs', '/matchs']].map(([label, to]) => (
+            {[[t('nav.accueil'), '/'], [t('nav.matchs'), '/matchs']].map(([label, to]) => (
               <span key={to} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Link to={to} style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none' }}
                   onMouseEnter={e => { e.currentTarget.style.color = '#fff'; }}
@@ -549,7 +557,7 @@ function MatchDetailPage() {
           {/* Compétition + date / stade */}
           <div style={{ textAlign: 'center', marginBottom: '28px' }}>
             <div style={{ color: '#fff', fontSize: '14px', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase' }}>
-              {journee ? `Journée ${journee} · ` : ''}{saison ? `MTN ${saison.label}` : 'Match'}
+              {journee ? `${t('matchs.journee', { n: journee })} · ` : ''}{saison ? `MTN ${saison.label}` : t('matchDetail.match')}
             </div>
             <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', marginTop: '4px', textTransform: 'capitalize' }}>
               {dateLongue(m.dateMatch)}{stade ? ` · ${stade}` : ''}
@@ -568,17 +576,17 @@ function MatchDetailPage() {
       {/* ── ONGLETS ────────────────────────────────────────────────────── */}
       <div style={{ backgroundColor: '#fff', borderBottom: `1px solid ${CLAIR.bord}` }}>
         <div style={{ ...CONTENEUR, display: 'flex', gap: '8px' }}>
-          {ONGLETS.map(o => {
-            const actif = o.cle === onglet;
+          {ONGLETS.map(cle => {
+            const actif = cle === onglet;
             return (
-              <button key={o.cle} onClick={() => choisirOnglet(o.cle)}
+              <button key={cle} onClick={() => choisirOnglet(cle)}
                 style={{
                   padding: '16px 10px', margin: '0 6px', background: 'none', border: 'none', cursor: 'pointer',
                   fontSize: '15px', fontWeight: actif ? 700 : 500,
                   color: actif ? CLAIR.vert : '#4a514d',
                   borderBottom: `3px solid ${actif ? CLAIR.vert : 'transparent'}`,
                 }}>
-                {o.label}
+                {t(`matchDetail.onglets.${cle}`)}
               </button>
             );
           })}

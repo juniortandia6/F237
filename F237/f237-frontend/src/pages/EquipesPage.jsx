@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Search, MapPin, ArrowRight, X, CalendarClock } from 'lucide-react';
 import { equipeService } from '../services/equipeService';
 import { classementService } from '../services/classementService';
@@ -50,13 +51,12 @@ const couleurDe = (id) => COULEURS[(id ?? 0) % COULEURS.length];
 const villeDe = (e) => e.ville ?? e.city ?? null;
 const sansAccents = (s) => (s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
-const TRIS = [
-  { cle: 'classement', label: 'Classement' },
-  { cle: 'alpha', label: 'A → Z' },
-];
+// Libellés traduits : equipes.tri.<cle>
+const TRIS = ['classement', 'alpha'];
 
 // ── Carte d'un club ─────────────────────────────────────────────────────
 function CarteEquipe({ e, rang }) {
+  const { t } = useTranslation();
   const ville = villeDe(e);
   return (
     <Link
@@ -102,9 +102,9 @@ function CarteEquipe({ e, rang }) {
         padding: '11px 18px', borderTop: `1px solid ${CLAIR.bord}`, backgroundColor: '#fafbfa',
         fontSize: '13px', fontWeight: 700, color: CLAIR.doux,
       }}>
-        <span>{rang ? <><strong style={{ color: CLAIR.texte }}>{rang.points}</strong> pts</> : '—'}</span>
+        <span>{rang ? <><strong style={{ color: CLAIR.texte }}>{rang.points}</strong> {t('commun.pts')}</> : '—'}</span>
         <span className="transition-colors group-hover:text-[#14532f]" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          Voir le club <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+          {t('equipes.voirClub')} <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
         </span>
       </span>
     </Link>
@@ -113,6 +113,7 @@ function CarteEquipe({ e, rang }) {
 
 // ── Page ────────────────────────────────────────────────────────────────
 function EquipesPage() {
+  const { t } = useTranslation();
   const [equipes, setEquipes] = useState([]);
   const [clsEtat, setClsEtat] = useState(null); // { annee, data: { one: [...], two: [...] } }
   const [annee, setAnnee] = useState(ANNEE_ACTUELLE);
@@ -190,10 +191,10 @@ function EquipesPage() {
             <div>
               <SelecteurSaison annee={annee} onChange={setAnnee} />
               <h1 style={{ color: '#fff', fontSize: '56px', fontWeight: 400, lineHeight: 1.05, margin: '14px 0 10px', fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
-                Équipes
+                {t('equipes.titre')}
               </h1>
               <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '15px' }}>
-                Tous les clubs de la MTN Elite One et de la MTN Elite Two.
+                {t('equipes.sousTitre')}
               </p>
             </div>
 
@@ -234,12 +235,12 @@ function EquipesPage() {
               <input
                 value={recherche}
                 onChange={ev => setRecherche(ev.target.value)}
-                placeholder="Rechercher un club ou une ville..."
-                aria-label="Rechercher un club"
+                placeholder={t('equipes.recherche')}
+                aria-label={t('equipes.rechercheLabel')}
                 style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', padding: '14px 0', fontSize: '15px', color: CLAIR.texte, background: 'transparent' }}
               />
               {recherche && (
-                <button onClick={() => setRecherche('')} aria-label="Effacer"
+                <button onClick={() => setRecherche('')} aria-label={t('equipes.effacer')}
                   style={{ border: 'none', background: CLAIR.tuile, borderRadius: '50%', width: '26px', height: '26px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <X size={14} color={CLAIR.doux} />
                 </button>
@@ -247,17 +248,17 @@ function EquipesPage() {
             </div>
 
             <div style={{ display: 'flex', backgroundColor: '#fff', borderRadius: '12px', padding: '4px', boxShadow: '0 10px 30px rgba(0,0,0,0.22)' }}>
-              {TRIS.map(t => {
-                const actif = t.cle === tri;
+              {TRIS.map(cle => {
+                const actif = cle === tri;
                 return (
-                  <button key={t.cle} onClick={() => setTri(t.cle)}
+                  <button key={cle} onClick={() => setTri(cle)}
                     style={{
                       padding: '10px 16px', borderRadius: '9px', border: 'none', cursor: 'pointer',
                       fontSize: '14px', fontWeight: 700,
                       backgroundColor: actif ? CLAIR.vert : 'transparent',
                       color: actif ? '#fff' : CLAIR.doux,
                     }}>
-                    {t.label}
+                    {t(`equipes.tri.${cle}`)}
                   </button>
                 );
               })}
@@ -272,7 +273,7 @@ function EquipesPage() {
           <h2 style={{ fontSize: '22px', fontWeight: 800, color: CLAIR.texte, marginBottom: '18px' }}>
             MTN {competition}
             <span style={{ fontSize: '15px', fontWeight: 600, color: CLAIR.doux, marginLeft: '10px' }}>
-              {loading || !saisonDispo ? '' : `${affichees.length} club${affichees.length > 1 ? 's' : ''}`}
+              {loading || !saisonDispo ? '' : t('equipes.nbClubs', { count: affichees.length })}
             </span>
           </h2>
 
@@ -284,20 +285,20 @@ function EquipesPage() {
               <span style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#e8f3ec', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CalendarClock size={26} color={CLAIR.vert} />
               </span>
-              <div style={{ fontSize: '20px', fontWeight: 800, color: CLAIR.texte }}>MTN {competition} · Saison {libelleSaison(annee)}</div>
+              <div style={{ fontSize: '20px', fontWeight: 800, color: CLAIR.texte }}>MTN {competition} · {t('saison.saison', { s: libelleSaison(annee) })}</div>
               <p style={{ fontSize: '15px', color: CLAIR.doux, maxWidth: '440px', lineHeight: 1.5 }}>
-                Les clubs de cette saison ne sont pas encore disponibles sur F237. Ils arrivent bientôt !
+                {t('equipes.saisonIndispo')}
               </p>
               <button onClick={() => setAnnee(ANNEE_ACTUELLE)}
                 style={{ marginTop: '6px', padding: '10px 20px', borderRadius: '999px', border: 'none', cursor: 'pointer', backgroundColor: CLAIR.vert, color: '#fff', fontSize: '14px', fontWeight: 700 }}>
-                Revenir à la saison {libelleSaison(ANNEE_ACTUELLE)}
+                {t('matchs.revenirSaison', { s: libelleSaison(ANNEE_ACTUELLE) })}
               </button>
             </div>
           ) : loading ? (
-            <div style={{ textAlign: 'center', padding: '60px 0', color: CLAIR.doux }}>Chargement des équipes...</div>
+            <div style={{ textAlign: 'center', padding: '60px 0', color: CLAIR.doux }}>{t('equipes.chargement')}</div>
           ) : affichees.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '56px 20px', color: CLAIR.doux, backgroundColor: CLAIR.carte, border: `1px dashed ${CLAIR.bord}`, borderRadius: '14px' }}>
-              {recherche ? `Aucun club ne correspond à « ${recherche} ».` : 'Aucun club pour ce championnat.'}
+              {recherche ? t('equipes.aucunResultat', { q: recherche }) : t('equipes.aucun')}
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
