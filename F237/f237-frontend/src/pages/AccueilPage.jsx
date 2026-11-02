@@ -285,10 +285,10 @@ function SectionDirect({ matchsLive, matchsAVenir, matchsTermines, isConnected, 
 
   return (
     <section style={{
-      position: 'relative', overflow: 'hidden', padding: '56px 0 64px',
-      background: FOND_BANDE,
+      position: 'relative', padding: '56px 0 40px',
+      // Fond fourni par la bande commune (voir AccueilPage) : une seule bande
+      // verte continue pour Prochains matchs + Classements + Buteurs
     }}>
-      <EclatsBande />
 
       {/* En-tête aligné sur le contenu */}
       <div style={{ position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '0 60px', boxSizing: 'content-box' }}>
@@ -394,6 +394,15 @@ function bilan(e) {
   return v != null && n != null && d != null ? `${v}V · ${n}N · ${d}D` : null;
 }
 
+// Palette des sections Classements + Meilleurs buteurs (posées sur la bande verte)
+const CLAIRE = {
+  ...theme,
+  surface: 'rgba(0,0,0,0.22)',
+  surfaceHover: 'rgba(0,0,0,0.32)',
+  bg: 'rgba(0,0,0,0.12)',
+  border: 'rgba(255,255,255,0.12)',
+};
+
 function CartePodium({ e, rang }) {
   const med = MEDAILLES[rang];
   const premier = rang === 1;
@@ -402,8 +411,8 @@ function CartePodium({ e, rang }) {
       className="group transition-transform duration-300 hover:-translate-y-1"
       style={{
         flex: 1, alignSelf: 'flex-end',
-        backgroundColor: premier ? theme.surfaceHover : theme.surface,
-        border: `1px solid ${premier ? 'rgba(245,197,66,0.35)' : theme.border}`,
+        backgroundColor: premier ? CLAIRE.surfaceHover : CLAIRE.surface,
+        border: `1px solid ${premier ? 'rgba(245,197,66,0.35)' : CLAIRE.border}`,
         borderRadius: '14px',
         padding: premier ? '26px 16px 22px' : '20px 16px 18px',
         minHeight: premier ? '196px' : '168px',
@@ -422,13 +431,13 @@ function CartePodium({ e, rang }) {
         ? <img src={logoEquipe(e)} alt=""
             className="transition-transform duration-300 group-hover:scale-110"
             style={{ width: premier ? '72px' : '56px', height: premier ? '72px' : '56px', objectFit: 'contain' }} />
-        : <span style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: theme.border }} />}
+        : <span style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: CLAIRE.border }} />}
 
-      <span style={{ fontSize: premier ? '19px' : '17px', fontWeight: 800, color: theme.text, lineHeight: 1.2 }}>
+      <span style={{ fontSize: premier ? '19px' : '17px', fontWeight: 800, color: CLAIRE.text, lineHeight: 1.2 }}>
         {nomEquipe(e)}
       </span>
-      <span style={{ fontSize: '13px', color: theme.textMuted }}>
-        <strong style={{ color: theme.text }}>{e.points ?? 0} pts</strong>
+      <span style={{ fontSize: '13px', color: CLAIRE.textMuted }}>
+        <strong style={{ color: CLAIRE.text }}>{e.points ?? 0} pts</strong>
         {bilan(e) && <> · {bilan(e)}</>}
       </span>
     </div>
@@ -525,7 +534,7 @@ function CarteButeur({ j, rang }) {
     >
       {/* En-tête : rang */}
       <div style={{ backgroundColor: L.entete, padding: '14px 16px', textAlign: 'center' }}>
-        <div style={{ color: premier ? theme.yellow : '#fff', fontWeight: 800, fontSize: '15px' }}>
+        <div style={{ color: premier ? CLAIRE.yellow : '#fff', fontWeight: 800, fontSize: '15px' }}>
           {RANGS[rang - 1] ?? `${rang}e`}
         </div>
         <div style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 700, fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase', marginTop: '2px' }}>
@@ -595,21 +604,21 @@ function BlocButeurs({ matchs, live }) {
     <div style={{ marginTop: '48px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <h3 style={{ color: theme.text, fontSize: '28px', fontWeight: 400, fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
+          <h3 style={{ color: CLAIRE.text, fontSize: '28px', fontWeight: 400, fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
             Meilleurs buteurs
           </h3>
           {live && (
             <span style={{
               display: 'flex', alignItems: 'center', gap: '6px', padding: '3px 10px', borderRadius: '20px',
-              backgroundColor: 'rgba(225,37,43,0.15)', color: theme.red, fontSize: '11px', fontWeight: 800, letterSpacing: '0.6px',
+              backgroundColor: 'rgba(225,37,43,0.15)', color: CLAIRE.red, fontSize: '11px', fontWeight: 800, letterSpacing: '0.6px',
             }}>
-              <span className="animate-pulse" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: theme.red }} />
+              <span className="animate-pulse" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: CLAIRE.red }} />
               EN DIRECT
             </span>
           )}
         </div>
         <Link to="/classement" className="flex items-center gap-1 transition-opacity hover:opacity-80"
-          style={{ fontSize: '15px', fontWeight: 600, color: theme.text, textDecoration: 'none' }}>
+          style={{ fontSize: '15px', fontWeight: 600, color: CLAIRE.text, textDecoration: 'none' }}>
           Afficher tout <ChevronRight size={18} />
         </Link>
       </div>
@@ -618,7 +627,7 @@ function BlocButeurs({ matchs, live }) {
         <div ref={rangeeRef} onScroll={maj}
           style={{ display: 'flex', gap: '16px', overflowX: 'auto', scrollbarWidth: 'none', scrollSnapType: 'x mandatory', paddingBottom: '4px' }}>
           {buteurs.length === 0 ? (
-            <div style={{ padding: '28px', color: theme.textMuted, fontSize: '14px' }}>Aucun buteur enregistré pour cette compétition.</div>
+            <div style={{ padding: '28px', color: CLAIRE.textMuted, fontSize: '14px' }}>Aucun buteur enregistré pour cette compétition.</div>
           ) : buteurs.map((j, i) => (
             <CarteButeur key={`${j.nom}|${j.equipe}`} j={j} rang={i + 1} />
           ))}
@@ -676,17 +685,17 @@ function SectionClassement({ signatureLive = '', live = false }) {
     <section style={{ marginBottom: '56px' }}>
       {/* En-tête */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
-        <h2 style={{ color: theme.text, fontSize: '28px', fontWeight: 400, fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
+        <h2 style={{ color: CLAIRE.text, fontSize: '28px', fontWeight: 400, fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
           Classements
         </h2>
         <Link to="/classement" className="flex items-center gap-1 transition-opacity hover:opacity-80"
-          style={{ fontSize: '15px', fontWeight: 600, color: theme.text, textDecoration: 'none' }}>
+          style={{ fontSize: '15px', fontWeight: 600, color: CLAIRE.text, textDecoration: 'none' }}>
           Tous les détails <ChevronRight size={18} />
         </Link>
       </div>
 
       {/* Onglets */}
-      <div style={{ display: 'flex', gap: '28px', borderBottom: `1px solid ${theme.border}`, marginBottom: '26px' }}>
+      <div style={{ display: 'flex', gap: '28px', borderBottom: `1px solid ${CLAIRE.border}`, marginBottom: '26px' }}>
         {LIGUES.map(l => {
           const actif = l.cle === ligue;
           return (
@@ -695,8 +704,8 @@ function SectionClassement({ signatureLive = '', live = false }) {
                 padding: '0 4px 12px', marginBottom: '-1px',
                 background: 'none', border: 'none', cursor: 'pointer',
                 fontSize: '15px', fontWeight: actif ? 700 : 500,
-                color: actif ? theme.text : theme.textMuted,
-                borderBottom: `3px solid ${actif ? theme.greenBright : 'transparent'}`,
+                color: actif ? CLAIRE.text : CLAIRE.textMuted,
+                borderBottom: `3px solid ${actif ? CLAIRE.greenBright : 'transparent'}`,
                 transition: 'color 0.2s ease, border-color 0.2s ease',
               }}>
               {l.label}
@@ -706,9 +715,9 @@ function SectionClassement({ signatureLive = '', live = false }) {
       </div>
 
       {chargement ? (
-        <div className="text-center py-10" style={{ fontSize: '14px', color: theme.textFaint }}>Chargement...</div>
+        <div className="text-center py-10" style={{ fontSize: '14px', color: CLAIRE.textFaint }}>Chargement...</div>
       ) : top5.length === 0 ? (
-        <div className="text-center py-10" style={{ fontSize: '14px', color: theme.textMuted }}>
+        <div className="text-center py-10" style={{ fontSize: '14px', color: CLAIRE.textMuted }}>
           Classement indisponible pour le moment.
         </div>
       ) : (
@@ -722,12 +731,12 @@ function SectionClassement({ signatureLive = '', live = false }) {
 
           {/* 4e et 5e */}
           {suite.length > 0 && (
-            <div style={{ borderRadius: '12px', overflow: 'hidden', border: `1px solid ${theme.border}` }}>
+            <div style={{ borderRadius: '12px', overflow: 'hidden', border: `1px solid ${CLAIRE.border}` }}>
               <div style={{
                 display: 'grid', gridTemplateColumns: '48px 1fr 70px 80px', alignItems: 'center',
                 padding: '9px 16px', fontSize: '11px', fontWeight: 800, letterSpacing: '0.6px',
                 textTransform: 'uppercase', color: '#fff',
-                background: `linear-gradient(90deg, ${theme.green} 0%, #14532f 100%)`,
+                background: `linear-gradient(90deg, ${CLAIRE.green} 0%, #14532f 100%)`,
               }}>
                 <span>#</span><span>Équipe</span>
                 <span style={{ textAlign: 'center' }}>J</span>
@@ -739,20 +748,20 @@ function SectionClassement({ signatureLive = '', live = false }) {
                   style={{
                     display: 'grid', gridTemplateColumns: '48px 1fr 70px 80px', alignItems: 'center',
                     padding: '11px 16px', fontSize: '15px',
-                    backgroundColor: i % 2 === 0 ? theme.surface : theme.bg,
+                    backgroundColor: i % 2 === 0 ? CLAIRE.surface : CLAIRE.bg,
                   }}
-                  onMouseEnter={ev => { ev.currentTarget.style.backgroundColor = theme.surfaceHover; }}
-                  onMouseLeave={ev => { ev.currentTarget.style.backgroundColor = i % 2 === 0 ? theme.surface : theme.bg; }}
+                  onMouseEnter={ev => { ev.currentTarget.style.backgroundColor = CLAIRE.surfaceHover; }}
+                  onMouseLeave={ev => { ev.currentTarget.style.backgroundColor = i % 2 === 0 ? CLAIRE.surface : CLAIRE.bg; }}
                 >
-                  <span style={{ color: theme.textMuted, fontWeight: 600 }}>{e.position ?? i + 4}</span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '10px', color: theme.text, fontWeight: 700, minWidth: 0 }}>
+                  <span style={{ color: CLAIRE.textMuted, fontWeight: 600 }}>{e.position ?? i + 4}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '10px', color: CLAIRE.text, fontWeight: 700, minWidth: 0 }}>
                     {logoEquipe(e) && <img src={logoEquipe(e)} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain', flexShrink: 0 }} />}
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{nomEquipe(e)}</span>
                   </span>
-                  <span style={{ textAlign: 'center', color: theme.textMuted }}>
+                  <span style={{ textAlign: 'center', color: CLAIRE.textMuted }}>
                     {stat(e, 'matchsJoues', 'joues', 'played') ?? '–'}
                   </span>
-                  <span style={{ textAlign: 'right', color: theme.text, fontWeight: 800 }}>{e.points ?? 0}</span>
+                  <span style={{ textAlign: 'right', color: CLAIRE.text, fontWeight: 800 }}>{e.points ?? 0}</span>
                 </div>
               ))}
             </div>
@@ -795,18 +804,16 @@ function SectionNouvelles() {
   return (
     <section style={{
       position: 'relative', overflow: 'hidden', padding: '56px 0 64px',
-      background: FOND_BANDE,
+      backgroundColor: '#ffffff',
     }}>
-      <EclatsBande />
-
       {/* En-tête */}
       <div style={{ position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '0 60px', boxSizing: 'content-box' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '22px' }}>
-          <h2 style={{ color: '#fff', fontSize: '28px', fontWeight: 400, fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
+          <h2 style={{ color: '#141414', fontSize: '28px', fontWeight: 400, fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
             Dernières nouvelles
           </h2>
           <Link to="/actualites" className="flex items-center gap-1 transition-opacity hover:opacity-80"
-            style={{ fontSize: '15px', color: '#fff', fontWeight: 600, textDecoration: 'none' }}>
+            style={{ fontSize: '15px', color: '#141414', fontWeight: 600, textDecoration: 'none' }}>
             Toutes les actualités <ChevronRight size={18} />
           </Link>
         </div>
@@ -1154,20 +1161,28 @@ const AccueilPage = () => {
         </div>
       </div>
 
-      {/* ── EN DIRECT / DERNIERS RÉSULTATS (bande pleine largeur) ─────── */}
-      <SectionDirect
-        matchsLive={matchsLive}
-        matchsAVenir={matchsAVenir}
-        matchsTermines={matchs.filter(m => m.statut === 2)}
-        isConnected={isConnected}
-        demo={demoActive}
-      />
+      {/* ── UNE SEULE BANDE VERTE : Prochains matchs + Classements + Buteurs ── */}
+      <div style={{ position: 'relative', overflow: 'hidden', background: FOND_BANDE }}>
+        <EclatsBande />
 
-      {/* ── CONTENU ──────────────────────────────────────────────────────── */}
-      <div style={{ maxWidth: '1150px', margin: '0 auto', padding: '56px 60px 8px', boxSizing: 'content-box' }}>
+        {/* En direct / prochains matchs */}
+        <SectionDirect
+          matchsLive={matchsLive}
+          matchsAVenir={matchsAVenir}
+          matchsTermines={matchs.filter(m => m.statut === 2)}
+          isConnected={isConnected}
+          demo={demoActive}
+        />
 
-        {/* Classements Elite One / Elite Two */}
-        <SectionClassement signatureLive={signatureLive} live={matchsLive.length > 0} />
+        {/* Fin trait discret entre les deux parties */}
+        <div style={{ position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '0 60px', boxSizing: 'content-box' }}>
+          <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent)' }} />
+        </div>
+
+        {/* Classements Elite One / Elite Two + Meilleurs buteurs */}
+        <div style={{ position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '48px 60px 8px', boxSizing: 'content-box' }}>
+          <SectionClassement signatureLive={signatureLive} live={matchsLive.length > 0} />
+        </div>
       </div>
 
       {/* ── DERNIÈRES NOUVELLES (bande pleine largeur) ──────────────────── */}

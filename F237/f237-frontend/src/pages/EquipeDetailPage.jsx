@@ -1,17 +1,19 @@
 // f237-frontend/src/pages/EquipeDetailPage.jsx
 // Fiche d'un club (route /equipes/:id), inspirée de FIBA :
 // - zone haute sombre : fil d'Ariane, logo, nom, infos du club, photo du stade en fond
-// - barre d'onglets : Aperçu · Matchs · Effectif · Palmarès
+// - barre d'onglets : Aperçu · Histoire · Matchs · Effectif · Palmarès
 // - zone basse claire : contenu de l'onglet + colonne (forme, prochain match, buteurs, fiche)
 
 import { useEffect, useState, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   ChevronRight, MapPin, Calendar, Building2, Users, Trophy, AlertCircle, Goal, ArrowRight,
+  Palette, Star, BookOpen, ExternalLink, Medal, Globe,
 } from 'lucide-react';
 import { equipeService } from '../services/equipeService';
 import { matchService } from '../services/matchService';
 import { SAISONS_DB, ANNEE_ACTUELLE, libelleSaison } from '../data/saisons';
+import { getInfosClub } from '../data/clubsInfos';
 import theme from '../theme';
 
 // ── Couleurs de la zone claire (mêmes que les autres pages) ─────────────
@@ -247,38 +249,186 @@ function OngletEffectif({ effectif }) {
   ));
 }
 
-function OngletPalmares({ palmares }) {
-  if (palmares.length === 0) {
-    return <Carte><Vide>Aucun titre enregistré dans l'API pour ce club.</Vide></Carte>;
-  }
+// Liens vers les sources (obligatoire pour les textes issus de Wikipédia, licence CC BY-SA)
+function Sources({ urls }) {
+  if (!urls?.length) return null;
+  const libelle = (u) => {
+    try { return new URL(u).hostname.replace('www.', ''); } catch { return u; }
+  };
   return (
-    <Carte titre={`${palmares.length} titre${palmares.length > 1 ? 's' : ''}`} icone={Trophy}>
-      {palmares.map((t, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 20px', borderTop: i ? `1px solid ${CLAIR.bord}` : 'none' }}>
-          <span style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#fdf3d0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Trophy size={19} color="#c9971b" />
-          </span>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: CLAIR.texte }}>{t.ligue}</div>
-            <div style={{ fontSize: '12px', color: CLAIR.doux }}>{[t.saison, t.pays].filter(Boolean).join(' · ')}</div>
-          </div>
-          {t.place && (
-            <span style={{ fontSize: '12px', fontWeight: 800, color: '#8a6510', backgroundColor: '#fdf3d0', borderRadius: '999px', padding: '3px 10px' }}>{t.place}</span>
-          )}
-        </div>
+    <p style={{ fontSize: '12px', color: CLAIR.doux, lineHeight: 1.6 }}>
+      Sources :{' '}
+      {urls.map((u, i) => (
+        <span key={u}>
+          {i > 0 && ' · '}
+          <a href={u} target="_blank" rel="noopener noreferrer" style={{ color: CLAIR.vert, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+            {libelle(u)} <ExternalLink size={11} />
+          </a>
+        </span>
       ))}
-    </Carte>
+      {urls.some(u => u.includes('wikipedia.org')) && ' — textes de Wikipédia sous licence CC BY-SA 4.0, résumés pour F237.'}
+    </p>
+  );
+}
+
+function OngletHistoire({ club }) {
+  if (!club) {
+    return <Carte><Vide>L'histoire de ce club arrive bientôt sur F237.</Vide></Carte>;
+  }
+  const enBref = [
+    [Calendar, 'Fondation', club.fondation],
+    [MapPin, 'Ville', club.ville],
+    [Palette, 'Couleurs', club.couleurs],
+    [Star, 'Surnom', club.surnom],
+    [Building2, 'Stade', club.stade],
+  ].filter(([, , v]) => v);
+
+  return (
+    <>
+      <Carte titre={club.nomComplet} icone={BookOpen}>
+        <div style={{ padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {club.histoire.map((p, i) => (
+            <p key={i} style={{ fontSize: '15px', lineHeight: 1.7, color: '#2c312e' }}>{p}</p>
+          ))}
+        </div>
+      </Carte>
+
+      {enBref.length > 0 && (
+        <Carte titre="Le club en bref">
+          <div className="grid grid-cols-1 sm:grid-cols-2">
+            {enBref.map(([Icone, label, valeur], i) => (
+              <div key={label} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '14px 20px', borderTop: i > 1 ? `1px solid ${CLAIR.bord}` : 'none' }}>
+                <span style={{ width: '34px', height: '34px', borderRadius: '10px', backgroundColor: '#e8f3ec', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Icone size={16} color={CLAIR.vert} />
+                </span>
+                <div>
+                  <div style={{ fontSize: '11px', fontWeight: 800, color: CLAIR.doux, textTransform: 'uppercase', letterSpacing: '0.4px' }}>{label}</div>
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: CLAIR.texte }}>{valeur}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Carte>
+      )}
+
+      {club.grandsJoueurs?.length > 0 && (
+        <Carte titre="Grands joueurs" icone={Star}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', padding: '16px 20px' }}>
+            {club.grandsJoueurs.map(j => (
+              <span key={j} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 14px', borderRadius: '999px', backgroundColor: CLAIR.tuile, fontSize: '14px', fontWeight: 700, color: CLAIR.texte }}>
+                <span style={{ display: 'flex', width: '18px', height: '12px', borderRadius: '2px', overflow: 'hidden', flexShrink: 0 }} aria-hidden="true">
+                  <span style={{ flex: 1, backgroundColor: theme.green }} />
+                  <span style={{ flex: 1, backgroundColor: theme.red }} />
+                  <span style={{ flex: 1, backgroundColor: theme.yellow }} />
+                </span>
+                {j}
+              </span>
+            ))}
+          </div>
+        </Carte>
+      )}
+
+      <Sources urls={club.sources} />
+    </>
+  );
+}
+
+// Une ligne de palmarès : trophée, compétition, nombre, années
+function LignePalmares({ p, premier }) {
+  const titre = p.type === 'titre';
+  const nombre = p.nombre ?? p.annees?.length ?? 0;
+  const Icone = p.continental ? Globe : titre ? Trophy : Medal;
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', padding: '16px 20px', borderTop: premier ? 'none' : `1px solid ${CLAIR.bord}` }}>
+      <span style={{
+        width: '44px', height: '44px', borderRadius: '50%', flexShrink: 0,
+        backgroundColor: titre ? '#fdf3d0' : CLAIR.tuile,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <Icone size={20} color={titre ? '#c9971b' : '#8a918d'} />
+      </span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '16px', fontWeight: 800, color: CLAIR.texte }}>{p.competition}</span>
+          {p.continental && <span style={{ fontSize: '10px', fontWeight: 800, color: '#1a3a7a', backgroundColor: '#e3eaf7', padding: '2px 8px', borderRadius: '999px', letterSpacing: '0.5px' }}>AFRIQUE</span>}
+        </div>
+        <div style={{ fontSize: '13px', color: CLAIR.doux, marginTop: '2px' }}>
+          {p.libelle ?? (titre ? (nombre > 1 ? `${nombre} fois vainqueur` : 'Vainqueur') : (nombre > 1 ? `${nombre} fois finaliste` : 'Finaliste'))}
+        </div>
+        {p.annees?.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '10px' }}>
+            {p.annees.map(a => (
+              <span key={a} style={{
+                fontFamily: CHIFFRES, fontSize: '15px', fontWeight: 800, padding: '3px 10px', borderRadius: '6px',
+                backgroundColor: titre ? '#fdf3d0' : CLAIR.tuile, color: titre ? '#7a5a08' : '#4a514d',
+              }}>{a}</span>
+            ))}
+          </div>
+        )}
+      </div>
+      <span style={{ fontFamily: CHIFFRES, fontSize: '30px', fontWeight: 800, color: titre ? '#c9971b' : '#b5bcb8', lineHeight: 1 }}>{nombre}</span>
+    </div>
+  );
+}
+
+function OngletPalmares({ palmares, club }) {
+  const local = club?.palmares ?? [];
+  const titres = local.filter(p => p.type === 'titre');
+  const finales = local.filter(p => p.type !== 'titre');
+  const totalTitres = titres.reduce((s, p) => s + (p.nombre ?? p.annees?.length ?? 0), 0);
+
+  if (local.length === 0 && palmares.length === 0) {
+    return <Carte><Vide>Aucun titre majeur enregistré pour ce club.</Vide></Carte>;
+  }
+
+  return (
+    <>
+      {titres.length > 0 && (
+        <Carte titre="Titres" icone={Trophy}
+          droite={<span style={{ fontSize: '12px', fontWeight: 800, color: '#7a5a08', backgroundColor: '#fdf3d0', padding: '3px 10px', borderRadius: '999px' }}>{totalTitres} trophée{totalTitres > 1 ? 's' : ''}</span>}>
+          {titres.map((p, i) => <LignePalmares key={p.competition + i} p={p} premier={i === 0} />)}
+        </Carte>
+      )}
+
+      {finales.length > 0 && (
+        <Carte titre="Finales et places d'honneur" icone={Medal}>
+          {finales.map((p, i) => <LignePalmares key={p.competition + i} p={p} premier={i === 0} />)}
+        </Carte>
+      )}
+
+      {/* Palmarès renvoyé par l'API (s'il y en a) */}
+      {palmares.length > 0 && (
+        <Carte titre="Selon API-Football" icone={Trophy}>
+          {palmares.map((t, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 20px', borderTop: i ? `1px solid ${CLAIR.bord}` : 'none' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: '15px', fontWeight: 700, color: CLAIR.texte }}>{t.ligue}</div>
+                <div style={{ fontSize: '12px', color: CLAIR.doux }}>{[t.saison, t.pays].filter(Boolean).join(' · ')}</div>
+              </div>
+              {t.place && (
+                <span style={{ fontSize: '12px', fontWeight: 800, color: '#8a6510', backgroundColor: '#fdf3d0', borderRadius: '999px', padding: '3px 10px' }}>{t.place}</span>
+              )}
+            </div>
+          ))}
+        </Carte>
+      )}
+
+      {club && <Sources urls={club.sources} />}
+    </>
   );
 }
 
 // ── Colonne de droite ───────────────────────────────────────────────────
-function ColonneDroite({ data, derniersMatchs, prochain, buteurs }) {
+function ColonneDroite({ data, club, derniersMatchs, prochain, buteurs }) {
   const infos = data.infos ?? {};
+  // L'API d'abord, nos fiches clubs (clubsInfos.js) en secours
   const fiche = [
-    [MapPin, 'Ville', infos.ville],
-    [Calendar, 'Fondé en', infos.anneeCreation],
-    [Building2, 'Stade', infos.stadeNom],
+    [MapPin, 'Ville', infos.ville ?? club?.ville],
+    [Calendar, 'Fondé en', infos.anneeCreation ?? club?.fondation],
+    [Building2, 'Stade', infos.stadeNom ?? club?.stade],
     [Users, 'Capacité', infos.stadeCapacite ? `${infos.stadeCapacite.toLocaleString('fr-FR')} places` : null],
+    [Palette, 'Couleurs', club?.couleurs],
+    [Star, 'Surnom', club?.surnom],
   ].filter(([, , v]) => v);
 
   return (
@@ -422,12 +572,17 @@ function EquipeDetailPage() {
   const palmares = data.palmares ?? [];
   const effectif = data.effectif ?? [];
   const eliteOne = data.division === 0;
+  const club = getInfosClub(data.nom); // histoire + palmarès (Wikipédia), null si pas encore rédigé
+  const nbTitres = (club?.palmares ?? [])
+    .filter(p => p.type === 'titre')
+    .reduce((s, p) => s + (p.nombre ?? p.annees?.length ?? 0), 0) + palmares.length;
 
   const ONGLETS = [
     { cle: 'apercu', label: 'Aperçu' },
+    { cle: 'histoire', label: 'Histoire' },
     { cle: 'matchs', label: 'Matchs' },
     { cle: 'effectif', label: 'Effectif', nb: effectif.length },
-    { cle: 'palmares', label: 'Palmarès', nb: palmares.length },
+    { cle: 'palmares', label: 'Palmarès', nb: nbTitres },
   ];
 
   const infoHero = (Icone, texte) => (
@@ -490,9 +645,9 @@ function EquipeDetailPage() {
                   {data.nom}
                 </h1>
                 <div style={{ display: 'flex', gap: '18px', flexWrap: 'wrap' }}>
-                  {infos.ville && infoHero(MapPin, infos.ville)}
-                  {infos.anneeCreation && infoHero(Calendar, `Fondé en ${infos.anneeCreation}`)}
-                  {infos.stadeNom && infoHero(Building2, infos.stadeNom)}
+                  {(infos.ville ?? club?.ville) && infoHero(MapPin, infos.ville ?? club.ville)}
+                  {(infos.anneeCreation ?? club?.fondation) && infoHero(Calendar, `Fondé en ${infos.anneeCreation ?? club.fondation}`)}
+                  {(infos.stadeNom ?? club?.stade) && infoHero(Building2, infos.stadeNom ?? club.stade)}
                 </div>
               </div>
             </div>
@@ -546,9 +701,10 @@ function EquipeDetailPage() {
               {onglet === 'apercu' && <OngletApercu classement={classement} derniersMatchs={derniersMatchs} />}
               {onglet === 'matchs' && <OngletMatchs derniersMatchs={derniersMatchs} aVenir={aVenir} />}
               {onglet === 'effectif' && <OngletEffectif effectif={effectif} />}
-              {onglet === 'palmares' && <OngletPalmares palmares={palmares} />}
+              {onglet === 'histoire' && <OngletHistoire club={club} />}
+              {onglet === 'palmares' && <OngletPalmares palmares={palmares} club={club} />}
             </div>
-            <ColonneDroite data={data} derniersMatchs={derniersMatchs} prochain={aVenir[0]} buteurs={buteurs} />
+            <ColonneDroite data={data} club={club} derniersMatchs={derniersMatchs} prochain={aVenir[0]} buteurs={buteurs} />
           </div>
         </div>
       </section>
