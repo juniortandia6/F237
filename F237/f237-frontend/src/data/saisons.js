@@ -38,17 +38,20 @@ export const SAISON_EN_COURS = 2027;
 // Saisons déjà importées dans F237Db (season API → SaisonId par compétition).
 // Ajoute une ligne ici chaque fois que tu importes une nouvelle saison.
 export const SAISONS_DB = {
-  2026: { one: 3, two: 4 }, // 2026
-  2024: { one: 1, two: 2 }, // 2023-24 (Elite Two : classement calculé, l'API n'en fournit pas)
-  2023: { one: 5, two: 6 }, // 2022-23 (Elite Two : classement calculé, l'API n'en fournit pas)
-  2022: { one: 7 },         // 2022    (pas d'Elite Two cette année-là chez API-Football)
+  2027: { one: 8, two: 9 },   // 2026-27 (saison en cours ; Elite Two : pas encore de buteurs chez l'API)
+  2026: { one: 3, two: 4 },   // 2026
+  2025: { one: 10, two: 11 }, // 2024-25 (Elite Two : classement calculé, l'API n'en fournit pas)
+  2024: { one: 1, two: 2 },   // 2023-24 (Elite Two : classement calculé, l'API n'en fournit pas)
+  2023: { one: 5, two: 6 },   // 2022-23 (Elite Two : classement calculé, l'API n'en fournit pas)
+  2022: { one: 7 },           // 2022    (pas d'Elite Two cette année-là chez API-Football)
 };
 
 // Saison affichée par défaut : la plus récente qui a des données
 export const ANNEE_ACTUELLE = Math.max(...Object.keys(SAISONS_DB).map(Number));
 
-// Toutes les saisons du menu, de la plus récente à la plus ancienne
-export const SAISONS = Array.from({ length: SAISON_EN_COURS - ANNEE_DEBUT + 1 }, (_, i) => SAISON_EN_COURS - i);
+// Saisons du menu : uniquement celles importées dans F237Db, de la plus récente à la plus ancienne.
+// (Pour en ajouter une : l'importer via /api/sync/saison puis l'ajouter dans SAISONS_DB.)
+export const SAISONS = Object.keys(SAISONS_DB).map(Number).sort((a, b) => b - a);
 
 // 2026 -> "2026" ; 2027 -> "2026-27"
 export function libelleSaison(annee) {
