@@ -5,6 +5,17 @@
         public int Id { get; set; }
         public int EquipeId { get; set; }
         public int SaisonId { get; set; }
+
+        // Poule ou phase (ex. "Elite One: Championship Round"). Null quand la saison
+        // n'a qu'un seul classement.
+        public string? Groupe { get; set; }
+
+        // Ordre d'affichage des groupes (0 = premier groupe renvoyé par l'API)
+        public int OrdreGroupe { get; set; } = 0;
+
+        // Ce que la place rapporte selon l'API (ex. "CAF Champions League", "Relegation")
+        public string? Description { get; set; }
+
         public int Position { get; set; }
         public int MatchsJoues { get; set; } = 0;
         public int Victoires { get; set; } = 0;

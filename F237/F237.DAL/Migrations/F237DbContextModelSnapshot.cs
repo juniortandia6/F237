@@ -82,16 +82,25 @@ namespace F237.DAL.Migrations
                     b.Property<int>("Defaites")
                         .HasColumnType("int");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("DifferenceDesButs")
                         .HasColumnType("int");
 
                     b.Property<int>("EquipeId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Groupe")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("MatchsJoues")
                         .HasColumnType("int");
 
                     b.Property<int>("Nuls")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrdreGroupe")
                         .HasColumnType("int");
 
                     b.Property<int>("Points")

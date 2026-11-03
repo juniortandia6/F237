@@ -5,7 +5,7 @@
 // - zone basse claire : contenu de l'onglet + colonne (forme, prochain match, buteurs, fiche)
 
 import { useEffect, useState, useMemo } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { locale } from '../i18n';
 import {
@@ -14,7 +14,9 @@ import {
 } from 'lucide-react';
 import { equipeService } from '../services/equipeService';
 import { matchService } from '../services/matchService';
-import { SAISONS_DB, ANNEE_ACTUELLE, libelleSaison } from '../data/saisons';
+import { classementService } from '../services/classementService';
+import { COMPETITIONS, SAISONS_DB, ANNEE_ACTUELLE, libelleSaison } from '../data/saisons';
+import SelecteurSaison from '../components/SelecteurSaison';
 import { getInfosClub } from '../data/clubsInfos';
 import theme from '../theme';
 
@@ -183,11 +185,12 @@ function CarteJoueur({ j }) {
 }
 
 // ── Contenu des onglets ─────────────────────────────────────────────────
-function OngletApercu({ classement, derniersMatchs }) {
+function OngletApercu({ classement, derniersMatchs, annee, chargement }) {
   const { t } = useTranslation();
+  if (chargement) return <Carte><Vide>{t('commun.chargement')}</Vide></Carte>;
   return (
     <>
-      <Carte titre={t('saison.saison', { s: libelleSaison(ANNEE_ACTUELLE) })}>
+      <Carte titre={t('saison.saison', { s: libelleSaison(annee) })}>
         {classement ? (
           <div className="grid grid-cols-4 gap-3 sm:grid-cols-8" style={{ padding: '18px 20px' }}>
             <Tuile label={t('equipe.tuiles.pos')} valeur={`#${classement.position}`} fort />
@@ -211,8 +214,9 @@ function OngletApercu({ classement, derniersMatchs }) {
   );
 }
 
-function OngletMatchs({ derniersMatchs, aVenir }) {
+function OngletMatchs({ derniersMatchs, aVenir, chargement }) {
   const { t } = useTranslation();
+  if (chargement) return <Carte><Vide>{t('commun.chargement')}</Vide></Carte>;
   return (
     <>
       <Carte titre={t('commun.aVenir')} droite={<span style={{ fontSize: '12px', fontWeight: 700, color: CLAIR.doux }}>{t('matchs.nbMatchs', { count: aVenir.length })}</span>}>
@@ -512,11 +516,32 @@ function ColonneDroite({ data, club, derniersMatchs, prochain, buteurs }) {
   );
 }
 
+// Le club pendant une saison : son championnat, sa ligne de classement et ses matchs
+function trouverSaisonClub(donnees, idClub) {
+  if (!donnees) return null;
+  const estLeClub = (eq) => eq?.id === idClub;
+  for (const c of COMPETITIONS) {
+    const d = donnees[c.cle];
+    const matchs = (d?.matchs ?? []).filter(m => estLeClub(m.equipeDomicile) || estLeClub(m.equipeExterieur));
+    const ligne = (d?.classement ?? []).find(l => (l.equipeId ?? l.equipe?.id) === idClub) ?? null;
+    if (matchs.length || ligne) return { comp: c.cle, matchs, classement: ligne };
+  }
+  return { comp: null, matchs: [], classement: null };
+}
+
 // ── Page ────────────────────────────────────────────────────────────────
 function EquipeDetailPage() {
   const { t } = useTranslation();
   const { id } = useParams();
-  const [etat, setEtat] = useState(null); // { id, data, matchsSaison, erreur }
+  const [parametres, setParametres] = useSearchParams();
+  const [etat, setEtat] = useState(null); // { id, data, erreur }
+  // Données de la saison choisie (classements + matchs des deux championnats)
+  const [saisonEtat, setSaisonEtat] = useState(null); // { annee, one: { classement, matchs }, two: {...} }
+
+  // Saison choisie : dans l'adresse (?saison=2025), sinon la saison en cours
+  const saisonUrl = Number(parametres.get('saison'));
+  const annee = SAISONS_DB[saisonUrl] ? saisonUrl : ANNEE_ACTUELLE;
+  const changerSaison = (a) => setParametres({ saison: String(a) }, { replace: true });
   const [ongletChoisi, setOngletChoisi] = useState({ id: null, cle: 'apercu' });
   const [logoOk, setLogoOk] = useState(true);
 
@@ -527,25 +552,60 @@ function EquipeDetailPage() {
   useEffect(() => {
     let ignore = false;
     equipeService.getById(id)
-      .then(async (data) => {
-        // Matchs de la saison du club : prochains matchs + buteurs du club
-        const saisonId = SAISONS_DB[ANNEE_ACTUELLE]?.[data.division === 1 ? 'two' : 'one'];
-        const matchsSaison = saisonId != null ? await matchService.getBySaison(saisonId).catch(() => []) : [];
-        if (!ignore) setEtat({ id, data, matchsSaison, erreur: null });
-      })
-      .catch(() => { if (!ignore) setEtat({ id, data: null, matchsSaison: [], erreur: 'introuvable' }); });
+      .then(data => { if (!ignore) setEtat({ id, data, erreur: null }); })
+      .catch(() => { if (!ignore) setEtat({ id, data: null, erreur: 'introuvable' }); });
     return () => { ignore = true; };
   }, [id]);
+
+  // Classements + matchs de la saison choisie, pour les deux championnats
+  // (on ne sait pas d'avance dans lequel le club jouait cette saison-là)
+  useEffect(() => {
+    const ids = SAISONS_DB[annee] ?? {};
+    let ignore = false;
+    const charger = (service, sid) => (sid != null ? service.getBySaison(sid).catch(() => []) : Promise.resolve([]));
+    Promise.all(COMPETITIONS.flatMap(c => [charger(classementService, ids[c.cle]), charger(matchService, ids[c.cle])]))
+      .then(res => {
+        if (ignore) return;
+        setSaisonEtat({
+          annee,
+          ...Object.fromEntries(COMPETITIONS.map((c, i) => [c.cle, { classement: res[i * 2], matchs: res[i * 2 + 1] }])),
+        });
+      });
+    return () => { ignore = true; };
+  }, [annee]);
 
   useEffect(() => { window.scrollTo(0, 0); }, [id]);
 
   const data = etat?.data;
-  const matchsSaison = useMemo(() => etat?.matchsSaison ?? [], [etat]);
+  const idClub = Number(id);
+  const donneesSaison = saisonEtat?.annee === annee ? saisonEtat : null;
+  const chargementSaison = donneesSaison === null;
+
+  // Le club cette saison : son championnat, sa ligne de classement et ses matchs
+  const saisonClub = useMemo(() => trouverSaisonClub(donneesSaison, idClub), [donneesSaison, idClub]);
+  const matchsSaison = useMemo(() => saisonClub?.matchs ?? [], [saisonClub]);
+
+  // Matchs joués, du plus récent au plus ancien, au format des lignes de match
+  const resultats = useMemo(() => matchsSaison
+    .filter(m => m.statut === 2)
+    .sort((a, b) => new Date(b.dateMatch) - new Date(a.dateMatch))
+    .map(m => {
+      const estDomicile = m.equipeDomicile?.id === idClub;
+      const pour = estDomicile ? m.scoreDomicile : m.scoreExterieur;
+      const contre = estDomicile ? m.scoreExterieur : m.scoreDomicile;
+      return {
+        matchId: m.id, dateMatch: m.dateMatch, estDomicile,
+        equipeDomicile: m.equipeDomicile?.nom, logoDomicile: m.equipeDomicile?.logoUrl,
+        equipeExterieur: m.equipeExterieur?.nom, logoExterieur: m.equipeExterieur?.logoUrl,
+        scoreDomicile: m.scoreDomicile, scoreExterieur: m.scoreExterieur,
+        resultat: pour > contre ? 'V' : pour < contre ? 'D' : 'N',
+      };
+    }), [matchsSaison, idClub]);
 
   // Prochains matchs du club (statut 0 = à venir)
-  const aVenir = useMemo(() => !data ? [] : matchsSaison
-    .filter(m => m.statut === 0 && (m.equipeDomicile?.nom === data.nom || m.equipeExterieur?.nom === data.nom))
-    .sort((a, b) => new Date(a.dateMatch) - new Date(b.dateMatch)), [matchsSaison, data]);
+  const aVenir = useMemo(() => matchsSaison
+    .filter(m => m.statut === 0)
+    .sort((a, b) => new Date(a.dateMatch) - new Date(b.dateMatch)), [matchsSaison]);
 
   // Buteurs du club (sans CSC ni inconnus), top 5
   const buteurs = useMemo(() => {
@@ -579,11 +639,12 @@ function EquipeDetailPage() {
   }
 
   const infos = data.infos ?? {};
-  const classement = data.classement;
-  const derniersMatchs = data.derniersMatchs ?? [];
+  const classement = saisonClub?.classement ?? null;
+  const derniersMatchs = resultats.slice(0, 5); // Aperçu + forme récente
   const palmares = data.palmares ?? [];
   const effectif = data.effectif ?? [];
-  const eliteOne = data.division === 0;
+  // Championnat de la saison choisie (à défaut, la division actuelle du club)
+  const eliteOne = saisonClub?.comp ? saisonClub.comp === 'one' : data.division === 0;
   const club = getInfosClub(data.nom); // histoire + palmarès (Wikipédia), null si pas encore rédigé
   const nbTitres = (club?.palmares ?? [])
     .filter(p => p.type === 'titre')
@@ -621,8 +682,9 @@ function EquipeDetailPage() {
 
         <div style={CONTENEUR}>
           {/* Fil d'Ariane */}
-          <nav style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', marginBottom: '30px' }}>
-            {[[t('nav.accueil'), '/'], [t('nav.equipes'), '/equipes']].map(([label, to]) => (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '30px' }}>
+          <nav style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
+            {[[t('nav.accueil'), '/'], [t('nav.equipes'), `/equipes?saison=${annee}`]].map(([label, to]) => (
               <span key={to} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Link to={to} style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none' }}
                   onMouseEnter={e => { e.currentTarget.style.color = '#fff'; }}
@@ -634,6 +696,8 @@ function EquipeDetailPage() {
             ))}
             <span style={{ color: '#fff', fontWeight: 700 }}>{data.nom}</span>
           </nav>
+          <SelecteurSaison annee={annee} onChange={changerSaison} />
+          </div>
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '28px', flexWrap: 'wrap' }}>
             {/* Logo + nom + infos */}
@@ -710,8 +774,8 @@ function EquipeDetailPage() {
         <div style={CONTENEUR}>
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]" style={{ alignItems: 'start' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {onglet === 'apercu' && <OngletApercu classement={classement} derniersMatchs={derniersMatchs} />}
-              {onglet === 'matchs' && <OngletMatchs derniersMatchs={derniersMatchs} aVenir={aVenir} />}
+              {onglet === 'apercu' && <OngletApercu classement={classement} derniersMatchs={derniersMatchs} annee={annee} chargement={chargementSaison} />}
+              {onglet === 'matchs' && <OngletMatchs derniersMatchs={resultats} aVenir={aVenir} chargement={chargementSaison} />}
               {onglet === 'effectif' && <OngletEffectif effectif={effectif} />}
               {onglet === 'histoire' && <OngletHistoire club={club} />}
               {onglet === 'palmares' && <OngletPalmares palmares={palmares} club={club} />}

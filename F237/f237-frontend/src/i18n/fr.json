@@ -215,7 +215,18 @@
     "chargement": "Chargement du classement...",
     "aucun": "Aucun classement disponible pour le moment.",
     "calcule": "Classement officiel indisponible pour cette saison : il est calculé à partir des résultats des matchs (3 pts la victoire, 1 pt le nul).",
-    "legende": "J : joués · V : victoires · N : nuls · D : défaites · BP : buts pour · BC : buts contre · DB : différence de buts · Forme : 5 derniers matchs (clique pour voir le match)"
+    "legende": "J : joués · V : victoires · N : nuls · D : défaites · BP : buts pour · BC : buts contre · DB : différence de buts · Forme : 5 derniers matchs (clique pour voir le match)",
+    "groupes": {
+      "Championship Round": "Poule pour le titre",
+      "Relegation Round": "Poule de maintien",
+      "Group A": "Poule A",
+      "Group B": "Poule B",
+      "Group C": "Poule C",
+      "Group D": "Poule D",
+      "Play-offs": "Play-offs",
+      "Play-downs": "Play-downs"
+    },
+    "poule": "Poule {{l}}"
   },
   "equipes": {
     "tri": {

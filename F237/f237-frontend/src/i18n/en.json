@@ -215,7 +215,18 @@
     "chargement": "Loading standings...",
     "aucun": "No standings available right now.",
     "calcule": "Official standings are unavailable for this season: they are calculated from match results (3 pts for a win, 1 pt for a draw).",
-    "legende": "P: played · W: won · D: drawn · L: lost · GF: goals for · GA: goals against · GD: goal difference · Form: last 5 matches (click to see the match)"
+    "legende": "P: played · W: won · D: drawn · L: lost · GF: goals for · GA: goals against · GD: goal difference · Form: last 5 matches (click to see the match)",
+    "groupes": {
+      "Championship Round": "Championship round",
+      "Relegation Round": "Relegation round",
+      "Group A": "Group A",
+      "Group B": "Group B",
+      "Group C": "Group C",
+      "Group D": "Group D",
+      "Play-offs": "Play-offs",
+      "Play-downs": "Play-downs"
+    },
+    "poule": "Group {{l}}"
   },
   "equipes": {
     "tri": {

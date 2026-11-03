@@ -9,26 +9,46 @@ import theme from '../theme';
 
 function SelecteurSaison({ annee, onChange }) {
   const { t } = useTranslation();
-  const [ouvert, setOuvert] = useState(false);
+  // null = fermé ; sinon position du menu à l'écran ({ top, left })
+  const [pos, setPos] = useState(null);
+  const ouvert = pos !== null;
   const ref = useRef(null);
+  const menuRef = useRef(null);
+
+  // Le menu est en position fixe (par rapport à l'écran) : ainsi il n'est jamais
+  // coupé par une section qui a overflow: hidden (les bandes vertes en ont)
+  const basculer = () => {
+    if (ouvert) { setPos(null); return; }
+    const r = ref.current.getBoundingClientRect();
+    setPos({ top: r.bottom + 8, left: r.left });
+  };
+  const fermer = () => setPos(null);
 
   // Ferme le menu quand on clique ailleurs ou qu'on appuie sur Échap
   useEffect(() => {
     if (!ouvert) return;
-    const clic = (e) => { if (!ref.current?.contains(e.target)) setOuvert(false); };
-    const touche = (e) => { if (e.key === 'Escape') setOuvert(false); };
+    const clic = (e) => {
+      if (!ref.current?.contains(e.target) && !menuRef.current?.contains(e.target)) fermer();
+    };
+    const touche = (e) => { if (e.key === 'Escape') fermer(); };
+    // Si la page défile ou change de taille, on ferme (le menu ne suivrait plus le bouton)
+    const defile = (e) => { if (!menuRef.current?.contains(e.target)) fermer(); };
     document.addEventListener('mousedown', clic);
     document.addEventListener('keydown', touche);
+    window.addEventListener('scroll', defile, true);
+    window.addEventListener('resize', fermer);
     return () => {
       document.removeEventListener('mousedown', clic);
       document.removeEventListener('keydown', touche);
+      window.removeEventListener('scroll', defile, true);
+      window.removeEventListener('resize', fermer);
     };
   }, [ouvert]);
 
   return (
     <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
       <button
-        onClick={() => setOuvert(o => !o)}
+        onClick={basculer}
         aria-haspopup="listbox"
         aria-expanded={ouvert}
         style={{
@@ -47,9 +67,9 @@ function SelecteurSaison({ annee, onChange }) {
       </button>
 
       {ouvert && (
-        <ul role="listbox" style={{
-          position: 'absolute', top: 'calc(100% + 8px)', left: 0, zIndex: 20, minWidth: '230px',
-          maxHeight: '300px', overflowY: 'auto', listStyle: 'none', margin: 0, padding: '6px',
+        <ul ref={menuRef} role="listbox" style={{
+          position: 'fixed', top: pos.top, left: pos.left, zIndex: 60, minWidth: '230px',
+          maxHeight: `calc(100vh - ${pos.top + 16}px)`, overflowY: 'auto', listStyle: 'none', margin: 0, padding: '6px',
           backgroundColor: '#fff', borderRadius: '12px', boxShadow: '0 16px 40px rgba(0,0,0,0.3)',
         }}>
           {SAISONS.map(a => {
@@ -60,7 +80,7 @@ function SelecteurSaison({ annee, onChange }) {
                 <button
                   role="option"
                   aria-selected={actif}
-                  onClick={() => { onChange(a); setOuvert(false); }}
+                  onClick={() => { onChange(a); fermer(); }}
                   style={{
                     width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px',
                     padding: '10px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer', textAlign: 'left',

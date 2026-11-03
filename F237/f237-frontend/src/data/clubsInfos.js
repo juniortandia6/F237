@@ -468,6 +468,278 @@ export const CLUBS_INFOS = {
     sources: ['https://www.hilltopvoices.com/search/label/National%20Interpools'],
   },
 
+
+  // ── Clubs ajoutés avec les saisons 2022 à 2026-27 ─────────────────────
+
+  'fovu club': {
+    nomComplet: 'Fovu Club de Baham',
+    alias: ['fovu', 'fovu de baham', 'fovu club de baham', 'racing fovu'],
+    ville: 'Baham',
+    fondation: 1978,
+    stade: 'Stade de Baham',
+    histoire: [
+      "Fondé le 17 novembre 1978 à Baham, dans l'Ouest, le Fovu Club tire son nom d'une grotte sacrée de la région.",
+      "Champion du Cameroun en 2000, il découvre la Ligue des champions de la CAF en 2001, puis la Coupe des vainqueurs de coupe en 2002 et la Coupe de la Confédération en 2011.",
+      "Le Fovu est surtout un spécialiste de la Coupe du Cameroun : vainqueur en 2001, 2010 et 2023, finaliste en 2006.",
+    ],
+    palmares: [
+      { competition: 'Championnat du Cameroun', type: 'titre', annees: [2000] },
+      { competition: 'Coupe du Cameroun', type: 'titre', annees: [2001, 2010, 2023] },
+      { competition: 'Coupe du Cameroun', type: 'finale', annees: [2006] },
+    ],
+    sources: ['https://en.wikipedia.org/wiki/Fovu_Club', 'https://en.wikipedia.org/wiki/Cameroonian_Cup', 'https://rsssf.org/tablesk/kamchamp.html'],
+  },
+
+  'ums de loum': {
+    nomComplet: 'Union des Mouvements Sportifs de Loum',
+    alias: ['ums', 'ums loum', 'union des mouvements sportifs de loum'],
+    surnom: 'UMS',
+    ville: 'Loum',
+    fondation: 2011,
+    stade: 'Stade de Njombé',
+    histoire: [
+      "Créée en 2011 à Loum, dans le Moungo, l'UMS a connu une ascension express jusqu'au sommet du football camerounais.",
+      "Le club remporte la Coupe du Cameroun en 2015 en battant Panthère du Ndé (2-0), puis devient champion du Cameroun en 2016 et en 2019. Il dispute une nouvelle finale de Coupe en 2017.",
+      "Ces titres lui ouvrent les portes des compétitions africaines : Ligue des champions et Coupe de la Confédération de la CAF.",
+    ],
+    palmares: [
+      { competition: 'Championnat du Cameroun', type: 'titre', annees: [2016, 2019] },
+      { competition: 'Coupe du Cameroun', type: 'titre', annees: [2015] },
+      { competition: 'Coupe du Cameroun', type: 'finale', annees: [2017] },
+    ],
+    sources: ['https://en.wikipedia.org/wiki/UMS_de_Loum', 'https://en.wikipedia.org/wiki/Cameroonian_Cup', 'https://rsssf.org/tablesk/kamfound.html'],
+  },
+
+  'young sport academy': {
+    nomComplet: 'Yong Sports Academy',
+    alias: ['yong sports academy', 'young sports academy', 'yosa', 'yosa bamenda', 'yosa fc'],
+    surnom: 'YOSA',
+    ville: 'Bamenda',
+    fondation: 2004,
+    stade: 'Stade municipal de Bamenda',
+    histoire: [
+      "Fondée en 2004 à Bamenda par Yong Francis, ancien arbitre, la Yong Sports Academy a longtemps été le seul club de première division du Nord-Ouest.",
+      "Son plus grand exploit : la Coupe du Cameroun 2013, remportée aux tirs au but face au Canon de Yaoundé (0-0, 4 t.a.b. à 1).",
+    ],
+    palmares: [
+      { competition: 'Coupe du Cameroun', type: 'titre', annees: [2013] },
+    ],
+    sources: ['https://en.wikipedia.org/wiki/Yong_Sports_Academy', 'https://en.wikipedia.org/wiki/Cameroonian_Cup'],
+  },
+
+  'jeunes fauves': {
+    nomComplet: 'Fauve Azur Elite',
+    alias: ['fauve azur elite', 'fauve azur', 'fauve azur elite fc', 'fauve azur de yaounde'],
+    ville: 'Yaoundé',
+    histoire: [
+      "Club de Yaoundé, Fauve Azur Elite fait son grand retour en MTN Elite One pour la saison 2023-2024, sous la présidence de Norbert Nya.",
+      "Pour cette saison disputée en deux phases, il termine dans la poule de maintien.",
+    ],
+    palmares: [],
+    sources: ['https://cameroon-tribune.cm/article.html/60447/fr.html/details_2'],
+  },
+
+  'renaissance': {
+    nomComplet: 'Renaissance Football Club de Ngoumou',
+    alias: ['renaissance fc', 'renaissance de ngoumou', 'renaissance fc de ngoumou', 'rfc'],
+    surnom: 'RFC',
+    ville: 'Ngoumou',
+    fondation: 2000,
+    stade: 'Stade municipal de Ngoumou',
+    histoire: [
+      "Fondé le 2 janvier 2000 par le comité de développement de Nkong-Abok, un village à une soixantaine de kilomètres de Yaoundé, le Renaissance FC a commencé dans le championnat départemental de la Méfou-et-Akono.",
+      "Huitième de finaliste puis quart de finaliste de la Coupe du Cameroun en 2001 et 2002, il représente le Centre aux Interpoules de 2002 avant de gravir les divisions jusqu'à l'Elite One.",
+    ],
+    palmares: [],
+    sources: ['https://en.wikipedia.org/wiki/Renaissance_FC_de_Ngoumou', 'https://rsssf.org/tablesk/kamfound.html'],
+  },
+
+  'dragon de yaounde': {
+    nomComplet: 'Dragon Club de Yaoundé',
+    alias: ['dragon', 'dragon club', 'dragon club de yaounde', 'dragon fc'],
+    ville: 'Yaoundé',
+    fondation: 1928,
+    stade: 'Stade municipal de Mbalmayo',
+    histoire: [
+      "Fondé en 1928 sous le nom d'Allico Maritime, le Dragon Club de Yaoundé est l'un des plus anciens clubs du pays.",
+      "Il évolue en Elite Two, où il a terminé huitième en 2023-2024.",
+    ],
+    palmares: [],
+    sources: ['https://en.wikipedia.org/wiki/Dragon_Club_(Yaound%C3%A9)', 'https://rsssf.org/tablesk/kamfound.html'],
+  },
+
+  'feutcheu': {
+    nomComplet: 'Feutcheu FC',
+    alias: ['feutcheu fc', 'djiko', 'djiko fc', 'djiko fc de bandjoun'],
+    ville: 'Bandjoun',
+    fondation: 2011,
+    couleurs: 'Rouge et blanc',
+    stade: 'Stade de Kouekong (Bafoussam)',
+    histoire: [
+      "Fondé en 2011 à Bandjoun sous le nom de Djiko FC, le club a disputé l'Elite One à la fin des années 2010.",
+      "En 2020, après sa reprise par Joseph Feutcheu, il est rebaptisé Feutcheu FC. Il joue ses matchs à domicile au stade de Kouekong, à Bafoussam.",
+    ],
+    palmares: [],
+    sources: ['https://en.wikipedia.org/wiki/Djiko_FC_de_Bandjoun', 'https://rsssf.org/tablesk/kamfound.html'],
+  },
+
+  'leopard de douala': {
+    nomComplet: 'Léopard Sportif de Douala',
+    alias: ['leopard', 'leopards douala', 'leopard douala', 'leopard sportif de douala'],
+    ville: 'Douala',
+    fondation: 1940,
+    stade: 'Stade de la Réunification',
+    histoire: [
+      "Fondé en 1940 sous le nom de Diables Noirs de Deido, le Léopard de Douala est un club historique de la capitale économique.",
+      "Avec un jeune Roger Milla dans ses rangs, il devient champion du Cameroun en 1972, puis conserve son titre en 1973.",
+      "Le club a aussi disputé quatre finales de Coupe du Cameroun (1942, 1956, 1957 et 1993), sans jamais la remporter.",
+    ],
+    palmares: [
+      { competition: 'Championnat du Cameroun', type: 'titre', annees: [1972, 1973] },
+      { competition: 'Coupe du Cameroun', type: 'finale', annees: [1942, 1956, 1957, 1993] },
+    ],
+    grandsJoueurs: ['Roger Milla'],
+    sources: ['https://en.wikipedia.org/wiki/L%C3%A9opard_Douala', 'https://en.wikipedia.org/wiki/Elite_One', 'https://en.wikipedia.org/wiki/Cameroonian_Cup', 'https://rsssf.org/tablesk/kamfound.html'],
+  },
+
+  'fc rangers': {
+    nomComplet: 'Rangers FC de Bafut',
+    alias: ['rangers', 'rangers fc', 'rangers bafut', 'rangers fc bafut', 'bafut rangers'],
+    ville: 'Bafut',
+    fondation: 2012,
+    histoire: [
+      "Club de Bafut, dans le Nord-Ouest, fondé en 2012, Rangers FC décroche sa place en Elite Two lors des Interpoules nationales 2020-2021, grâce à un nul face à Best Stars de Limbé.",
+    ],
+    palmares: [],
+    sources: ['https://www.hilltopvoices.com/2021/09/national-interpools-20202021-rangers-fc_25.html', 'https://rsssf.org/tablesk/kamfound.html'],
+  },
+
+  'isohsa': {
+    nomComplet: 'Isle of Hope Sports Academy',
+    alias: ['isosha', 'isohsa fc', 'isohsa limbe', 'isle of hope sports academy'],
+    ville: 'Limbé',
+    fondation: 2015,
+    histoire: [
+      "Fondée en 2015 à Limbé par Karl Njomo Mokake, l'Isle of Hope Sports Academy monte en championnat régional dès 2017.",
+      "En 2023, elle remporte le championnat régional du Sud-Ouest puis les Interpoules nationales (2-0 contre Bafmeng United), ce qui lui ouvre les portes de l'Elite Two.",
+    ],
+    palmares: [
+      { competition: 'Interpoules nationales', type: 'titre', annees: [2023] },
+    ],
+    sources: ['https://cameroon-tribune.cm/article.html/59474/fr.html/isohsa-limbe-road'],
+  },
+
+  'atlantic': {
+    nomComplet: 'Atlantic Sports Academy de Kribi',
+    alias: ['atlantic sa', 'atlantic s.a', 'atlantic de kribi', 'atlantic sports academy'],
+    ville: 'Kribi',
+    histoire: [
+      "Club de Kribi, dans le Sud, Atlantic Sports Academy remporte les Interpoules nationales en août 2024 en battant l'Union Sportive d'Abong-Mbang (1-0) en finale. Les deux clubs montent ensemble en Elite Two.",
+      "En 2026, il se qualifie pour les play-offs d'accession à l'Elite One.",
+    ],
+    palmares: [
+      { competition: 'Interpoules nationales', type: 'titre', annees: [2024] },
+    ],
+    sources: ['https://cameroon-tribune.cm/article.html/66594/fr.html/details_2', 'https://cameroon-tribune.cm/article.html/77091/fr.html/details_2'],
+  },
+
+  'kumba': {
+    nomComplet: 'Kumba City FC',
+    alias: ['kumba city', 'kumba city fc'],
+    ville: 'Kumba',
+    histoire: [
+      "Représentant du Sud-Ouest, Kumba City FC remporte les Interpoules nationales en septembre 2025 au bout du suspense, face au Sable de Batié (4-3 après prolongation). Il découvre l'Elite Two dans la foulée.",
+      "Pour sa première saison, il se qualifie pour les play-offs d'accession à l'Elite One.",
+    ],
+    palmares: [
+      { competition: 'Interpoules nationales', type: 'titre', annees: [2025] },
+    ],
+    sources: ['https://www.cameroon-tribune.cm/article.html/72740/fr.html/details_2', 'https://cameroun24.net/article/70685-interpoules-2025-kumba-city-sacr-champion-au-bout-du-suspense-sable-de-bati-aussi-promu.html', 'https://cameroon-tribune.cm/article.html/77091/fr.html/details_2'],
+  },
+
+  'ofta': {
+    nomComplet: 'OFTA de Kribi',
+    alias: ['ofta fc', 'ofta de kribi', 'ofta kribi'],
+    ville: 'Kribi',
+    histoire: [
+      "Club de Kribi soutenu par le Port Autonome de Kribi, l'OFTA est monté en quelques saisons du championnat régional jusqu'à l'Elite One, qu'il a disputée en 2022.",
+      "Il évolue ensuite en Elite Two, avec l'ambition de retrouver l'élite.",
+    ],
+    palmares: [],
+    sources: ['https://cameroon-tribune.cm/article.html/46801/fr.html/interview-ofta-ne-jouera-pas', 'https://pak.cm/en/pak-renews-its-support-to-ofta/'],
+  },
+
+  'stade de bertoua': {
+    nomComplet: 'Stade FC de Bertoua',
+    alias: ['stade bertoua', 'stade fc de bertoua', 'stade'],
+    ville: 'Bertoua',
+    fondation: 1983,
+    stade: 'Stade municipal de Bertoua',
+    histoire: [
+      "Fondé en 1983, le Stade FC de Bertoua est un club de la région de l'Est.",
+      "En mai 2023, après des violences contre les arbitres lors d'un match d'Elite Two face à Victoria United, la Fécafoot le relègue en division inférieure et le suspend un an.",
+    ],
+    palmares: [],
+    sources: ['https://cameroon-tribune.cm/article.html/57098/fr.html/details_2', 'https://rsssf.org/tablesk/kamfound.html'],
+  },
+
+  'lausanne': {
+    nomComplet: 'AS Lausanne de Yaoundé',
+    alias: ['as lausanne', 'lausanne de yaounde', 'as lausanne de yaounde'],
+    ville: 'Yaoundé',
+    stade: 'Stade Ahmadou-Ahidjo',
+    histoire: [
+      "Club de Yaoundé, l'AS Lausanne remporte l'Elite Two en 2009-2010 et monte en Elite One pour la saison 2010-2011.",
+      "Redescendu par la suite, il retrouve l'Elite Two grâce aux Interpoules nationales 2020-2021.",
+    ],
+    palmares: [
+      { competition: 'Elite Two', type: 'titre', annees: ['2009-10'] },
+    ],
+    sources: ['https://en.wikipedia.org/wiki/AS_Lausanne_de_Yaound%C3%A9', 'https://www.hilltopvoices.com/2021/09/national-interpools-20202021-rangers-fc_25.html'],
+  },
+
+  'new star': {
+    nomComplet: 'New Star de Douala',
+    alias: ['new star fc', 'new stars', 'new stars de douala', 'new star de douala'],
+    ville: 'Douala',
+    stade: 'Stade de la Réunification',
+    histoire: [
+      "Club de Douala, New Star dispute la finale de la Coupe du Cameroun en 2012, perdue face à Unisport de Bafang (2-0).",
+      "Il prend sa revanche en 2017 en remportant le trophée face à l'UMS de Loum (1-0), après avoir découvert les compétitions africaines avec la Coupe de la Confédération 2016.",
+    ],
+    palmares: [
+      { competition: 'Coupe du Cameroun', type: 'titre', annees: [2017] },
+      { competition: 'Coupe du Cameroun', type: 'finale', annees: [2012] },
+    ],
+    sources: ['https://en.wikipedia.org/wiki/New_Star_de_Douala', 'https://en.wikipedia.org/wiki/Cameroonian_Cup'],
+  },
+
+  'mintack': {
+    nomComplet: 'Mintack FC de la Haute-Sanaga',
+    alias: ['mintack fc', 'mintack de la haute sanaga', 'mintack fc de haute-sanaga'],
+    ville: 'Nanga-Eboko',
+    fondation: 2015,
+    histoire: [
+      "Fondé en 2015 à Nanga-Eboko, dans la Haute-Sanaga, Mintack FC remporte les Interpoules nationales en 2026 en battant Elecsport de Limbé en finale (1-0), à Yaoundé.",
+      "Il découvre l'Elite Two lors de la saison 2026-2027.",
+    ],
+    palmares: [
+      { competition: 'Interpoules nationales', type: 'titre', annees: [2026] },
+    ],
+    sources: ['https://cameroon-tribune.cm/article.html/79371/fr.html/details_2', 'https://rsssf.org/tablesk/kamfound.html'],
+  },
+
+  'elecsport': {
+    nomComplet: 'Elecsport de Limbé',
+    alias: ['electsport', 'elecsport de limbe', 'elecsport fc'],
+    ville: 'Limbé',
+    fondation: 1983,
+    histoire: [
+      "Club de Limbé fondé en 1983, Elecsport atteint la finale des Interpoules nationales en 2026, perdue face à Mintack FC (1-0). Les deux finalistes montent en Elite Two pour la saison 2026-2027.",
+    ],
+    palmares: [],
+    sources: ['https://cameroon-tribune.cm/article.html/79371/fr.html/details_2', 'https://rsssf.org/tablesk/kamfound.html'],
+  },
 };
 
 // "Panthère Sportive du Ndé" -> "panthere sportive du nde"

@@ -4,11 +4,12 @@
 // - zone basse claire : grille de cartes blanches (logo, nom, ville, rang au classement)
 
 import { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Search, MapPin, ArrowRight, X, CalendarClock } from 'lucide-react';
 import { equipeService } from '../services/equipeService';
 import { classementService } from '../services/classementService';
+import { matchService } from '../services/matchService';
 import { COMPETITIONS, SAISONS_DB, ANNEE_ACTUELLE, libelleSaison } from '../data/saisons';
 import SelecteurSaison from '../components/SelecteurSaison';
 import theme from '../theme';
@@ -26,8 +27,6 @@ const CLAIR = {
 const CHIFFRES = '"Barlow Condensed", Arial, sans-serif';
 const CONTENEUR = { position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '0 60px', boxSizing: 'content-box' };
 
-// Dans la base : division 0 = Elite One, 1 = Elite Two
-const DIVISION = { one: 0, two: 1 };
 
 const FOND_BANDE = `linear-gradient(120deg, ${theme.greenDeep} 0%, #12462c 45%, #0f3a25 100%)`;
 
@@ -55,12 +54,12 @@ const sansAccents = (s) => (s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').to
 const TRIS = ['classement', 'alpha'];
 
 // ── Carte d'un club ─────────────────────────────────────────────────────
-function CarteEquipe({ e, rang }) {
+function CarteEquipe({ e, rang, annee }) {
   const { t } = useTranslation();
   const ville = villeDe(e);
   return (
     <Link
-      to={`/equipes/${e.id}`}
+      to={`/equipes/${e.id}?saison=${annee}`}
       className="group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
       style={{
         position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
@@ -115,9 +114,15 @@ function CarteEquipe({ e, rang }) {
 function EquipesPage() {
   const { t } = useTranslation();
   const [equipes, setEquipes] = useState([]);
-  const [clsEtat, setClsEtat] = useState(null); // { annee, data: { one: [...], two: [...] } }
-  const [annee, setAnnee] = useState(ANNEE_ACTUELLE);
-  const [loading, setLoading] = useState(true);
+  // Données de la saison choisie : { annee, classements: { one, two }, matchs: { one, two } }
+  const [saisonEtat, setSaisonEtat] = useState(null);
+  // Saison : reprise de l'adresse (?saison=2025) quand on revient d'une fiche club
+  const [parametres] = useSearchParams();
+  const [annee, setAnnee] = useState(() => {
+    const s = Number(parametres.get('saison'));
+    return SAISONS_DB[s] ? s : ANNEE_ACTUELLE;
+  });
+  const [loadingEquipes, setLoadingEquipes] = useState(true);
   const [comp, setComp] = useState('one');
   const [recherche, setRecherche] = useState('');
   const [tri, setTri] = useState('classement');
@@ -129,23 +134,51 @@ function EquipesPage() {
     let ignore = false;
     equipeService.getAll()
       .catch(() => [])
-      .then(liste => { if (!ignore) { setEquipes(liste); setLoading(false); } });
+      .then(liste => { if (!ignore) { setEquipes(liste); setLoadingEquipes(false); } });
     return () => { ignore = true; };
   }, []);
 
-  // Classements de la saison choisie (pour afficher le rang de chaque club)
+  // Classements + matchs de la saison choisie : les matchs disent QUELS clubs ont
+  // joué cette saison-là, le classement donne leur rang
   useEffect(() => {
     const ids = SAISONS_DB[annee];
     if (!ids) return;
     let ignore = false;
-    Promise.all(COMPETITIONS.map(c => (ids[c.cle] != null ? classementService.getBySaison(ids[c.cle]).catch(() => []) : Promise.resolve([]))))
-      .then(cls => {
-        if (!ignore) setClsEtat({ annee, data: Object.fromEntries(COMPETITIONS.map((c, i) => [c.cle, cls[i]])) });
+    const charger = (service, id) => (id != null ? service.getBySaison(id).catch(() => []) : Promise.resolve([]));
+    Promise.all(COMPETITIONS.flatMap(c => [charger(classementService, ids[c.cle]), charger(matchService, ids[c.cle])]))
+      .then(res => {
+        if (ignore) return;
+        setSaisonEtat({
+          annee,
+          classements: Object.fromEntries(COMPETITIONS.map((c, i) => [c.cle, res[i * 2]])),
+          matchs: Object.fromEntries(COMPETITIONS.map((c, i) => [c.cle, res[i * 2 + 1]])),
+        });
       });
     return () => { ignore = true; };
   }, [annee]);
 
-  const classements = useMemo(() => (clsEtat?.annee === annee ? clsEtat.data : {}), [clsEtat, annee]);
+  const donneesSaison = saisonEtat?.annee === annee ? saisonEtat : null;
+  const classements = useMemo(() => donneesSaison?.classements ?? {}, [donneesSaison]);
+  const loading = loadingEquipes || (saisonDispo && !donneesSaison);
+
+  // Clubs de chaque championnat pour la saison choisie : ceux qui apparaissent dans
+  // ses matchs (ou, à défaut, dans son classement). On complète avec les infos de
+  // /api/equipes (ville...) quand on les a.
+  const clubsParComp = useMemo(() => {
+    if (!donneesSaison) return {};
+    const parId = new Map(equipes.map(e => [e.id, e]));
+    return Object.fromEntries(COMPETITIONS.map(c => {
+      const clubs = new Map();
+      const ajouter = (eq) => {
+        const id = eq?.id;
+        if (id == null || clubs.has(id)) return;
+        clubs.set(id, { ...eq, ...(parId.get(id) ?? {}) });
+      };
+      for (const m of donneesSaison.matchs[c.cle] ?? []) { ajouter(m.equipeDomicile); ajouter(m.equipeExterieur); }
+      for (const l of donneesSaison.classements[c.cle] ?? []) ajouter(l.equipe ?? { id: l.equipeId });
+      return [c.cle, [...clubs.values()].filter(e => e.nom)];
+    }));
+  }, [donneesSaison, equipes]);
 
   // Rang de chaque club dans son championnat (par id, sinon par nom)
   const rangs = useMemo(() => {
@@ -165,10 +198,9 @@ function EquipesPage() {
   const rangDe = (e) => rangs.get(`id:${e.id}`) ?? rangs.get(`nom:${e.nom}`) ?? null;
 
   const competition = COMPETITIONS.find(c => c.cle === comp)?.label ?? '';
-  const nbParComp = (cle) => equipes.filter(e => e.estActive !== false && e.division === DIVISION[cle]).length;
+  const nbParComp = (cle) => clubsParComp[cle]?.length ?? 0;
 
-  const affichees = equipes
-    .filter(e => e.estActive !== false && e.division === DIVISION[comp]) // les clubs des anciennes saisons (estActive = false) sont masqués
+  const affichees = (clubsParComp[comp] ?? [])
     .filter(e => {
       const q = sansAccents(recherche.trim());
       return !q || sansAccents(e.nom).includes(q) || sansAccents(villeDe(e)).includes(q);
@@ -302,7 +334,7 @@ function EquipesPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-              {affichees.map(e => <CarteEquipe key={e.id} e={e} rang={rangDe(e)} />)}
+              {affichees.map(e => <CarteEquipe key={e.id} e={e} rang={rangDe(e)} annee={annee} />)}
             </div>
           )}
         </div>

@@ -26,8 +26,9 @@ namespace F237.BLL.Services.Implementations
         // Nombre max de matchs par appel /fixtures?ids=... (limite API-Football)
         private const int TAILLE_LOT = 20;
 
-        // Plan gratuit : 10 requêtes par minute -> une requête toutes les 7 secondes
-        private static readonly TimeSpan DELAI_MIN_ENTRE_REQUETES = TimeSpan.FromSeconds(7);
+        // Plan Pro : on garde une petite pause entre deux appels (si l'API répond 429,
+        // le code attend et réessaie tout seul)
+        private static readonly TimeSpan DELAI_MIN_ENTRE_REQUETES = TimeSpan.FromMilliseconds(300);
         private DateTime _derniereRequete = DateTime.MinValue;
 
         public ApiFootballService(
@@ -326,16 +327,24 @@ namespace F237.BLL.Services.Implementations
             await EnregistrerClassementAsync(data.RootElement.GetProperty("response"), saisonId);
         }
 
-        // Modifié : lit TOUS les groupes (l'Elite Two se joue parfois en poules),
-        // pas seulement le premier
+        // Enregistre le classement d'une saison. Certaines saisons se jouent en
+        // plusieurs poules / phases (ex. Elite One 2023-24 : "Championship Round" et
+        // "Relegation Round") : chaque ligne garde le nom de son groupe et son ordre.
+        // On repart de zéro à chaque import pour ne pas garder de vieilles lignes.
         private async Task<int> EnregistrerClassementAsync(JsonElement responseArray, int saisonId)
         {
             if (responseArray.GetArrayLength() == 0) return 0;
 
             var groupes = responseArray[0].GetProperty("league").GetProperty("standings");
             var equipes = await _context.Equipes.ToListAsync();
-            var total = 0;
 
+            // 1. Supprime l'ancien classement de cette saison
+            var anciens = await _context.Classements.Where(c => c.SaisonId == saisonId).ToListAsync();
+            _context.Classements.RemoveRange(anciens);
+
+            // 2. Ajoute toutes les lignes, groupe par groupe
+            var total = 0;
+            var ordreGroupe = 0;
             foreach (var groupe in groupes.EnumerateArray())
             {
                 foreach (var entry in groupe.EnumerateArray())
@@ -345,27 +354,37 @@ namespace F237.BLL.Services.Implementations
                     if (equipe == null) continue;
 
                     var all = entry.GetProperty("all");
-                    var existant = await _context.Classements
-                        .FirstOrDefaultAsync(c => c.EquipeId == equipe.Id && c.SaisonId == saisonId);
-
-                    var classement = existant ?? new Classement { EquipeId = equipe.Id, SaisonId = saisonId };
-                    classement.Position = entry.GetProperty("rank").GetInt32();
-                    classement.MatchsJoues = all.GetProperty("played").GetInt32();
-                    classement.Victoires = all.GetProperty("win").GetInt32();
-                    classement.Nuls = all.GetProperty("draw").GetInt32();
-                    classement.Defaites = all.GetProperty("lose").GetInt32();
-                    classement.ButsPour = EntierOuNull(all.GetProperty("goals").GetProperty("for")) ?? 0;
-                    classement.ButsContre = EntierOuNull(all.GetProperty("goals").GetProperty("against")) ?? 0;
-                    classement.DifferenceDesButs = entry.GetProperty("goalsDiff").GetInt32();
-                    classement.Points = entry.GetProperty("points").GetInt32();
-
-                    if (existant == null) await _context.Classements.AddAsync(classement);
-                    else _context.Classements.Update(classement);
+                    await _context.Classements.AddAsync(new Classement
+                    {
+                        EquipeId = equipe.Id,
+                        SaisonId = saisonId,
+                        Groupe = TexteOuNull(entry, "group"),
+                        OrdreGroupe = ordreGroupe,
+                        Description = TexteOuNull(entry, "description"),
+                        Position = entry.GetProperty("rank").GetInt32(),
+                        MatchsJoues = all.GetProperty("played").GetInt32(),
+                        Victoires = all.GetProperty("win").GetInt32(),
+                        Nuls = all.GetProperty("draw").GetInt32(),
+                        Defaites = all.GetProperty("lose").GetInt32(),
+                        ButsPour = EntierOuNull(all.GetProperty("goals").GetProperty("for")) ?? 0,
+                        ButsContre = EntierOuNull(all.GetProperty("goals").GetProperty("against")) ?? 0,
+                        DifferenceDesButs = entry.GetProperty("goalsDiff").GetInt32(),
+                        Points = entry.GetProperty("points").GetInt32(),
+                    });
                     total++;
                 }
+                ordreGroupe++;
             }
             await _context.SaveChangesAsync();
             return total;
+        }
+
+        // Lit une propriété texte du JSON (null si absente ou vide)
+        private static string? TexteOuNull(JsonElement element, string nom)
+        {
+            if (!element.TryGetProperty(nom, out var valeur) || valeur.ValueKind != JsonValueKind.String) return null;
+            var texte = valeur.GetString();
+            return string.IsNullOrWhiteSpace(texte) ? null : texte;
         }
 
         public async Task SyncJoueursAsync(int leagueId, int saison)

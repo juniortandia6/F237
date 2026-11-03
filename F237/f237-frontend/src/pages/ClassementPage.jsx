@@ -227,12 +227,39 @@ function Forme({ matchs, nom }) {
   );
 }
 
+// Nom lisible d'un groupe : "Elite One: Championship Round" -> "Championship Round"
+const nomGroupe = (g) => (g ?? '').replace(/^[^:]*:\s*/, '').trim();
+
+// Titre traduit d'un groupe : "Group B" -> "Poule B", "Championship Round" -> "Poule pour le titre"...
+const titreGroupe = (g, t) => {
+  const nom = nomGroupe(g);
+  const poule = nom.match(/^group\s+(\w+)$/i);
+  if (poule) return t('classement.poule', { l: poule[1].toUpperCase() });
+  return t(`classement.groupes.${nom}`, { defaultValue: nom || t('classement.titre') });
+};
+
+// Zone d'une ligne : 'haut' (vert), 'bas' (rouge) ou null.
+// Si l'API a précisé ce que rapporte chaque place (description), on s'en sert ;
+// sinon on applique les règles par défaut de ZONES.
+const zoneDe = (l, rang, total, zones, parDescription) => {
+  if (parDescription) {
+    if (!l.description) return null;
+    return /relegation|relégation/i.test(l.description) ? 'bas' : 'haut';
+  }
+  if (rang <= zones.haut) return 'haut';
+  if (rang > total - zones.bas) return 'bas';
+  return null;
+};
+const COULEUR_ZONE = { haut: theme.green, bas: theme.red };
+
 // ── Tableau du classement ───────────────────────────────────────────────
 const COLONNES = '56px minmax(200px, 1fr) repeat(4, 46px) repeat(3, 52px) 60px 140px';
 
-function TableauClassement({ lignes, zones }) {
+function TableauClassement({ lignes, zones, annee }) {
   const { t } = useTranslation();
   const total = lignes.length;
+  const parDescription = lignes.some(l => l.description);
+  const zonesLignes = lignes.map((l, i) => zoneDe(l, l.position ?? i + 1, total, zones, parDescription));
   const entete = { fontSize: '11px', fontWeight: 800, color: CLAIR.doux, letterSpacing: '0.5px', textAlign: 'center' };
 
   return (
@@ -247,9 +274,9 @@ function TableauClassement({ lignes, zones }) {
 
         {lignes.map((l, i) => {
           const rang = l.position ?? i + 1;
-          const enHaut = rang <= zones.haut;
-          const enBas = rang > total - zones.bas;
-          const couleurZone = enHaut ? theme.green : enBas ? theme.red : 'transparent';
+          const couleurZone = COULEUR_ZONE[zonesLignes[i]] ?? 'transparent';
+          // Séparateur quand la zone change à la ligne suivante
+          const finDeZone = i < total - 1 && zonesLignes[i] !== zonesLignes[i + 1];
           const id = idEquipe(l.brut);
           const nombre = (v, couleur) => (
             <span style={{ textAlign: 'center', fontSize: '15px', color: couleur ?? '#3d4441' }}>{v ?? '–'}</span>
@@ -263,14 +290,14 @@ function TableauClassement({ lignes, zones }) {
                 padding: '12px 16px', borderTop: i ? `1px solid ${CLAIR.bord}` : 'none',
                 boxShadow: `inset 4px 0 0 ${couleurZone}`,
                 // Séparateurs de zone, comme chez FIBA
-                borderBottom: rang === zones.haut || rang === total - zones.bas ? `2px dashed ${CLAIR.bord}` : undefined,
+                borderBottom: finDeZone ? `2px dashed ${CLAIR.bord}` : undefined,
               }}
               onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f7f9f8'; }}
               onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
             >
               <span style={{ textAlign: 'center', fontWeight: 800, fontSize: '15px', color: CLAIR.texte }}>{rang}</span>
 
-              <Link to={id != null ? `/equipes/${id}` : '#'}
+              <Link to={id != null ? `/equipes/${id}?saison=${annee}` : '#'}
                 style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, textDecoration: 'none', color: CLAIR.texte }}>
                 {l.logo
                   ? <img src={l.logo} alt="" style={{ width: '30px', height: '30px', objectFit: 'contain', flexShrink: 0 }} />
@@ -344,7 +371,8 @@ function ClassementPage() {
     if (donnees?.cle !== cle) return [];
     const source = donnees.classement.length > 0 ? donnees.classement : classementDepuisMatchs(donnees.matchs);
     return [...source]
-      .sort((a, b) => (a.position ?? 999) - (b.position ?? 999) || (b.points ?? 0) - (a.points ?? 0))
+      .sort((a, b) => (a.ordreGroupe ?? 0) - (b.ordreGroupe ?? 0)
+        || (a.position ?? 999) - (b.position ?? 999) || (b.points ?? 0) - (a.points ?? 0))
       .map(e => {
         const nom = nomEquipe(e);
         const calc = statsDepuisMatchs(donnees.matchs, nom);
@@ -352,6 +380,7 @@ function ClassementPage() {
         const bc = stat(e, 'butsContre', 'butsEncaisses', 'bc', 'goalsAgainst') ?? calc.bc;
         return {
           brut: e, nom, logo: logoEquipe(e), position: e.position,
+          groupe: e.groupe ?? null, ordreGroupe: e.ordreGroupe ?? 0, description: e.description ?? null,
           j: stat(e, 'matchsJoues', 'joues', 'played'),
           v: stat(e, 'victoires', 'gagnes', 'win'),
           n: stat(e, 'nuls', 'egalites', 'draw'),
@@ -363,6 +392,17 @@ function ClassementPage() {
         };
       });
   }, [donnees, cle]);
+
+  // Saisons en plusieurs poules / phases : un tableau par groupe (dans l'ordre de l'API)
+  const groupes = useMemo(() => {
+    const parGroupe = new Map();
+    for (const l of lignes) {
+      const cleGroupe = l.groupe ?? '';
+      if (!parGroupe.has(cleGroupe)) parGroupe.set(cleGroupe, []);
+      parGroupe.get(cleGroupe).push(l);
+    }
+    return [...parGroupe.entries()].map(([nom, liste]) => ({ nom, lignes: liste }));
+  }, [lignes]);
 
   const buteurs = useMemo(() => calculerButeurs(matchs), [matchs]);
 
@@ -458,7 +498,21 @@ function ClassementPage() {
                   {t('classement.calcule')}
                 </div>
               )}
-              <TableauClassement lignes={lignes} zones={zones} />
+              {groupes.length > 1 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+                  {groupes.map(g => (
+                    <div key={g.nom}>
+                      <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '20px', fontWeight: 800, color: CLAIR.texte, marginBottom: '12px' }}>
+                        <span style={{ width: '6px', height: '22px', borderRadius: '3px', background: `linear-gradient(${theme.green}, ${theme.red}, ${theme.yellow})` }} />
+                        {titreGroupe(g.nom, t)}
+                      </h2>
+                      <TableauClassement lignes={g.lignes} zones={zones} annee={annee} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <TableauClassement lignes={lignes} zones={zones} annee={annee} />
+              )}
               <p style={{ marginTop: '12px', fontSize: '12px', color: CLAIR.doux }}>
                 {t('classement.legende')}
               </p>
