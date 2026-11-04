@@ -260,6 +260,9 @@ namespace F237.DAL.Migrations
                     b.Property<int>("ApiFootballId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("DateApi")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("DateMatch")
                         .HasColumnType("datetime2");
 
@@ -268,6 +271,9 @@ namespace F237.DAL.Migrations
 
                     b.Property<int>("EquipeExterieurId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("HeureManuelle")
+                        .HasColumnType("bit");
 
                     b.Property<int>("SaisonId")
                         .HasColumnType("int");

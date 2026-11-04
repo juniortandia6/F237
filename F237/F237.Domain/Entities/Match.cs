@@ -13,6 +13,9 @@ namespace F237.Domain.Entities
         public DateTime DateMatch { get; set; }
         public StatutMatchEnum Statut { get; set; }
         public int SaisonId { get; set; }
+        // Dernière heure reçue de l'API (UTC) et heure corrigée à la main par l'admin
+        public DateTime? DateApi { get; set; }
+        public bool HeureManuelle { get; set; } = false;
 
         // Navigation
         public Equipe EquipeDomicile { get; set; } = null!;

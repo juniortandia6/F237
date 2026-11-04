@@ -2,7 +2,6 @@
 
 using F237.API.DTOs;
 using F237.API.Hubs;
-using F237.DAL;
 using F237.DAL.Data;
 using F237.Domain.Enums;
 using Microsoft.AspNetCore.SignalR;
@@ -12,12 +11,14 @@ using System.Text.Json;
 namespace F237.API.Services
 {
     /// <summary>
-    /// Background service qui tourne en arrière-plan.
-    /// Toutes les 60 secondes :
-    ///   1. Vérifie s'il y a des matchs en cours (Elite One/Two 2026)
-    ///   2. Appelle API-Football /fixtures?live=all&league=411 et &league=813
-    ///   3. Met à jour les scores en DB
-    ///   4. Broadcast via SignalR à tous les clients connectés
+    /// Service en arrière-plan pour les scores en direct (Elite One + Elite Two).
+    /// À chaque tour :
+    ///   1. Demande à API-Football les matchs en cours : /fixtures?live=411-813
+    ///      (pas de saison dans la requête : ça marche quelle que soit la saison en cours)
+    ///   2. Met à jour score, statut et minute en base
+    ///   3. Pour les matchs qui ne sont plus "live" depuis le tour précédent (match terminé,
+    ///      interrompu...), va chercher leur état final : sinon ils resteraient "en cours"
+    ///   4. Envoie les scores à tous les navigateurs connectés (SignalR)
     /// </summary>
     public class LiveScoreService : BackgroundService
     {
@@ -26,15 +27,21 @@ namespace F237.API.Services
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<LiveScoreService> _logger;
 
-        // Intervalles
-        private readonly TimeSpan _intervalLive = TimeSpan.FromSeconds(60);    // pendant matchs live
-        private readonly TimeSpan _intervalIdle = TimeSpan.FromMinutes(5);     // aucun match en cours
+        // Plan Pro (7 500 requêtes/jour) : 1 requête par tour
+        private readonly TimeSpan _intervalLive = TimeSpan.FromSeconds(30);  // pendant les matchs
+        private readonly TimeSpan _intervalIdle = TimeSpan.FromMinutes(2);   // aucun match en cours
 
-        private const int ELITE_ONE_ID = 411;
-        private const int ELITE_TWO_ID = 813;
-        private const int SAISON = 2026;
-        private const int ELITE_ONE_SAISONID = 3;
-        private const int ELITE_TWO_SAISONID = 4;
+        private const string LIGUES = "411-813"; // Elite One - Elite Two
+
+        // Matchs (id API) en cours au tour précédent
+        private HashSet<int> _enCoursPrecedent = new();
+
+        /// <summary>
+        /// Dernier état du direct envoyé aux navigateurs. Le hub le renvoie à chaque
+        /// nouvelle connexion : le navigateur a tout de suite scores et minutes,
+        /// sans attendre le prochain tour (jusqu'à 30 s).
+        /// </summary>
+        public static IReadOnlyList<MatchDto> DernierEtat { get; private set; } = Array.Empty<MatchDto>();
 
         public LiveScoreService(
             IServiceProvider services,
@@ -54,8 +61,7 @@ namespace F237.API.Services
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                bool desMatchsEnCours = false;
-
+                var desMatchsEnCours = false;
                 try
                 {
                     desMatchsEnCours = await SyncEtBroadcast(stoppingToken);
@@ -66,7 +72,7 @@ namespace F237.API.Services
                 }
 
                 var delai = desMatchsEnCours ? _intervalLive : _intervalIdle;
-                _logger.LogInformation($"⏱ Prochain sync dans {delai.TotalSeconds}s");
+                _logger.LogInformation("⏱ Prochain sync dans {Secondes}s", delai.TotalSeconds);
                 await Task.Delay(delai, stoppingToken);
             }
         }
@@ -74,165 +80,130 @@ namespace F237.API.Services
         private async Task<bool> SyncEtBroadcast(CancellationToken ct)
         {
             var client = _httpClientFactory.CreateClient("ApiFootball");
-            var matchsLiveDto = new List<MatchDto>();
-            bool auMoinsUnLive = false;
 
-            // Sync Elite One + Elite Two en parallèle
-            var tasks = new[]
+            // 1. Matchs en cours chez API-Football
+            var enCours = await GetFixturesAsync(client, $"fixtures?live={LIGUES}", ct);
+            if (enCours == null)
             {
-                FetchMatchsLive(client, ELITE_ONE_ID, ELITE_ONE_SAISONID),
-                FetchMatchsLive(client, ELITE_TWO_ID, ELITE_TWO_SAISONID)
-            };
+                // Erreur réseau / API : on ne dit SURTOUT PAS "aucun match en direct" aux
+                // navigateurs (le direct disparaîtrait). On garde l'état et on réessaie au tour suivant.
+                return _enCoursPrecedent.Count > 0;
+            }
 
-            var results = await Task.WhenAll(tasks);
+            // 3. Matchs qui étaient en cours au tour précédent et ne le sont plus : état final
+            var idsEnCours = enCours.Select(f => f.ApiFootballId).ToHashSet();
+            var disparus = _enCoursPrecedent.Where(id => !idsEnCours.Contains(id)).ToList();
+            var finis = disparus.Count > 0
+                ? await GetFixturesAsync(client, $"fixtures?ids={string.Join('-', disparus)}", ct) ?? new List<MatchDto>()
+                : new List<MatchDto>();
+            _enCoursPrecedent = idsEnCours;
 
+            // 2. Mise à jour en base
             using var scope = _services.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<F237DbContext>();
 
-            foreach (var (fixtures, saisonId) in results)
+            var aDiffuser = new List<MatchDto>();
+            foreach (var fixture in enCours.Concat(finis))
             {
-                if (fixtures == null || fixtures.Count == 0) continue;
-
-                auMoinsUnLive = true;
-
-                foreach (var fixture in fixtures)
+                var match = await context.Matchs.FirstOrDefaultAsync(m => m.ApiFootballId == fixture.ApiFootballId, ct);
+                if (match == null)
                 {
-                    var matchId = fixture.ApiFootballId;
-
-                    var match = await context.Matchs
-                        .FirstOrDefaultAsync(m => m.ApiFootballId == matchId, ct);
-
-                    if (match == null) continue;
-
-                    // Mettre à jour score + statut
-                    var ancienScore = $"{match.ScoreDomicile}-{match.ScoreExterieur}";
-                    match.ScoreDomicile = fixture.ScoreDomicile;
-                    match.ScoreExterieur = fixture.ScoreExterieur;
-                    match.Statut = (StatutMatchEnum)fixture.Statut;
-
-                    var nouveauScore = $"{match.ScoreDomicile}-{match.ScoreExterieur}";
-
-                    // Broadcast même si score n'a pas changé (pour le temps écoulé)
-                    matchsLiveDto.Add(fixture);
-
-                    _logger.LogInformation(
-                        $"⚽ Match {match.Id}: {ancienScore} → {nouveauScore} (statut: {match.Statut})");
+                    _logger.LogWarning("Match API {Id} en direct mais absent de la base (saison pas importée ?)", fixture.ApiFootballId);
+                    continue;
                 }
 
-                await context.SaveChangesAsync(ct);
+                var ancienScore = $"{match.ScoreDomicile}-{match.ScoreExterieur}";
+                match.ScoreDomicile = fixture.ScoreDomicile;
+                match.ScoreExterieur = fixture.ScoreExterieur;
+                match.Statut = (StatutMatchEnum)fixture.Statut;
+
+                // Infos de notre base pour les navigateurs
+                fixture.Id = match.Id;
+                fixture.SaisonId = match.SaisonId;
+                if (fixture.Statut == 1) aDiffuser.Add(fixture);
+
+                _logger.LogInformation("⚽ Match {Id}: {Ancien} → {Nouveau} ({Minute}', statut {Statut})",
+                    match.Id, ancienScore, $"{match.ScoreDomicile}-{match.ScoreExterieur}", fixture.MinuteLive, match.Statut);
             }
+            await context.SaveChangesAsync(ct);
 
-            // Broadcast à tous les clients "live"
-            if (matchsLiveDto.Count > 0)
+            // 4. Diffusion
+            DernierEtat = aDiffuser;
+            if (aDiffuser.Count > 0)
             {
-                await _hub.Clients.Group("live").SendAsync(
-                    "ScoresLiveMaj",
-                    matchsLiveDto,
-                    ct
-                );
-
-                // Broadcast individuel par match
-                foreach (var m in matchsLiveDto)
-                {
-                    await _hub.Clients.Group($"match_{m.Id}").SendAsync(
-                        "MatchMaj",
-                        m,
-                        ct
-                    );
-                }
+                await _hub.Clients.Group("live").SendAsync("ScoresLiveMaj", aDiffuser, ct);
+                foreach (var m in aDiffuser)
+                    await _hub.Clients.Group($"match_{m.Id}").SendAsync("MatchMaj", m, ct);
             }
             else
             {
-                // Aucun match live → envoyer un ping pour dire que tout est calme
                 await _hub.Clients.Group("live").SendAsync("AucunMatchLive", ct);
             }
 
-            return auMoinsUnLive;
+            return aDiffuser.Count > 0;
         }
 
-        /// <summary>
-        /// Appelle /fixtures?live=all&league={leagueId} et retourne les matchs en cours
-        /// </summary>
-        private async Task<(List<MatchDto> fixtures, int saisonId)> FetchMatchsLive(
-            HttpClient client, int leagueId, int saisonId)
+        /// <summary>Appelle API-Football et transforme la réponse en MatchDto (null en cas d'erreur).</summary>
+        private async Task<List<MatchDto>?> GetFixturesAsync(HttpClient client, string url, CancellationToken ct)
         {
             var fixtures = new List<MatchDto>();
-
             try
             {
-                // D'abord essayer les matchs "live"
-                var resp = await client.GetAsync(
-                    $"fixtures?live=all&league={leagueId}&season={SAISON}");
-
+                var resp = await client.GetAsync(url, ct);
                 if (!resp.IsSuccessStatusCode)
-                    return (fixtures, saisonId);
+                {
+                    _logger.LogWarning("API-Football {Url} : HTTP {Code}", url, (int)resp.StatusCode);
+                    return null;
+                }
 
-                var json = await resp.Content.ReadAsStringAsync();
-                var doc = JsonDocument.Parse(json);
-                var responses = doc.RootElement.GetProperty("response");
-
-                foreach (var item in responses.EnumerateArray())
+                using var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync(ct));
+                foreach (var item in doc.RootElement.GetProperty("response").EnumerateArray())
                 {
                     var fix = item.GetProperty("fixture");
                     var goals = item.GetProperty("goals");
                     var teams = item.GetProperty("teams");
-
                     var statusEl = fix.GetProperty("status");
-                    var statusShort = statusEl.GetProperty("short").GetString();
 
-                    // Mapper le statut API → notre enum
-                    // NS=0, 1H/2H/ET/P=1, FT/AET/PEN=2, PST/CANC=3, SUSP=4
-                    int statut = statusShort switch
+                    // NS=0, en cours=1, terminé=2, reporté/annulé=3, suspendu=4
+                    var statut = statusEl.GetProperty("short").GetString() switch
                     {
-                        "NS" => 0,
                         "1H" or "HT" or "2H" or "ET" or "BT" or "P" or "LIVE" => 1,
-                        "FT" or "AET" or "PEN" => 2,
+                        "FT" or "AET" or "PEN" or "AWD" or "WO" => 2,
                         "PST" or "CANC" or "ABD" => 3,
                         "SUSP" or "INT" => 4,
-                        _ => 0
+                        _ => 0,
                     };
 
-                    // Temps écoulé
-                    int? minuteLive = null;
-                    if (statusEl.TryGetProperty("elapsed", out var elapsedEl)
-                        && elapsedEl.ValueKind == JsonValueKind.Number)
-                    {
-                        minuteLive = elapsedEl.GetInt32();
-                    }
+                    int? minute = statusEl.TryGetProperty("elapsed", out var el) && el.ValueKind == JsonValueKind.Number
+                        ? el.GetInt32() : null;
 
-                    var matchDto = new MatchDto
+                    fixtures.Add(new MatchDto
                     {
                         ApiFootballId = fix.GetProperty("id").GetInt32(),
-                        DateMatch = fix.GetProperty("date").GetDateTime(),
+                        DateMatch = fix.GetProperty("date").GetDateTimeOffset().UtcDateTime,
                         Statut = statut,
-                        SaisonId = saisonId,
-                        ScoreDomicile = goals.GetProperty("home").ValueKind == JsonValueKind.Number
-                            ? goals.GetProperty("home").GetInt32() : null,
-                        ScoreExterieur = goals.GetProperty("away").ValueKind == JsonValueKind.Number
-                            ? goals.GetProperty("away").GetInt32() : null,
+                        ScoreDomicile = goals.GetProperty("home").ValueKind == JsonValueKind.Number ? goals.GetProperty("home").GetInt32() : null,
+                        ScoreExterieur = goals.GetProperty("away").ValueKind == JsonValueKind.Number ? goals.GetProperty("away").GetInt32() : null,
                         EquipeDomicile = new EquipeSimpleDto
                         {
                             Nom = teams.GetProperty("home").GetProperty("name").GetString() ?? "",
-                            LogoUrl = teams.GetProperty("home").GetProperty("logo").GetString()
+                            LogoUrl = teams.GetProperty("home").GetProperty("logo").GetString(),
                         },
                         EquipeExterieur = new EquipeSimpleDto
                         {
                             Nom = teams.GetProperty("away").GetProperty("name").GetString() ?? "",
-                            LogoUrl = teams.GetProperty("away").GetProperty("logo").GetString()
+                            LogoUrl = teams.GetProperty("away").GetProperty("logo").GetString(),
                         },
-                        MinuteLive = minuteLive
-                    };
-
-                    fixtures.Add(matchDto);
+                        MinuteLive = minute,
+                    });
                 }
             }
             catch (Exception ex)
             {
-                // Logger mais ne pas crasher
-                Console.WriteLine($"[LiveScoreService] Erreur FetchMatchsLive league={leagueId}: {ex.Message}");
+                _logger.LogError(ex, "Erreur API-Football {Url}", url);
+                return null;
             }
-
-            return (fixtures, saisonId);
+            return fixtures;
         }
     }
 }

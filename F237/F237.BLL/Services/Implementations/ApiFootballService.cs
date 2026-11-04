@@ -265,7 +265,15 @@ namespace F237.BLL.Services.Implementations
                     matchExistant.ScoreDomicile = scoreDomicile;
                     matchExistant.ScoreExterieur = scoreExterieur;
                     matchExistant.SaisonId = saisonId;
-                    matchExistant.DateMatch = fixtureInfo.GetProperty("date").GetDateTime(); // match reporté = nouvelle date
+                    // Heure du match : on garde une heure corrigée à la main par l'admin, SAUF si
+                    // l'API a changé son heure depuis (elle a enfin la vraie heure, ou le match est reporté)
+                    var dateApi = DateUtc(fixtureInfo);
+                    if (!matchExistant.HeureManuelle || matchExistant.DateApi != dateApi)
+                    {
+                        matchExistant.DateMatch = dateApi;
+                        matchExistant.HeureManuelle = false;
+                    }
+                    matchExistant.DateApi = dateApi;
                     _context.Matchs.Update(matchExistant);
                 }
                 else
@@ -273,7 +281,8 @@ namespace F237.BLL.Services.Implementations
                     await _context.Matchs.AddAsync(new Match
                     {
                         ApiFootballId = apiFixtureId,
-                        DateMatch = fixtureInfo.GetProperty("date").GetDateTime(),
+                        DateMatch = DateUtc(fixtureInfo),
+                        DateApi = DateUtc(fixtureInfo),
                         Statut = statut,
                         EquipeDomicileId = equipeDomicile.Id,
                         EquipeExterieurId = equipeExterieur.Id,
@@ -378,6 +387,36 @@ namespace F237.BLL.Services.Implementations
             await _context.SaveChangesAsync();
             return total;
         }
+
+        // Corrige à la main l'heure d'un match (quand l'API a une heure provisoire fausse).
+        // L'heure reste corrigée tant que l'API ne change pas la sienne.
+        public async Task<Match?> CorrigerHeureMatchAsync(int apiFootballId, DateTimeOffset heure)
+        {
+            var match = await _context.Matchs.FirstOrDefaultAsync(m => m.ApiFootballId == apiFootballId);
+            if (match == null) return null;
+            match.DateApi ??= match.DateMatch; // l'heure actuelle vient de l'API : on la retient
+            match.DateMatch = heure.UtcDateTime;
+            match.HeureManuelle = true;
+            await _context.SaveChangesAsync();
+            return match;
+        }
+
+        // Annule la correction : on revient à l'heure donnée par l'API
+        public async Task<Match?> AnnulerCorrectionHeureAsync(int apiFootballId)
+        {
+            var match = await _context.Matchs.FirstOrDefaultAsync(m => m.ApiFootballId == apiFootballId);
+            if (match == null) return null;
+            if (match.DateApi != null) match.DateMatch = match.DateApi.Value;
+            match.HeureManuelle = false;
+            await _context.SaveChangesAsync();
+            return match;
+        }
+
+        // Date d'un match en UTC. L'API envoie "2026-11-04T14:30:00+00:00" : on garde
+        // l'heure UTC telle quelle, peu importe le fuseau de la machine qui fait l'import.
+        // Chaque navigateur la convertit ensuite dans SON fuseau (Canada, Cameroun...).
+        private static DateTime DateUtc(JsonElement fixtureInfo) =>
+            fixtureInfo.GetProperty("date").GetDateTimeOffset().UtcDateTime;
 
         // Lit une propriété texte du JSON (null si absente ou vide)
         private static string? TexteOuNull(JsonElement element, string nom)

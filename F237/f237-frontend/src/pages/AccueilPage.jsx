@@ -173,7 +173,7 @@ function CarteDirect({ m, mode }) {
   const avenir = mode === 'avenir';
   const dom = m.scoreDomicile, ext = m.scoreExterieur;
   const aScore = dom != null && ext != null;
-  const minute = m.minute ?? m.tempsEcoule ?? null;
+  const minute = m.minute ?? m.minuteLive ?? m.tempsEcoule ?? null;
 
   return (
     <Link

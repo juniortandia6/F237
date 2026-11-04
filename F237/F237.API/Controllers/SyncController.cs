@@ -49,6 +49,28 @@ namespace F237.API.Controllers
             return resultat.Erreur == null ? Ok(resultat) : StatusCode(207, resultat);
         }
 
+        // PUT /api/sync/match/1645866/heure   corps : { "heure": "2026-11-04T15:30:00+01:00" }
+        // Corrige l'heure d'un match quand l'API a une heure provisoire fausse.
+        // L'heure peut être donnée avec n'importe quel fuseau (+01:00 = heure du Cameroun).
+        [HttpPut("match/{apiFootballId:int}/heure")]
+        public async Task<IActionResult> CorrigerHeure(int apiFootballId, [FromBody] CorrectionHeureDto dto)
+        {
+            var match = await _apiFootballService.CorrigerHeureMatchAsync(apiFootballId, dto.Heure);
+            return match == null
+                ? NotFound($"Aucun match avec l'id API {apiFootballId}.")
+                : Ok(new { match.Id, match.ApiFootballId, match.DateMatch, match.HeureManuelle });
+        }
+
+        // DELETE /api/sync/match/1645866/heure — revient à l'heure donnée par l'API
+        [HttpDelete("match/{apiFootballId:int}/heure")]
+        public async Task<IActionResult> AnnulerCorrectionHeure(int apiFootballId)
+        {
+            var match = await _apiFootballService.AnnulerCorrectionHeureAsync(apiFootballId);
+            return match == null
+                ? NotFound($"Aucun match avec l'id API {apiFootballId}.")
+                : Ok(new { match.Id, match.ApiFootballId, match.DateMatch, match.HeureManuelle });
+        }
+
         [HttpPost("equipes")]
         public async Task<IActionResult> SyncEquipes()
         {
@@ -112,5 +134,11 @@ namespace F237.API.Controllers
             await _apiFootballService.SyncEvenementsAsync(ELITE_TWO_ID, SAISON, ELITE_TWO_SAISONID);
             return Ok("Synchronisation complète effectuée avec succès");
         }
+    }
+
+    // Corps de PUT /api/sync/match/{id}/heure
+    public class CorrectionHeureDto
+    {
+        public DateTimeOffset Heure { get; set; }
     }
 }

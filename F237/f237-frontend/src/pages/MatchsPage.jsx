@@ -361,7 +361,7 @@ const MatchsPage = () => {
     const live = new Map(matchsLive.map(l => [l.apiFootballId, l]));
     return matchs.map(m => {
       const l = m.apiFootballId != null ? live.get(m.apiFootballId) : null;
-      return l ? { ...m, statut: 1, scoreDomicile: l.scoreDomicile, scoreExterieur: l.scoreExterieur, minute: l.minute ?? m.minute } : m;
+      return l ? { ...m, statut: 1, scoreDomicile: l.scoreDomicile, scoreExterieur: l.scoreExterieur, minute: l.minuteLive ?? l.minute ?? m.minuteLive ?? m.minute, buts: l.buts ?? m.buts } : m;
     });
   }, [matchs, matchsLive]);
 

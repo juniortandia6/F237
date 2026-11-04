@@ -1,4 +1,6 @@
-﻿namespace F237.BLL.Services.Interfaces
+﻿using F237.Domain.Entities;
+
+namespace F237.BLL.Services.Interfaces
 {
     public interface IApiFootballService
     {
@@ -20,6 +22,12 @@
 
         /// <summary>Requêtes restantes aujourd'hui (GET /status, ne consomme pas de quota).</summary>
         Task<QuotaApiFootball?> GetQuotaAsync();
+
+        /// <summary>Corrige l'heure d'un match à la main (null si le match est introuvable).</summary>
+        Task<Match?> CorrigerHeureMatchAsync(int apiFootballId, DateTimeOffset heure);
+
+        /// <summary>Annule la correction : retour à l'heure de l'API (null si introuvable).</summary>
+        Task<Match?> AnnulerCorrectionHeureAsync(int apiFootballId);
     }
 
     public class ResultatImportSaison

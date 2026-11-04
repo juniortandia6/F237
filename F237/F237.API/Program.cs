@@ -1,4 +1,5 @@
 ﻿using F237.API.Hubs;
+using F237.API.Json;
 using F237.API.Services;
 using F237.BLL.Services.Implementations;
 using F237.BLL.Services.Interfaces;
@@ -18,6 +19,8 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.ReferenceHandler =
             System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        // Dates envoyées en UTC avec "Z" : chaque navigateur les affiche dans son fuseau
+        options.JsonSerializerOptions.Converters.Add(new DateTimeUtcConverter());
     });
 builder.Services.AddEndpointsApiExplorer();
 // builder.Services.AddSwaggerGen();
@@ -109,8 +112,10 @@ builder.Services.AddHttpClient("ApiFootball", client =>
     client.Timeout = TimeSpan.FromSeconds(15);
 });
 
-// SignalR
-builder.Services.AddSignalR();
+// SignalR (mêmes règles de dates que l'API)
+builder.Services.AddSignalR()
+    .AddJsonProtocol(options =>
+        options.PayloadSerializerOptions.Converters.Add(new DateTimeUtcConverter()));
 
 // Background Service scores live
 builder.Services.AddHostedService<LiveScoreService>();

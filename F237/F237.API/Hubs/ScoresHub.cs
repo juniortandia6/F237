@@ -1,5 +1,6 @@
 ﻿// F237.API/Hubs/ScoresHub.cs
 
+using F237.API.Services;
 using Microsoft.AspNetCore.SignalR;
 
 namespace F237.API.Hubs
@@ -37,6 +38,15 @@ namespace F237.API.Hubs
         {
             // Chaque nouvelle connexion rejoint automatiquement le groupe "live"
             await Groups.AddToGroupAsync(Context.ConnectionId, "live");
+
+            // ... et reçoit TOUT DE SUITE l'état actuel du direct (scores + minutes),
+            // au lieu d'attendre le prochain tour du LiveScoreService
+            var etat = LiveScoreService.DernierEtat;
+            if (etat.Count > 0)
+                await Clients.Caller.SendAsync("ScoresLiveMaj", etat);
+            else
+                await Clients.Caller.SendAsync("AucunMatchLive");
+
             await base.OnConnectedAsync();
         }
     }

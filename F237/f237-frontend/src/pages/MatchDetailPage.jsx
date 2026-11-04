@@ -49,6 +49,8 @@ const abrev = (nom) => (nom ?? '???').replace(/[^A-Za-zÀ-ÿ]/g, '').substring(0
 const dateLongue = (d) => new Date(d).toLocaleDateString(locale(), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 const heure = (d) => new Date(d).toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
 const nomButeur = (b) => (b.nomJoueur && b.nomJoueur !== 'Inconnu' ? b.nomJoueur : i18n.t('matchDetail.buteurInconnu'));
+// Minute d'un but : 23' ou 45+2'
+const minuteBut = (b) => `${b.minute}${b.minuteAdditionnelle ? `+${b.minuteAdditionnelle}` : ''}'`;
 const journeeDe = (m) => m.journee ?? m.numeroJournee ?? m.round ?? null;
 const stadeDe = (m) => m.stade ?? m.nomStade ?? m.lieu ?? m.venue ?? null;
 
@@ -92,7 +94,7 @@ function EquipeHero({ equipe, buts, alignement }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: alignement }}>
           {buts.map((b, i) => (
             <span key={i} style={{ color: 'rgba(255,255,255,0.75)', fontSize: '13px' }}>
-              ⚽ {nomButeur(b)} {b.minute}'
+              ⚽ {nomButeur(b)} {minuteBut(b)}
               {b.estPenalty && <span style={{ color: theme.greenBright, fontWeight: 700 }}> ({t('matchDetail.pen')})</span>}
               {b.estButCSC && <span style={{ color: '#ff8a8d', fontWeight: 700 }}> ({t('matchDetail.csc')})</span>}
             </span>
@@ -283,7 +285,7 @@ function Evenement({ ev }) {
         backgroundColor: '#fff', border: `2px solid ${gauche ? CLAIR.vert : theme.red}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontFamily: CHIFFRES, fontWeight: 800, fontSize: '18px', color: CLAIR.texte,
-      }}>{ev.minute}'</span>
+      }}>{minuteBut(ev)}</span>
       <div>{!gauche && bloc}</div>
     </div>
   );
@@ -505,7 +507,7 @@ function MatchDetailPage() {
   const m = useMemo(() => {
     if (!brut) return null;
     const l = brut.apiFootballId != null ? matchsLive?.find(x => x.apiFootballId === brut.apiFootballId) : null;
-    return l ? { ...brut, statut: 1, scoreDomicile: l.scoreDomicile, scoreExterieur: l.scoreExterieur, minute: l.minute ?? brut.minute } : brut;
+    return l ? { ...brut, statut: 1, scoreDomicile: l.scoreDomicile, scoreExterieur: l.scoreExterieur, minute: l.minuteLive ?? l.minute ?? brut.minuteLive ?? brut.minute, buts: l.buts ?? brut.buts } : brut;
   }, [brut, matchsLive]);
 
   // Matchs de la même saison (pour la forme récente)
