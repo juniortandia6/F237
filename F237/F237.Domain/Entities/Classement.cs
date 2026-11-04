@@ -16,6 +16,9 @@
         // Ce que la place rapporte selon l'API (ex. "CAF Champions League", "Relegation")
         public string? Description { get; set; }
 
+        // Évolution depuis la journée précédente selon l'API : "up", "down" ou "same"
+        public string? Evolution { get; set; }
+
         public int Position { get; set; }
         public int MatchsJoues { get; set; } = 0;
         public int Victoires { get; set; } = 0;

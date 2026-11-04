@@ -120,6 +120,9 @@ builder.Services.AddSignalR()
 // Background Service scores live
 builder.Services.AddHostedService<LiveScoreService>();
 
+// Synchronisation automatique (fins de match + toutes les 6 h)
+builder.Services.AddHostedService<SyncAutoService>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

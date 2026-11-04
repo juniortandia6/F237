@@ -25,7 +25,9 @@
     "bilan": "{{v}}V · {{n}}N · {{d}}D",
     "but_one": "but",
     "but_other": "buts",
-    "reporte": "Reporté"
+    "reporte": "Reporté",
+    "miTemps": "Mi-temps",
+    "miTempsMaj": "MI-TEMPS"
   },
   "accueil": {
     "enSavoirPlus": "En savoir plus",
@@ -226,7 +228,12 @@
       "Play-offs": "Play-offs",
       "Play-downs": "Play-downs"
     },
-    "poule": "Poule {{l}}"
+    "poule": "Poule {{l}}",
+    "evolution": {
+      "up": "Monte depuis la dernière journée",
+      "down": "Descend depuis la dernière journée",
+      "same": "Même place qu'à la dernière journée"
+    }
   },
   "equipes": {
     "tri": {

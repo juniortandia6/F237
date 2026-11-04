@@ -6,7 +6,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Goal, CalendarClock } from 'lucide-react';
+import { Goal, CalendarClock, ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { classementService } from '../services/classementService';
 import { matchService } from '../services/matchService';
 import { useLiveScores } from '../hooks/useLiveScores';
@@ -108,6 +108,32 @@ function classementDepuisMatchs(matchs) {
       || b.butsPour - a.butsPour
       || a.equipe.nom.localeCompare(b.equipe.nom, 'fr'))
     .map((l, i) => ({ ...l, position: i + 1, differenceDesButs: l.butsPour - l.butsContre }));
+}
+
+// Évolution de chaque équipe depuis la journée précédente, calculée nous-mêmes
+// (le champ "status" de l'API reste souvent bloqué sur "same" pour l'Elite One).
+// On compare le classement avec TOUS les matchs terminés au classement d'avant la
+// dernière journée (= matchs terminés plus de 3 jours avant le dernier match joué :
+// une journée d'Elite One s'étale en général sur 2-3 jours).
+// Renvoie Map(nom d'équipe -> 'up' | 'down' | 'same'), vide s'il n'y a pas d'avant.
+function evolutionsDepuisMatchs(matchs) {
+  const termines = matchs.filter(m => m.statut === 2 && m.equipeDomicile && m.equipeExterieur);
+  if (termines.length === 0) return new Map();
+  const dernier = Math.max(...termines.map(m => new Date(m.dateMatch).getTime()));
+  const seuil = dernier - 3 * 24 * 3600 * 1000;
+  const avant = termines.filter(m => new Date(m.dateMatch).getTime() < seuil);
+  if (avant.length === 0) return new Map();
+
+  const rangs = (liste) => new Map(classementDepuisMatchs(liste).map(l => [l.equipe.nom, l.position]));
+  const maintenant = rangs(termines);
+  const precedent = rangs(avant);
+  const evolutions = new Map();
+  for (const [nom, rang] of maintenant) {
+    const ancien = precedent.get(nom);
+    if (ancien == null) continue; // pas encore joué avant la dernière journée
+    evolutions.set(nom, rang < ancien ? 'up' : rang > ancien ? 'down' : 'same');
+  }
+  return evolutions;
 }
 
 // Meilleurs buteurs à partir des buts des matchs (sans CSC ni buteurs inconnus)
@@ -252,8 +278,26 @@ const zoneDe = (l, rang, total, zones, parDescription) => {
 };
 const COULEUR_ZONE = { haut: theme.green, bas: theme.red };
 
+// Flèche d'évolution depuis la journée précédente (donnée "status" de l'API)
+const EVOLUTIONS = {
+  up: { Icone: ArrowUp, couleur: theme.green },
+  down: { Icone: ArrowDown, couleur: theme.red },
+  same: { Icone: Minus, couleur: '#a3aaa6' },
+};
+function Evolution({ valeur }) {
+  const { t } = useTranslation();
+  const evo = EVOLUTIONS[valeur];
+  if (!evo) return <span style={{ width: '14px' }} />;
+  const { Icone, couleur } = evo;
+  return (
+    <span title={t(`classement.evolution.${valeur}`)} aria-label={t(`classement.evolution.${valeur}`)} style={{ display: 'flex', width: '14px' }}>
+      <Icone size={14} color={couleur} strokeWidth={2.6} />
+    </span>
+  );
+}
+
 // ── Tableau du classement ───────────────────────────────────────────────
-const COLONNES = '56px minmax(200px, 1fr) repeat(4, 46px) repeat(3, 52px) 60px 140px';
+const COLONNES = '76px minmax(200px, 1fr) repeat(4, 46px) repeat(3, 52px) 60px 140px';
 
 function TableauClassement({ lignes, zones, annee }) {
   const { t } = useTranslation();
@@ -295,7 +339,10 @@ function TableauClassement({ lignes, zones, annee }) {
               onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f7f9f8'; }}
               onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
             >
-              <span style={{ textAlign: 'center', fontWeight: 800, fontSize: '15px', color: CLAIR.texte }}>{rang}</span>
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <span style={{ minWidth: '20px', textAlign: 'right', fontWeight: 800, fontSize: '15px', color: CLAIR.texte }}>{rang}</span>
+                <Evolution valeur={l.evolution} />
+              </span>
 
               <Link to={id != null ? `/equipes/${id}?saison=${annee}` : '#'}
                 style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, textDecoration: 'none', color: CLAIR.texte }}>
@@ -370,7 +417,11 @@ function ClassementPage() {
   const lignes = useMemo(() => {
     if (donnees?.cle !== cle) return [];
     const source = donnees.classement.length > 0 ? donnees.classement : classementDepuisMatchs(donnees.matchs);
-    return [...source]
+    // Saison en plusieurs poules : on garde l'évolution donnée par l'API ;
+    // sinon on la calcule à partir des résultats
+    const plusieursGroupes = new Set(source.map(e => e.groupe ?? '')).size > 1;
+    const evolutions = plusieursGroupes ? new Map() : evolutionsDepuisMatchs(donnees.matchs);
+    const lignes = [...source]
       .sort((a, b) => (a.ordreGroupe ?? 0) - (b.ordreGroupe ?? 0)
         || (a.position ?? 999) - (b.position ?? 999) || (b.points ?? 0) - (a.points ?? 0))
       .map(e => {
@@ -381,6 +432,7 @@ function ClassementPage() {
         return {
           brut: e, nom, logo: logoEquipe(e), position: e.position,
           groupe: e.groupe ?? null, ordreGroupe: e.ordreGroupe ?? 0, description: e.description ?? null,
+          evolution: plusieursGroupes ? (e.evolution ?? null) : (evolutions.get(nom) ?? null),
           j: stat(e, 'matchsJoues', 'joues', 'played'),
           v: stat(e, 'victoires', 'gagnes', 'win'),
           n: stat(e, 'nuls', 'egalites', 'draw'),
@@ -391,6 +443,27 @@ function ClassementPage() {
           forme: calc.forme,
         };
       });
+
+    // Classement de l'API en retard sur nos résultats (elle met parfois du temps à
+    // le recalculer après un match) : pour une saison à un seul tableau, une équipe
+    // qui a plus de matchs joués dans nos résultats prend ses stats calculées,
+    // puis on refait l'ordre. Le classement officiel reprend la main dès que l'API suit.
+    if (plusieursGroupes || donnees.classement.length === 0) return lignes;
+    const calcules = new Map(classementDepuisMatchs(donnees.matchs).map(c => [c.equipe.nom, c]));
+    let modifie = false;
+    const misesAJour = lignes.map(l => {
+      const c = calcules.get(l.nom);
+      if (!c || c.matchsJoues <= (l.j ?? 0)) return l;
+      modifie = true;
+      return {
+        ...l, j: c.matchsJoues, v: c.victoires, n: c.nuls, d: c.defaites,
+        bp: c.butsPour, bc: c.butsContre, db: c.differenceDesButs, pts: c.points,
+      };
+    });
+    if (!modifie) return lignes;
+    return misesAJour
+      .sort((x, y) => y.pts - x.pts || y.db - x.db || y.bp - x.bp || x.nom.localeCompare(y.nom, 'fr'))
+      .map((l, i) => ({ ...l, position: i + 1 }));
   }, [donnees, cle]);
 
   // Saisons en plusieurs poules / phases : un tableau par groupe (dans l'ordre de l'API)

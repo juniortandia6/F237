@@ -25,7 +25,9 @@
     "bilan": "{{v}}W · {{n}}D · {{d}}L",
     "but_one": "goal",
     "but_other": "goals",
-    "reporte": "Postponed"
+    "reporte": "Postponed",
+    "miTemps": "Half-time",
+    "miTempsMaj": "HALF-TIME"
   },
   "accueil": {
     "enSavoirPlus": "Read more",
@@ -226,7 +228,12 @@
       "Play-offs": "Play-offs",
       "Play-downs": "Play-downs"
     },
-    "poule": "Group {{l}}"
+    "poule": "Group {{l}}",
+    "evolution": {
+      "up": "Up since the last matchday",
+      "down": "Down since the last matchday",
+      "same": "Same place as the last matchday"
+    }
   },
   "equipes": {
     "tri": {

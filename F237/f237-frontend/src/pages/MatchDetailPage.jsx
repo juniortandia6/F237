@@ -114,7 +114,7 @@ function BoiteScore({ m }) {
   const extGagne = joue && m.scoreExterieur > m.scoreDomicile;
 
   const bandeau = live
-    ? { texte: `${t('commun.enDirectMaj')}${m.minute ? ` · ${m.minute}'` : ''}`, fond: theme.red, couleur: '#fff' }
+    ? { texte: m.statutCourt === 'HT' ? t('commun.miTempsMaj') : `${t('commun.enDirectMaj')}${m.minute ? ` · ${m.minute}${m.minuteExtra ? `+${m.minuteExtra}` : ''}'` : ''}`, fond: theme.red, couleur: '#fff' }
     : termine ? { texte: t('matchDetail.termineMaj'), fond: '#d9dedb', couleur: '#5b625e' }
     : reporte ? { texte: t('matchDetail.reporteMaj'), fond: theme.yellow, couleur: '#1a1a1a' }
     : { texte: t('matchDetail.aVenirMaj'), fond: '#d9dedb', couleur: '#5b625e' };
@@ -511,7 +511,7 @@ function MatchDetailPage() {
   const m = useMemo(() => {
     if (!brut) return null;
     const l = brut.apiFootballId != null ? matchsLive?.find(x => x.apiFootballId === brut.apiFootballId) : null;
-    return l ? { ...brut, statut: 1, scoreDomicile: l.scoreDomicile, scoreExterieur: l.scoreExterieur, minute: l.minuteLive ?? l.minute ?? brut.minuteLive ?? brut.minute, buts: l.buts ?? brut.buts } : brut;
+    return l ? { ...brut, statut: 1, scoreDomicile: l.scoreDomicile, scoreExterieur: l.scoreExterieur, minute: l.minuteLive ?? l.minute ?? brut.minuteLive ?? brut.minute, statutCourt: l.statutCourt, minuteExtra: l.minuteExtra, buts: l.buts ?? brut.buts } : brut;
   }, [brut, matchsLive]);
 
   // Matchs de la même saison (pour la forme récente)

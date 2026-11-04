@@ -370,6 +370,7 @@ namespace F237.BLL.Services.Implementations
                         Groupe = TexteOuNull(entry, "group"),
                         OrdreGroupe = ordreGroupe,
                         Description = TexteOuNull(entry, "description"),
+                        Evolution = TexteOuNull(entry, "status"),
                         Position = entry.GetProperty("rank").GetInt32(),
                         MatchsJoues = all.GetProperty("played").GetInt32(),
                         Victoires = all.GetProperty("win").GetInt32(),

@@ -4,7 +4,7 @@
 // - zone basse claire : cartes de matchs + colonne "la journée en chiffres"
 
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { locale } from '../i18n';
 import { ChevronLeft, ChevronRight, EyeOff, Radio, CalendarClock } from 'lucide-react';
@@ -205,7 +205,7 @@ function CarteMatch({ m, competition, masquer }) {
             {live ? (
               <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 800, color: theme.red }}>
                 <span className="animate-pulse" style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: theme.red }} />
-                {t('commun.enDirectMaj')}{m.minute ? ` · ${m.minute}'` : ''}
+                {m.statutCourt === 'HT' ? t('commun.miTempsMaj') : `${t('commun.enDirectMaj')}${m.minute ? ` · ${m.minute}${m.minuteExtra ? `+${m.minuteExtra}` : ''}'` : ''}`}
               </span>
             ) : (
               <span style={{ fontSize: '12px', fontWeight: 700, color: CLAIR.doux, textTransform: 'uppercase' }}>
@@ -317,7 +317,10 @@ const MatchsPage = () => {
   const [matchs, setMatchs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [annee, setAnnee] = useState(ANNEE_ACTUELLE);
-  const [comp, setComp] = useState('one');
+  // Lien depuis l'accueil : /matchs?date=2026-11-07&comp=two
+  const [parametres] = useSearchParams();
+  const dateVoulue = parametres.get('date');
+  const [comp, setComp] = useState(parametres.get('comp') === 'two' ? 'two' : 'one');
   const saisonId = SAISONS_DB[annee]?.[comp] ?? null; // null = pas encore de données
   const [dateSelectionnee, setDateSelectionnee] = useState(null);
   const [masquerScores, setMasquerScores] = useState(false);
@@ -349,11 +352,13 @@ const MatchsPage = () => {
         // Date par défaut : le prochain jour de match (ou le dernier s'il n'y en a plus)
         const aujourd = cleJour(new Date());
         const dates = [...new Set(data.map(m => cleJour(m.dateMatch)))].sort();
-        setDateSelectionnee(dates.find(d => d >= aujourd) ?? dates[dates.length - 1] ?? null);
+        setDateSelectionnee(dateVoulue && dates.includes(dateVoulue)
+          ? dateVoulue
+          : dates.find(d => d >= aujourd) ?? dates[dates.length - 1] ?? null);
       })
       .catch(() => { if (!ignore) setLoading(false); });
     return () => { ignore = true; };
-  }, [saisonId]);
+  }, [saisonId, dateVoulue]);
 
   // Scores en direct (SignalR) : on met à jour les matchs correspondants
   const matchsAJour = useMemo(() => {
@@ -361,7 +366,7 @@ const MatchsPage = () => {
     const live = new Map(matchsLive.map(l => [l.apiFootballId, l]));
     return matchs.map(m => {
       const l = m.apiFootballId != null ? live.get(m.apiFootballId) : null;
-      return l ? { ...m, statut: 1, scoreDomicile: l.scoreDomicile, scoreExterieur: l.scoreExterieur, minute: l.minuteLive ?? l.minute ?? m.minuteLive ?? m.minute, buts: l.buts ?? m.buts } : m;
+      return l ? { ...m, statut: 1, scoreDomicile: l.scoreDomicile, scoreExterieur: l.scoreExterieur, minute: l.minuteLive ?? l.minute ?? m.minuteLive ?? m.minute, statutCourt: l.statutCourt, minuteExtra: l.minuteExtra, buts: l.buts ?? m.buts } : m;
     });
   }, [matchs, matchsLive]);
 

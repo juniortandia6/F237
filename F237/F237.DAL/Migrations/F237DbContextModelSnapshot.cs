@@ -91,6 +91,9 @@ namespace F237.DAL.Migrations
                     b.Property<int>("EquipeId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Evolution")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Groupe")
                         .HasColumnType("nvarchar(max)");
 

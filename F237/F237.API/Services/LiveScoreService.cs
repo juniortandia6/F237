@@ -47,6 +47,12 @@ namespace F237.API.Services
         // Buts lus dans les "events" de l'API, par match (id API)
         private readonly Dictionary<int, List<ButLive>> _butsParMatch = new();
 
+        // Statut court de l'API par match (ex. "HT" = mi-temps), pour l'affichage
+        private readonly Dictionary<int, string> _statutCourtParMatch = new();
+
+        // Temps additionnel en cours par match (ex. 5 pour "90+5'"), si l'API le donne
+        private readonly Dictionary<int, int?> _extraParMatch = new();
+
         public LiveScoreService(
             IServiceProvider services,
             IHubContext<ScoresHub> hub,
@@ -94,17 +100,24 @@ namespace F237.API.Services
                 return _enCoursPrecedent.Count > 0;
             }
 
-            // 3. Matchs qui étaient en cours au tour précédent et ne le sont plus : état final
+            using var scope = _services.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<F237DbContext>();
+
+            // 3. Matchs "en cours" dans NOTRE base mais plus en direct chez l'API : on va
+            //    chercher leur état final. On part de la base (et pas d'une liste en mémoire)
+            //    pour que ça marche même si l'API F237 a redémarré pendant ou après le match.
             var idsEnCours = enCours.Select(f => f.ApiFootballId).ToHashSet();
-            var disparus = _enCoursPrecedent.Where(id => !idsEnCours.Contains(id)).ToList();
-            var finis = disparus.Count > 0
-                ? await GetFixturesAsync(client, $"fixtures?ids={string.Join('-', disparus)}", ct) ?? new List<MatchDto>()
-                : new List<MatchDto>();
+            var enCoursEnBase = await context.Matchs
+                .Where(m => m.Statut == StatutMatchEnum.EnCours && m.ApiFootballId != null)
+                .Select(m => m.ApiFootballId)
+                .ToListAsync(ct);
+            var disparus = enCoursEnBase.Select(id => (int)id).Where(id => !idsEnCours.Contains(id)).Distinct().ToList();
+            var finis = new List<MatchDto>();
+            foreach (var lot in disparus.Chunk(20)) // 20 matchs max par appel /fixtures?ids=
+                finis.AddRange(await GetFixturesAsync(client, $"fixtures?ids={string.Join('-', lot)}", ct) ?? new List<MatchDto>());
             _enCoursPrecedent = idsEnCours;
 
             // 2. Mise à jour en base
-            using var scope = _services.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<F237DbContext>();
 
             var aDiffuser = new List<(int Id, object Donnees)>();
             foreach (var fixture in enCours.Concat(finis))
@@ -114,6 +127,13 @@ namespace F237.API.Services
                 {
                     _logger.LogWarning("Match API {Id} en direct mais absent de la base (saison pas importée ?)", fixture.ApiFootballId);
                     continue;
+                }
+
+                // Match qui vient de se terminer : réimport auto de sa saison (classement, flèches, buts)
+                if (fixture.Statut == 2 && (int)match.Statut != 2)
+                {
+                    SyncAutoService.Planifier(match.SaisonId, TimeSpan.FromMinutes(10));
+                    SyncAutoService.Planifier(match.SaisonId, TimeSpan.FromMinutes(60));
                 }
 
                 var ancienScore = $"{match.ScoreDomicile}-{match.ScoreExterieur}";
@@ -154,6 +174,8 @@ namespace F237.API.Services
                         fixture.ScoreDomicile,
                         fixture.ScoreExterieur,
                         fixture.MinuteLive,
+                        StatutCourt = _statutCourtParMatch.GetValueOrDefault(fixture.ApiFootballId),
+                        MinuteExtra = _extraParMatch.GetValueOrDefault(fixture.ApiFootballId),
                         fixture.EquipeDomicile,
                         fixture.EquipeExterieur,
                         Buts = buts,
@@ -240,6 +262,9 @@ namespace F237.API.Services
                         }
                     }
                     _butsParMatch[fix.GetProperty("id").GetInt32()] = buts;
+                    _statutCourtParMatch[fix.GetProperty("id").GetInt32()] = statusEl.GetProperty("short").GetString() ?? "";
+                    _extraParMatch[fix.GetProperty("id").GetInt32()] =
+                        statusEl.TryGetProperty("extra", out var extra) && extra.ValueKind == JsonValueKind.Number ? extra.GetInt32() : null;
 
                     fixtures.Add(new MatchDto
                     {

@@ -175,6 +175,13 @@ function LogoCarte({ src }) {
     : <span style={{ ...style, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.18)', border: '2px solid rgba(255,255,255,0.35)' }} />;
 }
 
+// Lien vers le calendrier, ouvert sur le jour (et le championnat) du match
+const lienCalendrier = (m) => {
+  const d = new Date(m.dateMatch);
+  const jour = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  return `/matchs?date=${jour}&comp=${m.competition === 'Elite Two' ? 'two' : 'one'}`;
+};
+
 // mode : 'live' | 'avenir' | 'termine'
 function CarteDirect({ m, mode }) {
   const { t } = useTranslation();
@@ -186,7 +193,7 @@ function CarteDirect({ m, mode }) {
 
   return (
     <Link
-      to={avenir ? '/jouer' : m.id != null ? `/matchs/${m.id}` : '/matchs'}
+      to={avenir ? lienCalendrier(m) : m.id != null ? `/matchs/${m.id}` : '/matchs'}
       state={avenir ? undefined : { match: m }}
       className="group"
       style={{
@@ -221,7 +228,7 @@ function CarteDirect({ m, mode }) {
           padding: '4px 10px', borderRadius: '20px',
         }}>
           {live && <span className="animate-pulse" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#fff' }} />}
-          {live ? (minute ? `${t('commun.enDirect')} · ${minute}'` : t('commun.enDirect')) : avenir ? t('commun.aVenir') : t('commun.termine')}
+          {live ? (m.statutCourt === 'HT' ? t('commun.miTemps') : minute ? `${t('commun.enDirect')} · ${minute}${m.minuteExtra ? `+${m.minuteExtra}` : ''}'` : t('commun.enDirect')) : avenir ? t('commun.aVenir') : t('commun.termine')}
         </span>
 
         <LogoCarte src={m.equipeDomicile?.logoUrl} />
@@ -266,7 +273,7 @@ function CarteDirect({ m, mode }) {
         marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #ececec',
         display: 'flex', alignItems: 'center', gap: '6px', color: '#6b6b6b', fontSize: '14px', fontWeight: 600,
       }}>
-        {live ? t('accueil.direct.suivre') : avenir ? t('accueil.direct.pronostic') : t('accueil.direct.resume')}
+        {live ? t('accueil.direct.suivre') : avenir ? t('jouer.voirCalendrier') : t('accueil.direct.resume')}
         <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
       </div>
     </Link>
@@ -903,6 +910,8 @@ const AccueilPage = () => {
   const { matchsLive, isConnected } = useLiveScores();
   const [matchs, setMatchs] = useState([]);
   const [loadingMatchs, setLoadingMatchs] = useState(true);
+  // Heure du chargement des matchs (Date.now() est interdit pendant le rendu)
+  const [chargeLe, setChargeLe] = useState(0);
   const [actuActive, setActuActive] = useState(0);
   const [progress, setProgress] = useState(0);
   const barreRef = useRef(null);
@@ -961,6 +970,7 @@ const AccueilPage = () => {
       .then(listes => {
         if (ignore) return;
         setMatchs(listes.flat());
+        setChargeLe(Date.now());
         setLoadingMatchs(false);
       });
     return () => { ignore = true; };
@@ -977,7 +987,7 @@ const AccueilPage = () => {
     const live = new Map(matchsLive.map(l => [l.apiFootballId, l]));
     return matchs.map(m => {
       const l = m.apiFootballId != null ? live.get(m.apiFootballId) : null;
-      return l ? { ...m, statut: 1, scoreDomicile: l.scoreDomicile, scoreExterieur: l.scoreExterieur, minute: l.minuteLive ?? l.minute, buts: l.buts ?? m.buts } : m;
+      return l ? { ...m, statut: 1, scoreDomicile: l.scoreDomicile, scoreExterieur: l.scoreExterieur, minute: l.minuteLive ?? l.minute, statutCourt: l.statutCourt, minuteExtra: l.minuteExtra, buts: l.buts ?? m.buts } : m;
     });
   }, [matchs, matchsLive]);
 
@@ -989,10 +999,12 @@ const AccueilPage = () => {
   const matchsCarrousel = useMemo(() => matchsTermines.slice(0, 12), [matchsTermines]);
 
   // Prochains matchs : les vrais (statut 0) s'il y en a, sinon la démo
+  // (statut "à venir" ET date pas encore passée : un match d'octobre resté "à venir"
+  // a été reporté sans nouvelle date, ce n'est pas un prochain match)
   const vraisAVenir = useMemo(() => matchsAJour
-    .filter(m => m.statut === 0)
+    .filter(m => m.statut === 0 && new Date(m.dateMatch).getTime() > chargeLe - 3 * 3600 * 1000)
     .sort((a, b) => new Date(a.dateMatch) - new Date(b.dateMatch))
-    .slice(0, 8), [matchsAJour]);
+    .slice(0, 8), [matchsAJour, chargeLe]);
   const demoActive = UTILISER_DEMO && !loadingMatchs && vraisAVenir.length === 0;
   const matchsAVenir = useMemo(() => {
     if (!demoActive) return vraisAVenir;
