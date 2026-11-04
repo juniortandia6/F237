@@ -3,6 +3,7 @@
 using F237.API.DTOs;
 using F237.API.Hubs;
 using F237.DAL.Data;
+using F237.Domain.Entities;
 using F237.Domain.Enums;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -41,7 +42,10 @@ namespace F237.API.Services
         /// nouvelle connexion : le navigateur a tout de suite scores et minutes,
         /// sans attendre le prochain tour (jusqu'à 30 s).
         /// </summary>
-        public static IReadOnlyList<MatchDto> DernierEtat { get; private set; } = Array.Empty<MatchDto>();
+        public static IReadOnlyList<object> DernierEtat { get; private set; } = Array.Empty<object>();
+
+        // Buts lus dans les "events" de l'API, par match (id API)
+        private readonly Dictionary<int, List<ButLive>> _butsParMatch = new();
 
         public LiveScoreService(
             IServiceProvider services,
@@ -102,7 +106,7 @@ namespace F237.API.Services
             using var scope = _services.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<F237DbContext>();
 
-            var aDiffuser = new List<MatchDto>();
+            var aDiffuser = new List<(int Id, object Donnees)>();
             foreach (var fixture in enCours.Concat(finis))
             {
                 var match = await context.Matchs.FirstOrDefaultAsync(m => m.ApiFootballId == fixture.ApiFootballId, ct);
@@ -117,10 +121,44 @@ namespace F237.API.Services
                 match.ScoreExterieur = fixture.ScoreExterieur;
                 match.Statut = (StatutMatchEnum)fixture.Statut;
 
+                // Buts du match (comme Flashscore : minute + buteur) : on remplace ceux de la base
+                var buts = _butsParMatch.GetValueOrDefault(fixture.ApiFootballId) ?? new List<ButLive>();
+                var anciensButs = await context.ButsMatch.Where(b => b.MatchId == match.Id).ToListAsync(ct);
+                context.ButsMatch.RemoveRange(anciensButs);
+                foreach (var b in buts)
+                {
+                    await context.ButsMatch.AddAsync(new ButMatch
+                    {
+                        MatchId = match.Id,
+                        NomJoueur = b.NomJoueur,
+                        NomEquipe = b.NomEquipe,
+                        ApiJoueurId = b.ApiJoueurId,
+                        Minute = b.Minute,
+                        EstButCSC = b.EstButCSC,
+                        EstPenalty = b.EstPenalty,
+                    }, ct);
+                }
+
                 // Infos de notre base pour les navigateurs
                 fixture.Id = match.Id;
                 fixture.SaisonId = match.SaisonId;
-                if (fixture.Statut == 1) aDiffuser.Add(fixture);
+                if (fixture.Statut == 1)
+                {
+                    aDiffuser.Add((match.Id, new
+                    {
+                        fixture.Id,
+                        fixture.ApiFootballId,
+                        fixture.SaisonId,
+                        fixture.Statut,
+                        fixture.DateMatch,
+                        fixture.ScoreDomicile,
+                        fixture.ScoreExterieur,
+                        fixture.MinuteLive,
+                        fixture.EquipeDomicile,
+                        fixture.EquipeExterieur,
+                        Buts = buts,
+                    }));
+                }
 
                 _logger.LogInformation("⚽ Match {Id}: {Ancien} → {Nouveau} ({Minute}', statut {Statut})",
                     match.Id, ancienScore, $"{match.ScoreDomicile}-{match.ScoreExterieur}", fixture.MinuteLive, match.Statut);
@@ -128,12 +166,12 @@ namespace F237.API.Services
             await context.SaveChangesAsync(ct);
 
             // 4. Diffusion
-            DernierEtat = aDiffuser;
+            DernierEtat = aDiffuser.Select(x => x.Donnees).ToList();
             if (aDiffuser.Count > 0)
             {
-                await _hub.Clients.Group("live").SendAsync("ScoresLiveMaj", aDiffuser, ct);
-                foreach (var m in aDiffuser)
-                    await _hub.Clients.Group($"match_{m.Id}").SendAsync("MatchMaj", m, ct);
+                await _hub.Clients.Group("live").SendAsync("ScoresLiveMaj", DernierEtat, ct);
+                foreach (var (id, donnees) in aDiffuser)
+                    await _hub.Clients.Group($"match_{id}").SendAsync("MatchMaj", donnees, ct);
             }
             else
             {
@@ -177,6 +215,32 @@ namespace F237.API.Services
                     int? minute = statusEl.TryGetProperty("elapsed", out var el) && el.ValueKind == JsonValueKind.Number
                         ? el.GetInt32() : null;
 
+                    // Buts (événements "Goal", sans les penaltys ratés)
+                    var buts = new List<ButLive>();
+                    if (item.TryGetProperty("events", out var events) && events.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var evt in events.EnumerateArray())
+                        {
+                            if (evt.GetProperty("type").GetString() != "Goal") continue;
+                            var detail = evt.GetProperty("detail").GetString();
+                            if (detail == "Missed Penalty") continue;
+                            var joueur = evt.GetProperty("player");
+                            var time = evt.GetProperty("time");
+                            buts.Add(new ButLive
+                            {
+                                NomJoueur = joueur.TryGetProperty("name", out var nom) && nom.ValueKind == JsonValueKind.String
+                                    ? nom.GetString() ?? "Inconnu" : "Inconnu",
+                                NomEquipe = evt.GetProperty("team").GetProperty("name").GetString() ?? "",
+                                ApiJoueurId = joueur.TryGetProperty("id", out var jid) && jid.ValueKind == JsonValueKind.Number ? jid.GetInt32() : 0,
+                                Minute = time.GetProperty("elapsed").ValueKind == JsonValueKind.Number ? time.GetProperty("elapsed").GetInt32() : 0,
+                                MinuteAdditionnelle = time.TryGetProperty("extra", out var ex) && ex.ValueKind == JsonValueKind.Number ? ex.GetInt32() : null,
+                                EstButCSC = detail == "Own Goal",
+                                EstPenalty = detail == "Penalty",
+                            });
+                        }
+                    }
+                    _butsParMatch[fix.GetProperty("id").GetInt32()] = buts;
+
                     fixtures.Add(new MatchDto
                     {
                         ApiFootballId = fix.GetProperty("id").GetInt32(),
@@ -205,5 +269,17 @@ namespace F237.API.Services
             }
             return fixtures;
         }
+    }
+
+    /// <summary>Un but tel que lu dans les événements en direct d'API-Football.</summary>
+    public class ButLive
+    {
+        public string NomJoueur { get; set; } = "Inconnu";
+        public string NomEquipe { get; set; } = "";
+        public int ApiJoueurId { get; set; }
+        public int Minute { get; set; }
+        public int? MinuteAdditionnelle { get; set; } // ex. 45+2
+        public bool EstButCSC { get; set; }
+        public bool EstPenalty { get; set; }
     }
 }

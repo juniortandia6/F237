@@ -171,8 +171,12 @@ function TableauMiTemps({ m }) {
   const fiable = lignes.every(l => l.buts.length === l.total);
   const mt1 = (l) => l.buts.filter(b => b.minute <= 45).length;
   const mt2 = (l) => l.buts.filter(b => b.minute > 45).length;
+  // 2e mi-temps commencée ? (match terminé, minute > 45 ou but marqué après la 45e)
+  const deuxiemeMtCommencee = m.statut === 2 || (m.minute ?? 0) > 45
+    || lignes.some(l => l.buts.some(b => b.minute > 45));
 
-  const cellule = { padding: '14px 12px', textAlign: 'center', borderLeft: `1px solid ${CLAIR.bord}`, fontSize: '16px' };
+  const cellule = { padding: '14px 12px', textAlign: 'center', borderLeft: `1px solid ${CLAIR.bord}`, fontSize: '16px', color: CLAIR.doux };
+  const termine = m.statut === 2; // le score FINAL ne s'affiche qu'à la fin du match
   const entete = { ...cellule, padding: '10px 12px', fontSize: '11px', fontWeight: 800, color: CLAIR.doux, letterSpacing: '0.5px' };
 
   return (
@@ -197,8 +201,8 @@ function TableauMiTemps({ m }) {
                   {abrev(l.equipe?.nom)}
                 </td>
                 <td style={{ ...cellule, ...(fiable ? gras(mt1(l), mt1(autre)) : {}) }}>{fiable ? mt1(l) : '–'}</td>
-                <td style={{ ...cellule, ...(fiable ? gras(mt2(l), mt2(autre)) : {}) }}>{fiable ? mt2(l) : '–'}</td>
-                <td style={{ ...cellule, fontFamily: CHIFFRES, fontSize: '22px', ...gras(l.total, autre.total) }}>{l.total}</td>
+                <td style={{ ...cellule, ...(fiable && deuxiemeMtCommencee ? gras(mt2(l), mt2(autre)) : {}) }}>{fiable && deuxiemeMtCommencee ? mt2(l) : '–'}</td>
+                <td style={{ ...cellule, fontFamily: CHIFFRES, fontSize: '22px', ...(termine ? gras(l.total, autre.total) : {}) }}>{termine ? l.total : '–'}</td>
               </tr>
             );
           })}

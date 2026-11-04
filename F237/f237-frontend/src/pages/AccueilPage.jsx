@@ -9,6 +9,7 @@ import { matchService } from '../services/matchService';
 import theme from '../theme';
 import { ACTUALITES, ACTUS_HERO, texteActu } from '../data/actualites';
 import { UTILISER_DEMO, construireMatchsDemo } from '../data/matchsDemo';
+import { COMPETITIONS, SAISONS_DB, ANNEE_ACTUELLE } from '../data/saisons';
 
 // Les 5 actus du hero viennent de la source partagée (src/data/actualites.js)
 const ACTUS = ACTUS_HERO;
@@ -66,6 +67,9 @@ function LigneEquipe({ equipe, score, gagnant, perdant, aVenir }) {
 
 function CarteMatch({ m }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  // Toute la carte ouvre la page du match (le match est passé au routeur : affichage immédiat)
+  const ouvrir = () => { if (m.id != null) navigate(`/matchs/${m.id}`, { state: { match: m } }); };
   const termine = m.statut === 2;
   const live = m.statut === 1;
   const aVenir = m.statut === 0;
@@ -75,9 +79,13 @@ function CarteMatch({ m }) {
 
   return (
     <div
+      role="link"
+      tabIndex={0}
+      onClick={ouvrir}
+      onKeyDown={e => { if (e.key === 'Enter') ouvrir(); }}
       className="transition-transform duration-200 hover:-translate-y-1"
       style={{
-        flex: `0 0 ${LARGEUR_CARTE}px`, scrollSnapAlign: 'start',
+        flex: `0 0 ${LARGEUR_CARTE}px`, scrollSnapAlign: 'start', cursor: 'pointer',
         display: 'flex', alignItems: 'stretch',
         backgroundColor: '#fff', borderRadius: '12px',
         boxShadow: '0 8px 22px rgba(0,0,0,0.30)',
@@ -88,7 +96,7 @@ function CarteMatch({ m }) {
       <div style={{ flex: 1, minWidth: 0, paddingRight: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: '11px', fontWeight: 700, color: '#333', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-            Elite One
+            {m.competition ?? 'Elite One'}
           </span>
           {live ? (
             <span style={{ fontSize: '11px', fontWeight: 800, color: theme.red, display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -120,7 +128,8 @@ function CarteMatch({ m }) {
             {formatHeure(m.dateMatch)}
           </span>
         ) : (
-          <Link to="/matchs"
+          <Link to={m.id != null ? `/matchs/${m.id}` : '/matchs'} state={{ match: m }}
+            onClick={e => e.stopPropagation()}
             className="transition-colors hover:bg-gray-200"
             style={{
               backgroundColor: '#efefef', color: '#333', fontWeight: 600, fontSize: '14px',
@@ -177,7 +186,8 @@ function CarteDirect({ m, mode }) {
 
   return (
     <Link
-      to={avenir ? '/jouer' : '/matchs'}
+      to={avenir ? '/jouer' : m.id != null ? `/matchs/${m.id}` : '/matchs'}
+      state={avenir ? undefined : { match: m }}
       className="group"
       style={{
         flex: `0 0 ${LARGEUR_CARTE_DIRECT}px`, scrollSnapAlign: 'start',
@@ -373,9 +383,10 @@ function SectionDirect({ matchsLive, matchsAVenir, matchsTermines, isConnected, 
 // Onglets Elite One / Elite Two, podium des 3 premiers, puis 4e et 5e
 // dans un petit tableau. "Tous les détails" mène au classement complet.
 
+// Saison en cours (la plus récente importée, voir data/saisons.js)
 const LIGUES = [
-  { cle: 'elite-one', label: 'MTN Elite One', saisonId: 3 },
-  { cle: 'elite-two', label: 'MTN Elite Two', saisonId: 4 },
+  { cle: 'elite-one', label: 'MTN Elite One', saisonId: SAISONS_DB[ANNEE_ACTUELLE]?.one },
+  { cle: 'elite-two', label: 'MTN Elite Two', saisonId: SAISONS_DB[ANNEE_ACTUELLE]?.two },
 ];
 
 const MEDAILLES = {
@@ -940,16 +951,18 @@ const AccueilPage = () => {
 
   useEffect(() => {
     let ignore = false;
-    matchService.getBySaison(3)
-      .then(data => {
-        if (!ignore) {
-          const aVenir = data.filter(m => m.statut === 0).sort((a, b) => new Date(a.dateMatch) - new Date(b.dateMatch)).slice(0, 5);
-          const termines = data.filter(m => m.statut === 2).sort((a, b) => new Date(b.dateMatch) - new Date(a.dateMatch)).slice(0, 8);
-          setMatchs([...aVenir, ...termines]);
-          setLoadingMatchs(false);
-        }
-      })
-      .catch(() => setLoadingMatchs(false));
+    // Matchs de la saison en cours, Elite One ET Elite Two
+    const ids = SAISONS_DB[ANNEE_ACTUELLE] ?? {};
+    Promise.all(COMPETITIONS
+      .filter(c => ids[c.cle] != null)
+      .map(c => matchService.getBySaison(ids[c.cle])
+        .then(liste => liste.map(m => ({ ...m, competition: c.label })))
+        .catch(() => [])))
+      .then(listes => {
+        if (ignore) return;
+        setMatchs(listes.flat());
+        setLoadingMatchs(false);
+      });
     return () => { ignore = true; };
   }, []);
 
@@ -958,8 +971,28 @@ const AccueilPage = () => {
     .map(m => `${m.apiFootballId ?? m.id}:${m.scoreDomicile ?? 0}-${m.scoreExterieur ?? 0}`)
     .join('|');
 
+  // Scores en direct (SignalR) appliqués aux matchs de la saison
+  const matchsAJour = useMemo(() => {
+    if (!matchsLive?.length) return matchs;
+    const live = new Map(matchsLive.map(l => [l.apiFootballId, l]));
+    return matchs.map(m => {
+      const l = m.apiFootballId != null ? live.get(m.apiFootballId) : null;
+      return l ? { ...m, statut: 1, scoreDomicile: l.scoreDomicile, scoreExterieur: l.scoreExterieur, minute: l.minuteLive ?? l.minute, buts: l.buts ?? m.buts } : m;
+    });
+  }, [matchs, matchsLive]);
+
+  // Bandeau "Matchs" : uniquement les derniers résultats de la saison
+  // (les matchs en direct ont leur propre section "En direct" plus bas)
+  const matchsTermines = useMemo(() => matchsAJour
+    .filter(m => m.statut === 2)
+    .sort((a, b) => new Date(b.dateMatch) - new Date(a.dateMatch)), [matchsAJour]);
+  const matchsCarrousel = useMemo(() => matchsTermines.slice(0, 12), [matchsTermines]);
+
   // Prochains matchs : les vrais (statut 0) s'il y en a, sinon la démo
-  const vraisAVenir = useMemo(() => matchs.filter(m => m.statut === 0), [matchs]);
+  const vraisAVenir = useMemo(() => matchsAJour
+    .filter(m => m.statut === 0)
+    .sort((a, b) => new Date(a.dateMatch) - new Date(b.dateMatch))
+    .slice(0, 8), [matchsAJour]);
   const demoActive = UTILISER_DEMO && !loadingMatchs && vraisAVenir.length === 0;
   const matchsAVenir = useMemo(() => {
     if (!demoActive) return vraisAVenir;
@@ -1150,9 +1183,9 @@ const AccueilPage = () => {
             >
               {loadingMatchs ? (
                 <span style={{ fontSize: '14px', color: theme.textMuted }}>{t('commun.chargement')}</span>
-              ) : matchs.length === 0 ? (
+              ) : matchsCarrousel.length === 0 ? (
                 <span style={{ fontSize: '14px', color: theme.textMuted }}>{t('accueil.aucunMatch')}</span>
-              ) : matchs.map((m, i) => (
+              ) : matchsCarrousel.map((m, i) => (
                 <CarteMatch key={m.id ?? i} m={m} />
               ))}
             </div>
@@ -1179,7 +1212,7 @@ const AccueilPage = () => {
         <SectionDirect
           matchsLive={matchsLive}
           matchsAVenir={matchsAVenir}
-          matchsTermines={matchs.filter(m => m.statut === 2)}
+          matchsTermines={matchsTermines}
           isConnected={isConnected}
           demo={demoActive}
         />
