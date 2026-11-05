@@ -195,7 +195,7 @@ function Footer() {
               {t('footer.creePar')}{' '}
               <a href="https://cyrjunior-tandia.com" target="_blank" rel="noopener noreferrer"
                 style={{ color: theme.text, fontWeight: 700, textDecoration: 'underline', textUnderlineOffset: '3px' }}>
-                Cyr Junior Tandia
+                Cyr Junior Tandia Mouafou 
               </a>.
               <br />{t('footer.donnees')}
             </p>

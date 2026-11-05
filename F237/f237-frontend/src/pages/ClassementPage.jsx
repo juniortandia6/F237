@@ -3,8 +3,8 @@
 // - zone haute sombre : saison, titre, choix du championnat + carte "Meilleurs buteurs"
 // - zone basse claire : tableau du classement (zones, forme récente cliquable)
 
-import { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { Link, useSearchParams, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Goal, CalendarClock, ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { classementService } from '../services/classementService';
@@ -156,10 +156,13 @@ function calculerButeurs(matchs) {
 }
 
 // ── Carte "Meilleurs buteurs" (dans la zone haute) ──────────────────────
-function CarteButeurs({ buteurs, logos, chargement, competition }) {
+function CarteButeurs({ buteurs, logos, chargement, competition, surligne }) {
   const { t } = useTranslation();
   const [tout, setTout] = useState(false);
-  const liste = buteurs.slice(0, tout ? 10 : 5);
+  // Joueur venu de l'accueil : on ouvre le top 10 s'il est au-delà du 5e
+  const indexSurligne = surligne ? buteurs.findIndex(j => `${j.nom}|${j.equipe}` === surligne) : -1;
+  const voirTout = tout || indexSurligne >= 5;
+  const liste = buteurs.slice(0, voirTout ? 10 : 5);
   const leader = liste[0];
 
   return (
@@ -178,7 +181,10 @@ function CarteButeurs({ buteurs, logos, chargement, competition }) {
       ) : (
         <>
           {/* Le leader, mis en avant */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 18px', background: 'linear-gradient(90deg, #e8f3ec, #fff)' }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 18px', background: 'linear-gradient(90deg, #e8f3ec, #fff)',
+            boxShadow: indexSurligne === 0 ? `inset 4px 0 0 ${CLAIR.vert}` : 'none',
+          }}>
             <span style={{
               width: '30px', height: '30px', borderRadius: '50%', backgroundColor: '#f5c542', color: '#3a2c00',
               display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px', flexShrink: 0,
@@ -200,7 +206,10 @@ function CarteButeurs({ buteurs, logos, chargement, competition }) {
 
           {/* Les suivants */}
           {liste.slice(1).map((j, i) => (
-            <div key={`${j.nom}|${j.equipe}`} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 18px', borderTop: `1px solid ${CLAIR.bord}` }}>
+            <div key={`${j.nom}|${j.equipe}`} style={{
+              display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 18px', borderTop: `1px solid ${CLAIR.bord}`,
+              ...(indexSurligne === i + 1 && { backgroundColor: '#e8f3ec', boxShadow: `inset 4px 0 0 ${CLAIR.vert}` }),
+            }}>
               <span style={{ width: '30px', textAlign: 'center', fontWeight: 800, fontSize: '14px', color: CLAIR.doux, flexShrink: 0 }}>{i + 2}</span>
               {logos.get(j.equipe)
                 ? <img src={logos.get(j.equipe)} alt="" style={{ width: '24px', height: '24px', objectFit: 'contain', flexShrink: 0 }} />
@@ -213,13 +222,13 @@ function CarteButeurs({ buteurs, logos, chargement, competition }) {
             </div>
           ))}
 
-          {buteurs.length > 5 && (
+          {buteurs.length > 5 && indexSurligne < 5 && (
             <button onClick={() => setTout(x => !x)}
               style={{
                 width: '100%', padding: '11px', border: 'none', borderTop: `1px solid ${CLAIR.bord}`, cursor: 'pointer',
                 backgroundColor: CLAIR.tuile, color: CLAIR.vert, fontWeight: 700, fontSize: '13px',
               }}>
-              {tout ? t('classement.voirMoins') : t('classement.voirTop10')}
+              {voirTout ? t('classement.voirMoins') : t('classement.voirTop10')}
             </button>
           )}
         </>
@@ -383,7 +392,13 @@ function Legende({ couleur, children }) {
 function ClassementPage() {
   const { t } = useTranslation();
   const [annee, setAnnee] = useState(ANNEE_ACTUELLE);
-  const [comp, setComp] = useState('one');
+  // ?comp=two&joueur=Nom|Club#buteurs : arrivée depuis une carte buteur de l'accueil
+  const [params] = useSearchParams();
+  const { hash } = useLocation();
+  const [comp, setComp] = useState(() => (params.get('comp') === 'two' ? 'two' : 'one'));
+  const joueurVise = params.get('joueur');
+  const blocButeursRef = useRef(null);
+  const dejaDefile = useRef(false);
   const [donnees, setDonnees] = useState(null); // { cle, classement, matchs }
   const { matchsLive } = useLiveScores();
 
@@ -479,6 +494,13 @@ function ClassementPage() {
 
   const buteurs = useMemo(() => calculerButeurs(matchs), [matchs]);
 
+  // Arrivée par #buteurs : on descend jusqu'à la carte une fois les buteurs chargés (une seule fois)
+  useEffect(() => {
+    if (chargement || dejaDefile.current || hash !== '#buteurs') return;
+    dejaDefile.current = true;
+    blocButeursRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [chargement, hash]);
+
   // Logos des équipes par nom (pour la carte des buteurs)
   const logos = useMemo(() => {
     const map = new Map();
@@ -532,7 +554,10 @@ function ClassementPage() {
 
             {/* Droite : meilleurs buteurs du championnat choisi */}
             {saisonId != null && (
-              <CarteButeurs key={cle} buteurs={buteurs} logos={logos} chargement={chargement} competition={`MTN ${competition}`} />
+              <div id="buteurs" ref={blocButeursRef} style={{ scrollMarginTop: '90px' }}>
+                <CarteButeurs key={cle} buteurs={buteurs} logos={logos} chargement={chargement}
+                  competition={`MTN ${competition}`} surligne={comp === (params.get('comp') === 'two' ? 'two' : 'one') ? joueurVise : null} />
+              </div>
             )}
           </div>
         </div>
