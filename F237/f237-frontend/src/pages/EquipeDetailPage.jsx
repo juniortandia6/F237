@@ -531,7 +531,7 @@ function trouverSaisonClub(donnees, idClub) {
 
 // ── Page ────────────────────────────────────────────────────────────────
 function EquipeDetailPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const [parametres, setParametres] = useSearchParams();
   const [etat, setEtat] = useState(null); // { id, data, erreur }
@@ -645,7 +645,8 @@ function EquipeDetailPage() {
   const effectif = data.effectif ?? [];
   // Championnat de la saison choisie (à défaut, la division actuelle du club)
   const eliteOne = saisonClub?.comp ? saisonClub.comp === 'one' : data.division === 0;
-  const club = getInfosClub(data.nom); // histoire + palmarès (Wikipédia), null si pas encore rédigé
+  // Histoire + palmarès (Wikipédia), dans la langue du site ; null si pas encore rédigé
+  const club = getInfosClub(data.nom, i18n.resolvedLanguage);
   const nbTitres = (club?.palmares ?? [])
     .filter(p => p.type === 'titre')
     .reduce((s, p) => s + (p.nombre ?? p.annees?.length ?? 0), 0) + palmares.length;

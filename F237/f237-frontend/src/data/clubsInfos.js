@@ -747,11 +747,346 @@ const normaliser = (s) => (s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toL
 
 const INDEX = new Map();
 for (const [cle, infos] of Object.entries(CLUBS_INFOS)) {
-  INDEX.set(normaliser(cle), infos);
-  for (const a of infos.alias ?? []) INDEX.set(normaliser(a), infos);
+  INDEX.set(normaliser(cle), { cle, infos });
+  for (const a of infos.alias ?? []) INDEX.set(normaliser(a), { cle, infos });
 }
 
-/** Infos d'un club à partir de son nom dans F237 (null si inconnu). */
-export function getInfosClub(nom) {
-  return INDEX.get(normaliser(nom)) ?? null;
+// ── Version anglaise ─────────────────────────────────────────────────────
+// Textes traduits par club (même clé que CLUBS_INFOS). Les noms propres
+// (stades, villes, grands joueurs) ne changent pas.
+const CLUBS_INFOS_EN = {
+  "aigle royal de moungo": {
+    "couleurs": "Blue and white",
+    "histoire": [
+      "Founded in the 1930s in Nkongsamba, in the Moungo department, Aigle Royal is one of the historic clubs of Cameroonian football.",
+      "The club enjoyed its golden age in the 1970s: Cameroonian champion in 1971, it played in the African Cup of Champions Clubs the following year and reached two Cameroon Cup finals (1970 and 1975). It added a second league title in 1994.",
+      "After a long spell in the lower divisions, Aigle Royal won Elite Two in the 2023-2024 season and returned to Elite One for 2024-2025."
+    ]
+  },
+  "aigle royal": {
+    "surnom": "El Pacha, the \"Rapide de la Menoua\"",
+    "histoire": [
+      "Founded in June 1932 in Dschang, in the West region, Aigle Royal de la Menoua is one of the oldest clubs in the country.",
+      "Runner-up in the Cameroonian league in 2005, it made its CAF Champions League debut in 2006, then reached the round of 16 of the Confederation Cup in 2009. It has played in two Cameroon Cup finals, in 2008 and 2024.",
+      "Elite Two champion in 2024-2025, the club returned to the top flight for the 2025-2026 season."
+    ]
+  },
+  "canon": {
+    "surnom": "Kpa-Kum, Mekok Me Ngonda",
+    "histoire": [
+      "Founded on 11 November 1930, Canon Sportif de Yaoundé is one of the most decorated clubs in Africa. Tonnerre Kalara Club was born from a split with Canon, and the two contest the Yaoundé derby.",
+      "Its 1970s and 1980s were exceptional: around ten league titles, many Cameroon Cups and three African Cups of Champions Clubs, led in particular by captain Théophile Abega.",
+      "After years of administrative instability, the club returned to the top of Elite One in the early 2020s."
+    ]
+  },
+  "colombe": {
+    "surnom": "Les Blancs (The Whites)",
+    "histoire": [
+      "A club from Sangmélima, in the Dja-et-Lobo department, Colombe first reached the top division in 1986-1987 before dropping out in 1993.",
+      "After 23 years away, it returned to the top flight in 2016. It established itself there and then enjoyed the best period in its history: the Cameroon Cup and the Roger Milla Super Cup in 2024, then a first Cameroonian league title in 2024-2025, retained in the 2026 season."
+    ]
+  },
+  "cotonsport": {
+    "surnom": "Les Cotonniers (The Cotton Growers)",
+    "histoire": [
+      "Founded in 1986 in Garoua, in the North, Coton Sport reached the top division in 1992 and, from the late 1990s, became the dominant club in Cameroonian football.",
+      "The club has also made its mark on the African stage: runner-up in the CAF Cup in 2003, then in the CAF Champions League in 2008 against Al Ahly, it reached the Champions League semi-finals again in 2013.",
+      "With 18 league titles, including seven in a row from 2003 to 2008, Coton Sport is by far the most successful club in the Cameroonian championship."
+    ]
+  },
+  "dynamo de douala": {
+    "surnom": "Bon Ba Djob",
+    "histoire": [
+      "Founded in 1948, Dynamo is one of the historic clubs of Douala, nicknamed \"Bon Ba Djob\".",
+      "It has won the Cameroon Cup three times, in 1979, 1981 and 1998. After a difficult period marked by internal disputes and a spell in the second division, the club returned to Elite One."
+    ]
+  },
+  "fortuna mfou": {
+    "histoire": [
+      "Founded in 1998 in Mfou, near Yaoundé, AS Fortuna was promoted to Elite One in 2018.",
+      "After a difficult first season (14th), the club quickly settled in the top half of the table: 4th in 2019 and 2020, then 3rd in 2020-2021, its best finish."
+    ]
+  },
+  "gazelle": {
+    "histoire": [
+      "A young club created in 2015 in Garoua, Gazelle FA climbed the divisions very quickly.",
+      "In July 2022, it won Elite Two by beating Aigle Royal de la Menoua 2-1 in the final, with a decisive goal in the last seconds of extra time. It then joined Coton Sport in Elite One, giving Garoua a second top-flight club."
+    ]
+  },
+  "panthère": {
+    "surnom": "Nzuimanto",
+    "histoire": [
+      "A club from Bangangté, in the Ndé department, Panthère Sportive is nicknamed \"Nzuimanto\".",
+      "It has made the Cameroon Cup its speciality: winner in 1988, 2009 and 2025, and runner-up two years in a row, in 2014 and 2015.",
+      "Elite One runner-up in 2024-2025, it won the Cameroon Cup and the Roger Milla Super Cup in the same year."
+    ]
+  },
+  "pwd bamenda": {
+    "surnom": "Abakwa Boys",
+    "histoire": [
+      "A club from Bamenda, in the North-West, PWD played in the Cameroon Cup final as early as 1967, and again in 1979.",
+      "The club has enjoyed its best years despite the crisis affecting the English-speaking regions: Elite One champion in 2019-2020, it won the Cameroon Cup the following year against Les Astres de Douala."
+    ]
+  },
+  "stade renard": {
+    "histoire": [
+      "A club from Melong, in the Moungo department, Stade Renard rose from Ligue 2 to the top flight after its promotion to the first division.",
+      "Its greatest success remains the 2019 Cameroon Cup, won 3-2 in the final against AS FAP of Yaoundé."
+    ]
+  },
+  "unisport bafang": {
+    "surnom": "Flambeau de l'Ouest (Torch of the West)",
+    "couleurs": "Yellow and red",
+    "histoire": [
+      "Nicknamed the \"Torch of the West\", Unisport is the club of Bafang, in the Haut-Nkam department.",
+      "Cameroonian champion in 1996, the club played in the CAF Champions League the following year and reached the second round.",
+      "A regular in end-of-season cup runs, Unisport lost three Cameroon Cup finals (2000, 2005 and 2011) before finally lifting the trophy in 2012, against New Star de Douala."
+    ]
+  },
+  "victoria united": {
+    "surnom": "OPOPO (One People, One Power)",
+    "histoire": [
+      "Based in Limbé, on the South-West coast, Victoria United goes by the nickname \"OPOPO\": One People, One Power.",
+      "Relegated from the top flight in 2004, the club bounced back: South-West regional champion in 2021-2022, then Elite Two champion in 2022-2023. On its return to the top flight, it pulled off the feat of winning the Cameroonian league title in 2023-2024."
+    ]
+  },
+  "tonnerre": {
+    "surnom": "The Kalara Boys",
+    "histoire": [
+      "Founded in 1934, Tonnerre Kalara Club is one of the two giants of Yaoundé. It was born from a split with Canon, its eternal rival in the capital's derby.",
+      "Its 1980s were glorious: five league titles between 1981 and 1988, plus many Cameroon Cups. On the continent, TKC won the African Cup Winners' Cup as early as 1975, then reached the final again the following year.",
+      "Big names have worn its shirt, such as Roger Milla, Rigobert Song, Stephen Tataw and the Liberian George Weah, a future Ballon d'Or winner, who made his debut in Central Africa there."
+    ]
+  },
+  "union douala": {
+    "surnom": "Kpa kum",
+    "histoire": [
+      "Founded as Jeunesse Bamiléké, Union Sportive de Douala is one of the most prestigious clubs in the country.",
+      "It is one of the few Cameroonian clubs to have won two African competitions: the African Cup of Champions Clubs in 1979, against Hearts of Oak, then the African Cup Winners' Cup in 1981.",
+      "Five-time Cameroonian champion, from 1969 to 2012, Union has also lifted many Cameroon Cups."
+    ]
+  },
+  "racing": {
+    "histoire": [
+      "Racing Club de Bafoussam was the leading club of the West region in the late 1980s and the 1990s.",
+      "It won four Cameroonian league titles (1989, 1992, 1993 and 1995), played in the CAF Champions League five times and won the Cameroon Cup in 1996, after losing three finals.",
+      "The club notably developed Geremi Njitap, who went on to play for Real Madrid and Chelsea. After some difficult years, it won Elite Two in 2020-2021."
+    ]
+  },
+  "les astres": {
+    "surnom": "The Brazilians of Bépanda",
+    "histoire": [
+      "Founded in 2002 in the Bépanda district of Douala, the club is nicknamed \"the Brazilians of Bépanda\" for its attacking style of play.",
+      "A regular among the leading places, it finished runner-up in the Cameroonian league three times (2010, 2011 and 2013) and played in four Cameroon Cup finals without managing to win one. It has also taken part in African competitions several times."
+    ]
+  },
+  "bamboutos": {
+    "histoire": [
+      "Founded in 1966 in Mbouda, in the Bamboutos department, the club is named after the mountains that dominate the region.",
+      "It has reached the Cameroon Cup final twice, in 2016 against APEJES and in 2022 against Coton Sport."
+    ]
+  },
+  "eding sport": {
+    "histoire": [
+      "Created in 2012 and attached to the Lékié department, Eding Sport is one of the great recent success stories of Cameroonian football.",
+      "Only a few years after its creation, it became Cameroonian champion in 2017, then followed up with the Cameroon Cup in 2018, against Lion Blessé de Fotouni."
+    ]
+  },
+  "sable": {
+    "histoire": [
+      "Founded in 1995 in Batié, in the West, Sable FC enjoyed a meteoric rise: four years later, it was Cameroonian champion (1999).",
+      "The club then played in two consecutive Cameroon Cup finals, in 2002 and 2003, without managing to win them."
+    ]
+  },
+  "apejes academy": {
+    "histoire": [
+      "A training academy created in 2006 in Mfou, near Yaoundé, APEJES focuses on young players.",
+      "Its finest success is the 2016 Cameroon Cup, won 2-0 in the final against Bamboutos de Mbouda."
+    ]
+  },
+  "fap": {
+    "histoire": [
+      "AS FAP is the club of the Armed Forces and Police, based in Yaoundé.",
+      "It reached the Cameroon Cup final in 2019, losing 3-2 to Stade Renard de Melong."
+    ]
+  },
+  "avion academy": {
+    "histoire": [
+      "Avion Academy is a football academy founded in 2012 in Douala, focused on developing young players."
+    ]
+  },
+  "union abong-mbang": {
+    "histoire": [
+      "Founded in 1954, Union Sportive d'Abong-Mbang is the flagship club of this town in the East region."
+    ]
+  },
+  "yafoot": {
+    "histoire": [
+      "Yafoot, also known as Yaoundé FC II, is a club from the capital that plays in Elite Two."
+    ]
+  },
+  "foncha st": {
+    "histoire": [
+      "A club from Bamenda, in the North-West, Foncha Street was crowned North-West regional champion, which opened the door to Elite Two."
+    ]
+  },
+  "bafmeng united": {
+    "histoire": [
+      "A club from the North-West, Bafmeng United finished second in the 2023 National Inter-pools, behind ISOSHA, and thus earned promotion to Elite Two."
+    ]
+  },
+  "fovu club": {
+    "histoire": [
+      "Founded on 17 November 1978 in Baham, in the West, Fovu Club takes its name from a sacred cave in the region.",
+      "Cameroonian champion in 2000, it made its CAF Champions League debut in 2001, then played in the Cup Winners' Cup in 2002 and the Confederation Cup in 2011.",
+      "Above all, Fovu is a Cameroon Cup specialist: winner in 2001, 2010 and 2023, runner-up in 2006."
+    ]
+  },
+  "ums de loum": {
+    "surnom": "UMS",
+    "histoire": [
+      "Created in 2011 in Loum, in the Moungo department, UMS made a lightning rise to the top of Cameroonian football.",
+      "The club won the Cameroon Cup in 2015 by beating Panthère du Ndé (2-0), then became Cameroonian champion in 2016 and 2019. It played in another Cup final in 2017.",
+      "These titles opened the door to African competitions: the CAF Champions League and the CAF Confederation Cup."
+    ]
+  },
+  "young sport academy": {
+    "surnom": "YOSA",
+    "histoire": [
+      "Founded in 2004 in Bamenda by Yong Francis, a former referee, Yong Sports Academy was for a long time the only top-division club in the North-West.",
+      "Its greatest achievement: the 2013 Cameroon Cup, won on penalties against Canon de Yaoundé (0-0, 4-1 on penalties)."
+    ]
+  },
+  "jeunes fauves": {
+    "histoire": [
+      "A club from Yaoundé, Fauve Azur Elite made its big comeback in MTN Elite One for the 2023-2024 season, under the presidency of Norbert Nya.",
+      "In that season, played in two phases, it finished in the relegation pool."
+    ]
+  },
+  "renaissance": {
+    "surnom": "RFC",
+    "histoire": [
+      "Founded on 2 January 2000 by the development committee of Nkong-Abok, a village about sixty kilometres from Yaoundé, Renaissance FC started out in the Méfou-et-Akono departmental championship.",
+      "A Cameroon Cup round-of-16 and then quarter-finalist in 2001 and 2002, it represented the Centre region at the 2002 Inter-pools before climbing the divisions all the way to Elite One."
+    ]
+  },
+  "dragon de yaounde": {
+    "histoire": [
+      "Founded in 1928 as Allico Maritime, Dragon Club de Yaoundé is one of the oldest clubs in the country.",
+      "It plays in Elite Two, where it finished eighth in 2023-2024."
+    ]
+  },
+  "feutcheu": {
+    "couleurs": "Red and white",
+    "histoire": [
+      "Founded in 2011 in Bandjoun as Djiko FC, the club played in Elite One in the late 2010s.",
+      "In 2020, after being taken over by Joseph Feutcheu, it was renamed Feutcheu FC. It plays its home games at the Kouekong stadium in Bafoussam."
+    ]
+  },
+  "leopard de douala": {
+    "histoire": [
+      "Founded in 1940 as Diables Noirs de Deido, Léopard de Douala is a historic club of the economic capital.",
+      "With a young Roger Milla in its ranks, it became Cameroonian champion in 1972, then retained its title in 1973.",
+      "The club also played in four Cameroon Cup finals (1942, 1956, 1957 and 1993) without ever winning it."
+    ]
+  },
+  "fc rangers": {
+    "histoire": [
+      "A club from Bafut, in the North-West, founded in 2012, Rangers FC earned its place in Elite Two at the 2020-2021 National Inter-pools, thanks to a draw against Best Stars de Limbé."
+    ]
+  },
+  "isohsa": {
+    "histoire": [
+      "Founded in 2015 in Limbé by Karl Njomo Mokake, Isle of Hope Sports Academy reached the regional championship as early as 2017.",
+      "In 2023, it won the South-West regional championship and then the National Inter-pools (2-0 against Bafmeng United), which opened the door to Elite Two."
+    ]
+  },
+  "atlantic": {
+    "histoire": [
+      "A club from Kribi, in the South, Atlantic Sports Academy won the National Inter-pools in August 2024 by beating Union Sportive d'Abong-Mbang (1-0) in the final. Both clubs were promoted to Elite Two together.",
+      "In 2026, it qualified for the Elite One promotion play-offs."
+    ]
+  },
+  "kumba": {
+    "histoire": [
+      "Representing the South-West, Kumba City FC won the National Inter-pools in September 2025 after a thrilling final against Sable de Batié (4-3 after extra time). It went straight into Elite Two.",
+      "In its first season, it qualified for the Elite One promotion play-offs."
+    ]
+  },
+  "ofta": {
+    "histoire": [
+      "A club from Kribi backed by the Port Autonome de Kribi, OFTA climbed in just a few seasons from the regional championship to Elite One, where it played in 2022.",
+      "It then moved to Elite Two, with the ambition of returning to the top flight."
+    ]
+  },
+  "stade de bertoua": {
+    "histoire": [
+      "Founded in 1983, Stade FC de Bertoua is a club from the East region.",
+      "In May 2023, after violence against referees during an Elite Two match against Victoria United, Fécafoot relegated it to the lower division and suspended it for a year."
+    ]
+  },
+  "lausanne": {
+    "histoire": [
+      "A club from Yaoundé, AS Lausanne won Elite Two in 2009-2010 and was promoted to Elite One for the 2010-2011 season.",
+      "Relegated later on, it returned to Elite Two through the 2020-2021 National Inter-pools."
+    ]
+  },
+  "new star": {
+    "histoire": [
+      "A club from Douala, New Star played in the 2012 Cameroon Cup final, losing to Unisport de Bafang (2-0).",
+      "It took its revenge in 2017 by winning the trophy against UMS de Loum (1-0), after making its African debut in the 2016 Confederation Cup."
+    ]
+  },
+  "mintack": {
+    "histoire": [
+      "Founded in 2015 in Nanga-Eboko, in the Haute-Sanaga department, Mintack FC won the 2026 National Inter-pools by beating Elecsport de Limbé in the final (1-0), in Yaoundé.",
+      "It makes its Elite Two debut in the 2026-2027 season."
+    ]
+  },
+  "elecsport": {
+    "histoire": [
+      "A club from Limbé founded in 1983, Elecsport reached the 2026 National Inter-pools final, losing to Mintack FC (1-0). Both finalists were promoted to Elite Two for the 2026-2027 season."
+    ]
+  }
+};
+
+// Noms des compétitions et libellés du palmarès
+const COMPETITIONS_EN = {
+  'Championnat du Cameroun': 'Cameroonian Championship',
+  'Coupe du Cameroun': 'Cameroon Cup',
+  'Super Coupe Roger Milla': 'Roger Milla Super Cup',
+  'Elite Two': 'Elite Two',
+  'Interpoules nationales': 'National Inter-pools',
+  "Coupe d'Afrique des clubs champions": 'African Cup of Champions Clubs',
+  "Coupe d'Afrique des vainqueurs de coupe": "African Cup Winners' Cup",
+  'Ligue des champions de la CAF': 'CAF Champions League',
+  'Coupe de la CAF': 'CAF Cup',
+  "Supercoupe d'Afrique": 'CAF Super Cup',
+};
+const LIBELLES_EN = {
+  'Vice-champion': 'Runner-up',
+  '3 fois vice-champion': '3-time runner-up',
+};
+
+// Copie des infos dans la langue voulue (le français reste la référence)
+function traduire(infos, cle, langue) {
+  if (!infos || !String(langue ?? '').toLowerCase().startsWith('en')) return infos;
+  const en = CLUBS_INFOS_EN[cle] ?? {};
+  return {
+    ...infos,
+    histoire: en.histoire ?? infos.histoire,
+    surnom: en.surnom ?? infos.surnom,
+    couleurs: en.couleurs ?? infos.couleurs,
+    palmares: (infos.palmares ?? []).map(p => ({
+      ...p,
+      competition: COMPETITIONS_EN[p.competition] ?? p.competition,
+      ...(p.libelle && { libelle: LIBELLES_EN[p.libelle] ?? p.libelle }),
+    })),
+  };
+}
+
+/** Infos d'un club à partir de son nom dans F237 (null si inconnu), dans la langue du site. */
+export function getInfosClub(nom, langue = 'fr') {
+  const trouve = INDEX.get(normaliser(nom));
+  return trouve ? traduire(trouve.infos, trouve.cle, langue) : null;
 }

@@ -13,6 +13,7 @@ import { useLiveScores } from '../hooks/useLiveScores';
 import { COMPETITIONS, ANNEE_ACTUELLE, SAISONS_DB, libelleSaison } from '../data/saisons';
 import SelecteurSaison from '../components/SelecteurSaison';
 import theme from '../theme';
+import AvatarJoueur from '../components/AvatarJoueur';
 
 // ── Couleurs de la zone claire (mêmes que MatchsPage) ───────────────────
 const CLAIR = {
@@ -189,9 +190,7 @@ function CarteButeurs({ buteurs, logos, chargement, competition, surligne }) {
               width: '30px', height: '30px', borderRadius: '50%', backgroundColor: '#f5c542', color: '#3a2c00',
               display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px', flexShrink: 0,
             }}>1</span>
-            {logos.get(leader.equipe)
-              ? <img src={logos.get(leader.equipe)} alt="" style={{ width: '40px', height: '40px', objectFit: 'contain', flexShrink: 0 }} />
-              : <span style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: CLAIR.tuile, flexShrink: 0 }} />}
+            <AvatarJoueur logo={logos.get(leader.equipe)} taille={52} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: '18px', fontWeight: 800, color: CLAIR.texte, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{leader.nom}</div>
               <div style={{ fontSize: '12px', color: CLAIR.doux }}>
@@ -211,9 +210,7 @@ function CarteButeurs({ buteurs, logos, chargement, competition, surligne }) {
               ...(indexSurligne === i + 1 && { backgroundColor: '#e8f3ec', boxShadow: `inset 4px 0 0 ${CLAIR.vert}` }),
             }}>
               <span style={{ width: '30px', textAlign: 'center', fontWeight: 800, fontSize: '14px', color: CLAIR.doux, flexShrink: 0 }}>{i + 2}</span>
-              {logos.get(j.equipe)
-                ? <img src={logos.get(j.equipe)} alt="" style={{ width: '24px', height: '24px', objectFit: 'contain', flexShrink: 0 }} />
-                : <span style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: CLAIR.tuile, flexShrink: 0 }} />}
+              <AvatarJoueur logo={logos.get(j.equipe)} taille={36} ombre={false} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: '14px', fontWeight: 700, color: CLAIR.texte, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{j.nom}</div>
                 <div style={{ fontSize: '11px', color: CLAIR.doux, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{j.equipe}</div>

@@ -7,6 +7,7 @@ import { useLiveScores } from '../hooks/useLiveScores';
 import { classementService } from '../services/classementService';
 import { matchService } from '../services/matchService';
 import theme from '../theme';
+import AvatarJoueur from '../components/AvatarJoueur';
 import { ACTUALITES, ACTUS_HERO, texteActu } from '../data/actualites';
 import { UTILISER_DEMO, construireMatchsDemo } from '../data/matchsDemo';
 import { COMPETITIONS, SAISONS_DB, ANNEE_ACTUELLE } from '../data/saisons';
@@ -563,29 +564,6 @@ const L = {
   bord: '#e9edeb',
 };
 
-// Initiales d'un club : "Victoria United" -> "VU"
-const initiales = (nom = '') =>
-  nom.split(/\s+/).filter(m => m.length > 2 || /^[A-Z]/.test(m)).slice(0, 2).map(m => m[0]).join('').toUpperCase() || '?';
-
-// Logo du club dans une pastille blanche ; initiales si l'image ne charge pas
-function LogoRond({ src, nom, taille = 52 }) {
-  const [erreur, setErreur] = useState(false);
-  return (
-    <span style={{
-      width: `${taille}px`, height: `${taille}px`, borderRadius: '50%', flexShrink: 0,
-      backgroundColor: '#fff', boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
-      display: 'inline-flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
-    }}>
-      {src && !erreur
-        ? <img src={src} alt="" onError={() => setErreur(true)}
-            style={{ width: '74%', height: '74%', objectFit: 'contain' }} />
-        : <span style={{ color: L.vert, fontWeight: 900, fontSize: `${Math.round(taille * 0.34)}px`, fontFamily: '"Barlow Condensed", Arial, sans-serif' }}>
-            {initiales(nom)}
-          </span>}
-    </span>
-  );
-}
-
 const LARGEUR_LEADER = 300;
 
 // Lien vers le classement des buteurs (page Classement, bonne compétition, joueur mis en avant)
@@ -611,65 +589,89 @@ function CarteButeur({ j, rang, lien }) {
     >
       {/* Le joueur */}
       <div style={{
-        position: 'relative', height: '214px', padding: '18px 18px 16px', overflow: 'hidden',
+        position: 'relative', height: '226px', overflow: 'hidden',
         background: `${L.rayures}, ${L.hero}`,
         borderTop: `4px solid ${med ? med.couleur : 'rgba(255,255,255,0.25)'}`,
       }}>
-        {/* Nombre de buts en filigrane */}
-        <span aria-hidden="true" className="transition-transform duration-500 group-hover:scale-110"
+        {/* Halo derrière le joueur */}
+        <span aria-hidden="true" style={{
+          position: 'absolute', right: '-40px', bottom: '-60px', width: '260px', height: '260px', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0) 65%)', pointerEvents: 'none',
+        }} />
+
+        {/* Le joueur, grand et posé sur le bas de la carte (comme FIBA) */}
+        <span aria-hidden="true" className="transition-transform duration-500 group-hover:scale-105"
           style={{
-            position: 'absolute', right: '-6px', bottom: '-40px', lineHeight: 1,
-            fontFamily: '"Barlow Condensed", Arial, sans-serif', fontWeight: 900, fontSize: '210px',
-            color: 'rgba(255,255,255,0.07)', pointerEvents: 'none', transformOrigin: 'bottom right',
+            position: 'absolute', right: '-6px', bottom: 0, width: '178px', height: '198px',
+            transformOrigin: 'bottom center', filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.25))',
           }}>
-          {j.buts}
+          {/* Pas de photo dans l'API pour l'instant : silhouette */}
+          <AvatarJoueur photo={j.photo} variante="buste" />
         </span>
 
-        <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', height: '100%' }}>
-          {/* Rang + logo */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              {med
-                ? <PastilleMedaille rang={rang} taille={34} />
-                : <span style={{
-                    width: '34px', height: '34px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                    backgroundColor: 'rgba(255,255,255,0.14)', border: '1px solid rgba(255,255,255,0.25)',
-                    color: '#fff', fontWeight: 800, fontSize: '17px', fontFamily: '"Barlow Condensed", Arial, sans-serif',
-                  }}>{rang}</span>}
-              <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: '10.5px', fontWeight: 800, letterSpacing: '1.2px', textTransform: 'uppercase', lineHeight: 1.3 }}>
-                {rang === 1 ? <span style={{ color: MEDAILLES[1].couleur }}>{t('accueil.buteurs.meilleurButeur')}</span> : t('accueil.buteurs.meilleurButeur')}
-              </span>
-            </div>
-            <LogoRond src={j.logo} nom={j.equipe} />
+        <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', height: '100%', padding: '16px 18px', maxWidth: '60%', boxSizing: 'border-box' }}>
+          {/* Rang */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+            {med
+              ? <PastilleMedaille rang={rang} taille={30} />
+              : <span style={{
+                  width: '30px', height: '30px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                  backgroundColor: 'rgba(255,255,255,0.14)', border: '1px solid rgba(255,255,255,0.25)',
+                  color: '#fff', fontWeight: 800, fontSize: '16px', fontFamily: '"Barlow Condensed", Arial, sans-serif',
+                }}>{rang}</span>}
+            <span style={{
+              color: rang === 1 ? MEDAILLES[1].couleur : 'rgba(255,255,255,0.75)',
+              fontSize: '10px', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', lineHeight: 1.25,
+            }}>
+              {t('accueil.buteurs.meilleurButeur')}
+            </span>
           </div>
 
-          {/* Nom + club */}
-          <div style={{ marginTop: 'auto', minWidth: 0 }}>
-            {prenom && <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '15px', fontWeight: 500 }}>{prenom}</div>}
+          {/* Club (logo + nom), comme le drapeau sur les cartes FIBA */}
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: '6px', alignSelf: 'flex-start', maxWidth: '100%',
+            marginTop: '16px', padding: '3px 9px 3px 4px', borderRadius: '6px',
+            backgroundColor: 'rgba(255,255,255,0.14)', border: '1px solid rgba(255,255,255,0.18)',
+            color: '#fff', fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.4px', textTransform: 'uppercase',
+          }}>
+            {j.logo && (
+              <span style={{ width: '18px', height: '18px', borderRadius: '4px', backgroundColor: '#fff', flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img src={j.logo} alt="" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />
+              </span>
+            )}
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{j.equipe}</span>
+          </span>
+
+          {/* Nom */}
+          <div style={{ marginTop: '12px', minWidth: 0 }}>
+            {prenom && <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '15px', fontWeight: 500, lineHeight: 1.2 }}>{prenom}</div>}
             <div style={{
-              color: '#fff', fontSize: '32px', fontWeight: 800, lineHeight: 1.05, textTransform: 'uppercase',
+              color: '#fff', fontSize: '28px', fontWeight: 800, lineHeight: 1.05, textTransform: 'uppercase',
               fontFamily: '"Barlow Condensed", Arial, sans-serif', letterSpacing: '0.3px',
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             }}>
               {famille}
             </div>
-            <span style={{
-              display: 'inline-block', marginTop: '8px', maxWidth: '100%',
-              padding: '3px 10px', borderRadius: '20px',
-              backgroundColor: 'rgba(255,255,255,0.14)', border: '1px solid rgba(255,255,255,0.2)',
-              color: '#fff', fontSize: '11px', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase',
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', verticalAlign: 'bottom',
-            }}>
-              {j.equipe}
-            </span>
           </div>
+
+          {/* Buts : la pastille blanche des cartes FIBA */}
+          <span style={{
+            marginTop: 'auto', alignSelf: 'flex-start',
+            backgroundColor: '#fff', borderRadius: '8px', padding: '5px 12px 4px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.18)', lineHeight: 1,
+            fontFamily: '"Barlow Condensed", Arial, sans-serif',
+          }}>
+            <span style={{ fontSize: '28px', fontWeight: 900, color: L.vert }}>{j.buts}</span>
+            <span style={{ marginLeft: '5px', fontSize: '13px', fontWeight: 700, color: L.doux, textTransform: 'uppercase' }}>
+              {t('commun.but', { count: j.buts })}
+            </span>
+          </span>
         </div>
       </div>
 
       {/* Statistiques */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
         {[
-          [t('commun.but', { count: j.buts }), j.buts, true],
           [t('accueil.buteurs.penaltys'), j.penaltys],
           [t('accueil.buteurs.matchsAvecBut'), j.matchs],
         ].map(([label, val, vedette], i) => (
