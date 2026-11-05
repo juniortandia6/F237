@@ -73,6 +73,11 @@
     "nouvelles": {
       "titre": "Dernières nouvelles",
       "toutes": "Toutes les actualités"
+    },
+    "bienvenue": {
+      "tag": "F237",
+      "titre": "Toute la MTN Elite One et l'Elite Two, en direct",
+      "bouton": "Voir les matchs"
     }
   },
   "footer": {
@@ -444,7 +449,9 @@
       "Transfert": "Transfert",
       "Talents": "Talents",
       "Compétition": "Compétition"
-    }
+    },
+    "erreur": "Impossible de charger les actualités pour le moment.",
+    "bientot": "Les premières actualités arrivent bientôt."
   },
   "profil": {
     "chargement": "Chargement du profil...",

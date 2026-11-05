@@ -8,12 +8,13 @@ import { classementService } from '../services/classementService';
 import { matchService } from '../services/matchService';
 import theme from '../theme';
 import AvatarJoueur from '../components/AvatarJoueur';
-import { ACTUALITES, ACTUS_HERO, texteActu } from '../data/actualites';
+import { texteActu, articlesHero, IMAGES_DEFAUT } from '../data/actualites';
+import { useActualites } from '../hooks/useActualites';
 import { UTILISER_DEMO, construireMatchsDemo } from '../data/matchsDemo';
 import { COMPETITIONS, SAISONS_DB, ANNEE_ACTUELLE } from '../data/saisons';
 
-// Les 5 actus du hero viennent de la source partagée (src/data/actualites.js)
-const ACTUS = ACTUS_HERO;
+// Hero : les actus de l'API (à la une d'abord, 5 max). Sans article publié,
+// une seule diapo d'accueil (pas de fausse actu).
 
 const DUREE = 5000;
 
@@ -989,7 +990,7 @@ function SectionClassement({ signatureLive = '', live = false }) {
 
 const LARGEUR_CARTE_NEWS = 220;
 
-function SectionNouvelles() {
+function SectionNouvelles({ articles }) {
   const { t } = useTranslation();
   const rangeeRef = useRef(null);
   const [gauche, setGauche] = useState(false);
@@ -1041,7 +1042,7 @@ function SectionNouvelles() {
             paddingTop: '6px', paddingBottom: '14px',
           }}
         >
-          {ACTUALITES.map(a => (
+          {articles.map(a => (
             <Link key={a.slug} to={`/actualites/${a.slug}`} className="group"
               style={{
                 position: 'relative', flex: `0 0 ${LARGEUR_CARTE_NEWS}px`, height: '330px',
@@ -1090,6 +1091,12 @@ const AccueilPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { matchsLive, isConnected } = useLiveScores();
+  const { articles } = useActualites();
+  const actusHero = articlesHero(articles);
+  const sansActu = actusHero.length === 0;
+  const ACTUS = sansActu
+    ? [{ slug: null, tag: null, img: IMAGES_DEFAUT[0], titre: t('accueil.bienvenue.titre'), en: null }]
+    : actusHero;
   const [matchs, setMatchs] = useState([]);
   const [loadingMatchs, setLoadingMatchs] = useState(true);
   // Heure du chargement des matchs (Date.now() est interdit pendant le rendu)
@@ -1112,7 +1119,7 @@ const AccueilPage = () => {
       setActuActive(prev => {
         startTimeRef.current = Date.now();
         setProgress(0);
-        return (prev + 1) % ACTUS.length;
+        return prev + 1;
       });
     }, DUREE);
   }, []);
@@ -1121,9 +1128,13 @@ const AccueilPage = () => {
     setActuActive(prev => {
       startTimeRef.current = Date.now();
       setProgress(0);
-      return (prev + 1) % ACTUS.length;
+      return prev + 1;
     });
   }, []);
+
+  // actuActive avance sans fin : l'actu affichée est son reste (le nombre d'actus peut changer)
+  const indexActu = actuActive % ACTUS.length;
+  const actu = ACTUS[indexActu];
 
   useEffect(() => {
     startTimeRef.current = Date.now();
@@ -1219,7 +1230,7 @@ const AccueilPage = () => {
   return (
     <div style={{ backgroundColor: theme.bg }}>
       {/* ── HERO PLEINE LARGEUR ───────────────────────────────────────────── */}
-      <div style={{ position: 'relative', height: '920px', overflow: 'hidden' }}>
+      <div style={{ position: 'relative', height: '1020px', overflow: 'hidden' }}>
 
         {/* Images fond */}
         {ACTUS.map((a, i) => (
@@ -1227,7 +1238,7 @@ const AccueilPage = () => {
             style={{
               position: 'absolute', inset: 0,
               width: '100%', height: '100%', objectFit: 'cover',
-              opacity: i === actuActive ? 1 : 0,
+              opacity: i === indexActu ? 1 : 0,
               transition: 'opacity 0.6s ease',
             }}
           />
@@ -1244,93 +1255,77 @@ const AccueilPage = () => {
             ${theme.bg} 92%)`,
         }} />
 
-        {/* Contenu : tag + titre + bouton + ticker */}
+        {/* Contenu : tag + titre + bouton + ticker (style FIBA : posé en bas du
+            visuel, juste au-dessus de la barre des matchs, aligné sur le contenu) */}
         <div style={{
           position: 'absolute',
-          top: 0, left: 0, right: 0, bottom: '230px',
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
+          top: 0, left: 0, right: 0, bottom: '450px',
+          display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
           padding: '0 60px',
         }}>
-          <div style={{ width: '100%', maxWidth: '1150px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
+          <div style={{ width: '100%', maxWidth: '1150px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
             <span style={{
               display: 'inline-block', backgroundColor: theme.red, color: '#fff',
-              padding: '4px 16px', borderRadius: '20px',
-              fontSize: '11px', fontWeight: 700, letterSpacing: '1.5px',
-              textTransform: 'uppercase', marginBottom: '16px',
+              padding: '5px 14px', borderRadius: '6px',
+              fontSize: '11px', fontWeight: 800, letterSpacing: '1.2px',
+              textTransform: 'uppercase', marginBottom: '18px',
             }}>
-              {t(`actualites.tags.${ACTUS[actuActive].tag}`, { defaultValue: ACTUS[actuActive].tag })}
+              {actu.tag ? t(`actualites.tags.${actu.tag}`, { defaultValue: actu.tag }) : t('accueil.bienvenue.tag')}
             </span>
 
             <h2 style={{
-              color: '#fff', fontWeight: 400, fontSize: '38px',
-              lineHeight: 1.25, maxWidth: '700px', marginBottom: '16px',
+              color: '#fff', fontWeight: 400, fontSize: '42px',
+              lineHeight: 1.15, maxWidth: '820px', marginBottom: '24px',
               fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif',
-              textShadow: '0 2px 12px rgba(0,0,0,0.45)',
+              textShadow: '0 3px 16px rgba(0,0,0,0.5)',
+              display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
             }}>
-              {texteActu(ACTUS[actuActive], 'titre')}
+              {texteActu(actu, 'titre')}
             </h2>
 
-            <Link to={`/actualites/${ACTUS[actuActive].slug}`}
-              className="transition-all hover:brightness-110"
+            <Link to={actu.slug ? `/actualites/${actu.slug}` : '/matchs'}
+              className="group transition-all hover:brightness-110"
               style={{
-                display: 'inline-flex', alignItems: 'center', gap: '8px',
+                display: 'inline-flex', alignItems: 'center', gap: '10px',
                 backgroundColor: theme.red, color: '#fff',
-                padding: '10px 24px', borderRadius: '24px',
-                fontWeight: 700, fontSize: '13px', textDecoration: 'none',
-                textTransform: 'uppercase', marginBottom: '22px',
+                padding: '15px 30px', borderRadius: '32px',
+                fontWeight: 800, fontSize: '14px', letterSpacing: '0.4px', textDecoration: 'none',
+                textTransform: 'uppercase', boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
               }}>
-              {t('accueil.enSavoirPlus')} →
+              {sansActu ? t('accueil.bienvenue.bouton') : t('accueil.enSavoirPlus')}
+              <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
             </Link>
 
-            {/* ── TICKER D'ACTUS ─────────────────────────────────────────── */}
-            <div style={{ width: '100%', maxWidth: '1030px' }}>
-              <div style={{ display: 'flex', gap: '20px', marginBottom: '10px' }}>
+            {/* ── TICKER D'ACTUS : 5 colonnes égales sur toute la largeur ───── */}
+            {!sansActu && (
+              <div style={{ width: '100%', marginTop: '44px', display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', columnGap: '24px' }}>
                 {ACTUS.map((a, i) => {
-                  const active = i === actuActive;
-                  return (
-                    <div key={i} style={{ flex: '0 0 185px', position: 'relative', height: '2px', borderRadius: '2px', overflow: 'hidden', backgroundColor: 'rgba(255,255,255,0.28)' }}>
-                      {active && (
-                        <div style={{
-                          position: 'absolute', top: 0, left: 0, bottom: 0,
-                          borderRadius: '2px',
-                          backgroundColor: theme.greenBright,
-                          width: `${progress}%`,
-                          boxShadow: `0 0 6px ${theme.greenBright}`,
-                        }} />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div style={{ display: 'flex', gap: '20px' }}>
-                {ACTUS.map((a, i) => {
-                  const active = i === actuActive;
+                  const active = i === indexActu;
                   return (
                     <button
-                      key={i}
+                      key={a.slug ?? i}
                       // 1er clic : affiche l'actu dans le hero ; clic sur l'actu déjà active : ouvre l'article
                       onClick={() => (active ? navigate(`/actualites/${a.slug}`) : goTo(i))}
                       title={active ? t('accueil.lireArticle') : texteActu(a, 'titre')}
-                      style={{
-                        flex: '0 0 185px', textAlign: 'left',
-                        padding: 0, margin: 0,
-                        backgroundColor: 'transparent',
-                        border: 'none', cursor: 'pointer',
-                      }}
+                      style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignSelf: 'start', textAlign: 'left', padding: 0, margin: 0, backgroundColor: 'transparent', border: 'none', cursor: 'pointer', minWidth: 0 }}
                     >
+                      {/* Barre de progression */}
+                      <span style={{ display: 'block', position: 'relative', height: '3px', borderRadius: '3px', overflow: 'hidden', backgroundColor: 'rgba(255,255,255,0.25)', marginBottom: '14px' }}>
+                        {active && (
+                          <span style={{
+                            position: 'absolute', top: 0, left: 0, bottom: 0, borderRadius: '3px',
+                            backgroundColor: theme.greenBright, width: `${progress}%`,
+                            boxShadow: `0 0 8px ${theme.greenBright}`,
+                          }} />
+                        )}
+                      </span>
                       <span style={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                        fontSize: '14px',
-                        lineHeight: 1.35,
+                        display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                        fontSize: '16px', lineHeight: 1.4,
                         fontFamily: '"Raleway", Arial, sans-serif',
-                        color: active ? '#ffffff' : 'rgba(235,235,235,0.62)',
+                        color: active ? '#ffffff' : 'rgba(235,235,235,0.6)',
                         fontWeight: active ? 700 : 500,
-                        textShadow: '0 1px 3px rgba(0,0,0,0.6)',
+                        textShadow: '0 1px 4px rgba(0,0,0,0.6)',
                         transition: 'color 0.3s ease',
                       }}>
                         {texteActu(a, 'titre')}
@@ -1339,7 +1334,7 @@ const AccueilPage = () => {
                   );
                 })}
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -1417,7 +1412,7 @@ const AccueilPage = () => {
       <SectionClassement signatureLive={signatureLive} live={matchsLive.length > 0} />
 
       {/* ── DERNIÈRES NOUVELLES (bande pleine largeur) ──────────────────── */}
-      <SectionNouvelles />
+      {articles.length > 0 && <SectionNouvelles articles={articles} />}
     </div>
   );
 };

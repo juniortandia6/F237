@@ -73,6 +73,11 @@
     "nouvelles": {
       "titre": "Latest news",
       "toutes": "All news"
+    },
+    "bienvenue": {
+      "tag": "F237",
+      "titre": "All of MTN Elite One and Elite Two, live",
+      "bouton": "See the matches"
     }
   },
   "footer": {
@@ -444,7 +449,9 @@
       "Transfert": "Transfer",
       "Talents": "Talents",
       "Compétition": "Competition"
-    }
+    },
+    "erreur": "News can't be loaded right now.",
+    "bientot": "The first news stories are coming soon."
   },
   "profil": {
     "chargement": "Loading profile...",

@@ -22,6 +22,7 @@ namespace F237.DAL.Data
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<DemandeRetrait> DemandesRetrait { get; set; }
         public DbSet<Transfert> Transferts { get; set; }
+        public DbSet<Article> Articles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -52,6 +53,13 @@ namespace F237.DAL.Data
                 .WithMany()
                 .HasForeignKey(t => t.EquipeArriveeId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Articles : slug unique (adresse /actualites/{slug}) + index pour la liste publique
+            modelBuilder.Entity<Article>(e =>
+            {
+                e.HasIndex(a => a.Slug).IsUnique();
+                e.HasIndex(a => new { a.EstPublie, a.DatePublication });
+            });
         }
     }
 }

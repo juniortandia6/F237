@@ -88,6 +88,7 @@ builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 builder.Services.AddScoped<IJoueurRepository, JoueurRepository>();
 builder.Services.AddScoped<IClassementRepository, ClassementRepository>();
 builder.Services.AddScoped<IPariRepository, PariRepository>();
+builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
 
 // Services
 builder.Services.AddScoped<IEquipeService, EquipeService>();
@@ -95,6 +96,7 @@ builder.Services.AddScoped<IMatchService, MatchService>();
 builder.Services.AddScoped<IJoueurService, JoueurService>();
 builder.Services.AddScoped<IClassementService, ClassementService>();
 builder.Services.AddScoped<IPariService, PariService>();
+builder.Services.AddScoped<IArticleService, ArticleService>();
 
 // ApiFootball Service (existant)
 builder.Services.AddHttpClient<IApiFootballService, ApiFootballService>();

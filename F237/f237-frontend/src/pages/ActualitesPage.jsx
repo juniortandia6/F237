@@ -6,7 +6,8 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight } from 'lucide-react';
 import theme from '../theme';
-import { ACTUALITES, formatDateActu, texteActu } from '../data/actualites';
+import { formatDateActu, texteActu } from '../data/actualites';
+import { useActualites } from '../hooks/useActualites';
 
 function Tag({ children }) {
   const { t } = useTranslation();
@@ -53,10 +54,11 @@ function CarteActu({ a }) {
 
 function ActualitesPage() {
   const { t } = useTranslation();
-  // null = toutes les catégories
-  const categories = useMemo(() => [null, ...new Set(ACTUALITES.map(a => a.tag))], []);
+  const { articles, chargement, erreur } = useActualites();
+  // null = toutes les catégories (seulement celles qui ont des articles)
+  const categories = useMemo(() => [null, ...new Set(articles.map(a => a.tag))], [articles]);
   const [filtre, setFiltre] = useState(null);
-  const liste = filtre === null ? ACTUALITES : ACTUALITES.filter(a => a.tag === filtre);
+  const liste = filtre === null ? articles : articles.filter(a => a.tag === filtre);
   const [une, ...reste] = liste;
 
   return (
@@ -65,8 +67,8 @@ function ActualitesPage() {
         {t('actualites.titre')}
       </h1>
 
-      {/* Filtres */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '32px' }}>
+      {/* Filtres (inutiles tant qu'il n'y a pas d'article) */}
+      {articles.length > 0 && <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '32px' }}>
         {categories.map(c => {
           const actif = c === filtre;
           return (
@@ -83,7 +85,7 @@ function ActualitesPage() {
             </button>
           );
         })}
-      </div>
+      </div>}
 
       {/* À la une */}
       {une && (
@@ -110,7 +112,13 @@ function ActualitesPage() {
         {reste.map(a => <CarteActu key={a.slug} a={a} />)}
       </div>
 
-      {liste.length === 0 && (
+      {chargement && articles.length === 0 ? (
+        <p style={{ color: theme.textFaint, textAlign: 'center', padding: '40px 0' }}>{t('commun.chargement')}</p>
+      ) : erreur && articles.length === 0 ? (
+        <p style={{ color: theme.textMuted, textAlign: 'center', padding: '40px 0' }}>{t('actualites.erreur')}</p>
+      ) : articles.length === 0 ? (
+        <p style={{ color: theme.textMuted, textAlign: 'center', padding: '40px 0' }}>{t('actualites.bientot')}</p>
+      ) : liste.length === 0 && (
         <p style={{ color: theme.textMuted, textAlign: 'center', padding: '40px 0' }}>{t('actualites.aucune')}</p>
       )}
     </div>
