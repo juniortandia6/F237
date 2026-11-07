@@ -379,7 +379,14 @@
     "convertir": "Convert my points",
     "taux": "1,000 points = 500 FCFA · via Mobile Money",
     "fcfaDispo": "FCFA available",
-    "retrait": "Request a withdrawal"
+    "retrait": "Request a withdrawal",
+    "prochaineJournee": "Next matchday",
+    "journeeSuivante": "Following matchday",
+    "deuxJournees": "Next 2 matchdays",
+    "tout": "All",
+    "match": "Match",
+    "voirMatch": "See the match",
+    "cotesIndicatives": "Indicative odds: real betting is coming soon."
   },
   "auth": {
     "email": "Email",

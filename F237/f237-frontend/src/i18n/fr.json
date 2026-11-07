@@ -379,7 +379,14 @@
     "convertir": "Convertir mes points",
     "taux": "1 000 points = 500 FCFA · via Mobile Money",
     "fcfaDispo": "FCFA disponibles",
-    "retrait": "Demander un retrait"
+    "retrait": "Demander un retrait",
+    "prochaineJournee": "Prochaine journée",
+    "journeeSuivante": "Journée suivante",
+    "deuxJournees": "Les 2 prochaines journées",
+    "tout": "Tout",
+    "match": "Match",
+    "voirMatch": "Voir le match",
+    "cotesIndicatives": "Cotes indicatives : les paris réels arrivent bientôt."
   },
   "auth": {
     "email": "Email",

@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { locale } from '../i18n';
-import { Trophy, TrendingUp, Users, Plus, Loader2, Gift, Target, Coins, Smartphone, ArrowRight, CalendarDays } from 'lucide-react';
+import { Trophy, TrendingUp, Users, Plus, Loader2, Gift, Target, Coins, Smartphone, ArrowRight, CalendarDays, Clock, Info } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { matchService } from '../services/matchService';
 import { COMPETITIONS, SAISONS_DB, ANNEE_ACTUELLE } from '../data/saisons';
@@ -45,20 +45,53 @@ function EclatsBande() {
   );
 }
 
-function formatDate(dateStr) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString(locale(), { weekday: 'short', day: 'numeric', month: 'short' })
-    + ' · ' + d.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
+const heure = (iso) => new Date(iso).toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
+const jourCourt = (iso) => new Date(iso).toLocaleDateString(locale(), { weekday: 'short', day: 'numeric', month: 'short' });
+
+// "sam. 7 nov." ou "sam. 7 – dim. 8 nov."
+function plageDates(matchs) {
+  const premier = new Date(matchs[0].dateMatch);
+  const dernier = new Date(matchs[matchs.length - 1].dateMatch);
+  if (premier.toDateString() === dernier.toDateString()) return jourCourt(premier);
+  return `${premier.toLocaleDateString(locale(), { weekday: 'short', day: 'numeric' })} – ${jourCourt(dernier)}`;
 }
 
-function Logo({ equipe, taille = 48 }) {
+const numeroJournee = (m) => {
+  const brut = m.journee ?? m.numeroJournee ?? m.round ?? null;
+  const n = typeof brut === 'string' ? parseInt(brut.match(/\d+/)?.[0] ?? '', 10) : brut;
+  return Number.isFinite(n) ? n : null;
+};
+
+// Les 2 prochaines journées d'une compétition, à partir des matchs à venir.
+// Avec le numéro de journée : on le suit. Sinon : une journée = un bloc de matchs
+// rapprochés (un nouveau bloc commence 4 jours après le premier match du bloc).
+function deuxProchainesJournees(matchs) {
+  if (matchs.length === 0) return [];
+  if (matchs.every(m => numeroJournee(m) != null)) {
+    const numeros = [...new Set(matchs.map(numeroJournee))].sort((a, b) => a - b).slice(0, 2);
+    return numeros.map(n => ({ numero: n, matchs: matchs.filter(m => numeroJournee(m) === n) }));
+  }
+  const blocs = [];
+  for (const m of matchs) {
+    const dernier = blocs[blocs.length - 1];
+    if (dernier && new Date(m.dateMatch) - new Date(dernier.matchs[0].dateMatch) < 4 * 86400000) dernier.matchs.push(m);
+    else if (blocs.length < 2) blocs.push({ numero: null, matchs: [m] });
+    else break;
+  }
+  return blocs;
+}
+
+function Logo({ equipe, taille = 28 }) {
   return equipe?.logoUrl
-    ? <img src={equipe.logoUrl} alt="" style={{ width: taille, height: taille, objectFit: 'contain' }} />
+    ? <img src={equipe.logoUrl} alt="" style={{ width: taille, height: taille, objectFit: 'contain', flexShrink: 0 }} />
     : <span style={{
-        width: taille, height: taille, borderRadius: '50%', backgroundColor: CLAIR.tuile, color: CLAIR.doux,
-        display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: taille / 3.5,
+        width: taille, height: taille, borderRadius: '50%', backgroundColor: CLAIR.tuile, color: CLAIR.doux, flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: taille / 3,
       }}>{equipe?.nom?.substring(0, 2).toUpperCase()}</span>;
 }
+
+// Heure | Équipes | Cotes 1 X 2
+const GRILLE_PARI = '64px minmax(0,1fr) 300px';
 
 // Cotes de démonstration (à remplacer par les vraies cotes du backend)
 // detail = clé de traduction jouer.cotes.<type>
@@ -68,8 +101,8 @@ const COTES = [
   { label: '2', cote: 2.80, type: 'ext' },
 ];
 
-// ── Carte d'un pari ─────────────────────────────────────────────────────
-function CartePari({ p, selection, onSelection, mise, onMise, solde }) {
+// ── Une ligne de pari (match + cotes, mise dépliée quand une cote est choisie) ──
+function LignePari({ p, selection, onSelection, mise, onMise, solde, premiere }) {
   const { t } = useTranslation();
   const miseMax = Math.max(MISE_MIN, Math.min(solde, MISE_MAX));
   const miseActuelle = Math.min(mise ?? MISE_DEFAUT, miseMax);
@@ -79,87 +112,120 @@ function CartePari({ p, selection, onSelection, mise, onMise, solde }) {
   const nomChoix = selection === 'dom' ? p.equipeDomicile?.nom : selection === 'ext' ? p.equipeExterieur?.nom : t('jouer.matchNul');
 
   return (
-    <div style={{ backgroundColor: CLAIR.carte, border: `1px solid ${CLAIR.bord}`, borderRadius: '16px', overflow: 'hidden' }}>
-      {/* En-tête */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 20px', borderBottom: `1px solid ${CLAIR.bord}`, backgroundColor: '#fafbfa' }}>
-        <span style={{ fontSize: '12px', fontWeight: 800, color: '#2c312e', letterSpacing: '0.5px', textTransform: 'uppercase' }}>MTN {p.competition}</span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: CLAIR.doux, textTransform: 'capitalize' }}>
-          <CalendarDays size={14} /> {formatDate(p.dateMatch)}
-        </span>
-      </div>
+    <div style={{ borderTop: premiere ? 'none' : `1px solid ${CLAIR.bord}`, backgroundColor: selection ? '#f6faf7' : CLAIR.carte, transition: 'background-color 0.2s ease' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: GRILLE_PARI, alignItems: 'center', gap: '16px', padding: '14px 20px' }}>
+        {/* Date / heure */}
+        <Link to={`/matchs/${p.id}`} style={{ textDecoration: 'none', textAlign: 'center' }} title={t('jouer.voirMatch')}>
+          <div style={{ fontSize: '11px', fontWeight: 700, color: CLAIR.doux, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+            {new Date(p.dateMatch).toLocaleDateString(locale(), { weekday: 'short', day: 'numeric' })}
+          </div>
+          <div style={{ fontFamily: CHIFFRES, fontSize: '20px', fontWeight: 800, color: CLAIR.texte, lineHeight: 1.1 }}>{heure(p.dateMatch)}</div>
+        </Link>
 
-      <div style={{ padding: '20px' }}>
         {/* Équipes */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textAlign: 'center' }}>
-            <Logo equipe={p.equipeDomicile} />
-            <span style={{ fontSize: '16px', fontWeight: 800, color: CLAIR.texte }}>{p.equipeDomicile?.nom}</span>
-          </div>
-          <span style={{ fontFamily: CHIFFRES, fontSize: '22px', fontWeight: 800, color: '#b5bcb8' }}>VS</span>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textAlign: 'center' }}>
-            <Logo equipe={p.equipeExterieur} />
-            <span style={{ fontSize: '16px', fontWeight: 800, color: CLAIR.texte }}>{p.equipeExterieur?.nom}</span>
-          </div>
-        </div>
+        <Link to={`/matchs/${p.id}`} style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: '8px', minWidth: 0 }}>
+          {[p.equipeDomicile, p.equipeExterieur].map((e, i) => (
+            <span key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+              <Logo equipe={e} />
+              <span style={{ fontSize: '15px', fontWeight: 700, color: CLAIR.texte, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e?.nom}</span>
+            </span>
+          ))}
+        </Link>
 
-        {/* Cotes */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '18px' }}>
+        {/* Cotes 1 / X / 2 */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
           {COTES.map(c => {
             const actif = selection === c.type;
             return (
               <button key={c.type} onClick={() => onSelection(c.type)}
-                className="transition-all"
+                className="transition-all hover:-translate-y-px"
+                title={t(`jouer.cotes.${c.type}`)}
                 style={{
-                  padding: '12px 10px', borderRadius: '12px', cursor: 'pointer', textAlign: 'center',
-                  border: `2px solid ${actif ? theme.green : CLAIR.bord}`,
+                  padding: '9px 6px', borderRadius: '10px', cursor: 'pointer', textAlign: 'center',
+                  border: `1.5px solid ${actif ? theme.green : CLAIR.bord}`,
                   backgroundColor: actif ? theme.green : CLAIR.tuile,
                   color: actif ? '#fff' : CLAIR.texte,
+                  boxShadow: actif ? '0 6px 14px rgba(31,157,85,0.28)' : 'none',
                 }}>
-                <div style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.5px', opacity: actif ? 0.85 : 0.6 }}>
-                  {c.label} · {t(`jouer.cotes.${c.type}`).toUpperCase()}
-                </div>
-                <div style={{ fontFamily: CHIFFRES, fontSize: '26px', fontWeight: 800, lineHeight: 1.1 }}>{c.cote.toFixed(2)}</div>
+                <div style={{ fontSize: '11px', fontWeight: 800, opacity: actif ? 0.85 : 0.55 }}>{c.label}</div>
+                <div style={{ fontFamily: CHIFFRES, fontSize: '21px', fontWeight: 800, lineHeight: 1.05 }}>{c.cote.toFixed(2)}</div>
               </button>
             );
           })}
         </div>
-
-        {/* Mise */}
-        {pasAssez ? (
-          <p style={{ fontSize: '13px', color: theme.red, fontWeight: 600 }}>{t('jouer.soldeInsuffisant', { n: MISE_MIN })}</p>
-        ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <span style={{ fontSize: '12px', fontWeight: 800, color: CLAIR.doux, letterSpacing: '0.5px' }}>{t('jouer.miseMaj')}</span>
-            <input
-              type="range" min={MISE_MIN} max={miseMax} step={10}
-              value={miseActuelle}
-              onChange={e => onMise(Number(e.target.value))}
-              style={{ flex: 1, accentColor: theme.green }}
-              aria-label={t('jouer.montantMise')}
-            />
-            <span style={{ minWidth: '74px', textAlign: 'right', fontFamily: CHIFFRES, fontSize: '22px', fontWeight: 800, color: CLAIR.texte }}>
-              {miseActuelle} <span style={{ fontSize: '14px', color: CLAIR.doux }}>{t('commun.pts')}</span>
-            </span>
-          </div>
-        )}
-
-        {/* Validation */}
-        {selection && !pasAssez && (
-          <button
-            className="transition-all hover:brightness-110"
-            style={{
-              width: '100%', marginTop: '16px', padding: '14px 18px', borderRadius: '999px', border: 'none', cursor: 'pointer',
-              backgroundColor: theme.green, color: '#fff', fontSize: '15px', fontWeight: 800,
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
-              boxShadow: '0 8px 20px rgba(31,157,85,0.3)',
-            }}>
-            <span>{t('jouer.parier', { n: miseActuelle, choix: nomChoix })}</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', opacity: 0.9 }}>
-              {t('jouer.gainPotentiel', { n: gain })} <ArrowRight size={16} />
-            </span>
-          </button>
-        )}
       </div>
+
+      {/* Mise + validation (seulement quand une cote est choisie) */}
+      {selection && (
+        <div style={{ padding: '0 20px 16px' }}>
+          {pasAssez ? (
+            <p style={{ fontSize: '13px', color: theme.red, fontWeight: 600 }}>{t('jouer.soldeInsuffisant', { n: MISE_MIN })}</p>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', alignItems: 'center', gap: '16px', padding: '12px 14px', borderRadius: '12px', backgroundColor: '#fff', border: `1px solid ${CLAIR.bord}` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 800, color: CLAIR.doux, letterSpacing: '0.6px' }}>{t('jouer.miseMaj')}</span>
+                <input type="range" min={MISE_MIN} max={miseMax} step={10} value={miseActuelle}
+                  onChange={e => onMise(Number(e.target.value))}
+                  style={{ flex: 1, accentColor: theme.green }} aria-label={t('jouer.montantMise')} />
+                <span style={{ minWidth: '64px', textAlign: 'right', fontFamily: CHIFFRES, fontSize: '20px', fontWeight: 800, color: CLAIR.texte }}>
+                  {miseActuelle} <span style={{ fontSize: '13px', color: CLAIR.doux }}>{t('commun.pts')}</span>
+                </span>
+              </div>
+              <button className="transition-all hover:brightness-110"
+                style={{
+                  padding: '11px 18px', borderRadius: '999px', border: 'none', cursor: 'pointer',
+                  backgroundColor: theme.green, color: '#fff', fontSize: '14px', fontWeight: 800,
+                  display: 'flex', alignItems: 'center', gap: '10px', whiteSpace: 'nowrap',
+                  boxShadow: '0 8px 18px rgba(31,157,85,0.3)',
+                }}>
+                {t('jouer.parier', { n: miseActuelle, choix: nomChoix })}
+                <span style={{ padding: '3px 9px', borderRadius: '999px', backgroundColor: 'rgba(255,255,255,0.2)', fontSize: '12px' }}>
+                  {t('jouer.gainPotentiel', { n: gain })}
+                </span>
+                <ArrowRight size={16} />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Une journée d'une compétition ───────────────────────────────────────
+function BlocJournee({ competition, journee, rang, enfants }) {
+  const { t } = useTranslation();
+  const titre = journee.numero != null
+    ? t('matchs.journee', { n: journee.numero })
+    : rang === 0 ? t('jouer.prochaineJournee') : t('jouer.journeeSuivante');
+  return (
+    <div style={{ backgroundColor: CLAIR.carte, border: `1px solid ${CLAIR.bord}`, borderRadius: '16px', overflow: 'hidden', boxShadow: '0 1px 2px rgba(20,40,30,0.04)' }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap',
+        padding: '12px 20px', background: `linear-gradient(90deg, ${CLAIR.vert}, #1c6b3e)`, color: '#fff',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ padding: '3px 9px', borderRadius: '6px', backgroundColor: 'rgba(255,255,255,0.16)', fontSize: '11px', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase' }}>
+            MTN {competition}
+          </span>
+          <span style={{ fontSize: '16px', fontWeight: 800 }}>{titre}</span>
+        </div>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'rgba(255,255,255,0.8)', textTransform: 'capitalize' }}>
+          <CalendarDays size={14} /> {plageDates(journee.matchs)}
+          <span style={{ padding: '2px 8px', borderRadius: '999px', backgroundColor: 'rgba(255,255,255,0.16)', fontSize: '12px', fontWeight: 700, textTransform: 'none' }}>
+            {t('matchs.nbMatchs', { count: journee.matchs.length })}
+          </span>
+        </span>
+      </div>
+      {/* En-tête des colonnes */}
+      <div style={{ display: 'grid', gridTemplateColumns: GRILLE_PARI, gap: '16px', padding: '8px 20px', borderBottom: `1px solid ${CLAIR.bord}`, backgroundColor: '#fafbfa', fontSize: '11px', fontWeight: 800, color: CLAIR.doux, letterSpacing: '0.6px', textTransform: 'uppercase' }}>
+        <span style={{ textAlign: 'center' }}><Clock size={12} style={{ display: 'inline', verticalAlign: '-2px' }} /></span>
+        <span>{t('jouer.match')}</span>
+        <span style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', textAlign: 'center' }}>
+          {COTES.map(c => <span key={c.type}>{t(`jouer.cotes.${c.type}`)}</span>)}
+        </span>
+      </div>
+      {enfants}
     </div>
   );
 }
@@ -234,25 +300,32 @@ const JouerPage = () => {
   const { t } = useTranslation();
   const [mises, setMises] = useState({});
   const [selectionnes, setSelectionnes] = useState({});
-  const [matchsAvenir, setMatchsAvenir] = useState([]);
+  // [{ cle, label, journees: [{ numero, matchs }] }] : les 2 prochaines journées par compétition
+  const [programme, setProgramme] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filtre, setFiltre] = useState('tout');
   const { user } = useAuth();
 
-  // Matchs à venir d'Elite One ET d'Elite Two (saison par défaut)
+  // Vrais matchs à venir d'Elite One ET d'Elite Two (saison en cours)
   useEffect(() => {
     let ignore = false;
     const ids = SAISONS_DB[ANNEE_ACTUELLE] ?? {};
     Promise.all(COMPETITIONS
       .filter(c => ids[c.cle] != null)
       .map(c => matchService.getBySaison(ids[c.cle])
-        .then(data => data.map(m => ({ ...m, competition: c.label })))
-        .catch(() => [])))
+        .then(data => ({ ...c, matchs: data }))
+        .catch(() => ({ ...c, matchs: [] }))))
       .then(listes => {
         if (ignore) return;
-        const avenir = listes.flat()
-          .filter(m => m.statut === 0)
-          .sort((a, b) => new Date(a.dateMatch) - new Date(b.dateMatch));
-        setMatchsAvenir(avenir);
+        const maintenant = Date.now();
+        setProgramme(listes.map(c => {
+          // Pas encore joués ET date à venir (les matchs reportés sans nouvelle date sont exclus)
+          const avenir = c.matchs
+            .filter(m => m.statut === 0 && new Date(m.dateMatch).getTime() > maintenant)
+            .sort((a, b) => new Date(a.dateMatch) - new Date(b.dateMatch))
+            .map(m => ({ ...m, competition: c.label }));
+          return { cle: c.cle, label: c.label, journees: deuxProchainesJournees(avenir) };
+        }));
         setLoading(false);
       });
     return () => { ignore = true; };
@@ -265,6 +338,12 @@ const JouerPage = () => {
   if (!user) return <Presentation />;
 
   const solde = user.soldePoints ?? 0;
+
+  // Blocs affichés selon le filtre : Elite One (J+1, J+2) puis Elite Two (J+1, J+2)
+  const blocs = programme
+    .filter(c => filtre === 'tout' || c.cle === filtre)
+    .flatMap(c => c.journees.map((journee, rang) => ({ comp: c, journee, rang })));
+  const nbParis = blocs.reduce((n, b) => n + b.journee.matchs.length, 0);
 
   // Amis de démonstration (à remplacer par les vrais amis du backend)
   const amis = [
@@ -323,18 +402,41 @@ const JouerPage = () => {
         <div style={CONTENEUR}>
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]" style={{ alignItems: 'start' }}>
 
-            {/* Paris disponibles */}
+            {/* Paris disponibles : les 2 prochaines journées de chaque compétition */}
             <div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '16px' }}>
-                <h2 style={{ fontSize: '22px', fontWeight: 800, color: CLAIR.texte }}>{t('jouer.parisDispo')}</h2>
-                {!loading && <span style={{ fontSize: '14px', fontWeight: 600, color: CLAIR.doux }}>{t('matchs.nbMatchs', { count: matchsAvenir.length })}</span>}
+              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                <div>
+                  <h2 style={{ fontSize: '22px', fontWeight: 800, color: CLAIR.texte, lineHeight: 1.2 }}>{t('jouer.parisDispo')}</h2>
+                  {!loading && (
+                    <span style={{ fontSize: '14px', fontWeight: 600, color: CLAIR.doux }}>
+                      {t('jouer.deuxJournees')} · {t('matchs.nbMatchs', { count: nbParis })}
+                    </span>
+                  )}
+                </div>
+                {/* Filtre compétition */}
+                <div style={{ display: 'flex', padding: '4px', borderRadius: '999px', backgroundColor: '#fff', border: `1px solid ${CLAIR.bord}` }}>
+                  {[{ cle: 'tout', label: t('jouer.tout') }, ...COMPETITIONS].map(c => {
+                    const actif = filtre === c.cle;
+                    return (
+                      <button key={c.cle} onClick={() => setFiltre(c.cle)}
+                        style={{
+                          padding: '7px 16px', borderRadius: '999px', border: 'none', cursor: 'pointer',
+                          fontSize: '13px', fontWeight: 800,
+                          backgroundColor: actif ? CLAIR.vert : 'transparent', color: actif ? '#fff' : CLAIR.doux,
+                          transition: 'background-color 0.2s ease, color 0.2s ease',
+                        }}>
+                        {c.label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {loading ? (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '56px 0', color: CLAIR.doux }}>
                   <Loader2 size={20} className="animate-spin" /> {t('jouer.chargement')}
                 </div>
-              ) : matchsAvenir.length === 0 ? (
+              ) : nbParis === 0 ? (
                 <div style={{ textAlign: 'center', padding: '48px 24px', backgroundColor: CLAIR.carte, border: `1px dashed ${CLAIR.bord}`, borderRadius: '16px' }}>
                   <span style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#e8f3ec', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
                     <CalendarDays size={26} color={CLAIR.vert} />
@@ -344,15 +446,23 @@ const JouerPage = () => {
                   <Link to="/matchs" style={{ color: CLAIR.vert, fontWeight: 800, fontSize: '14px' }}>{t('jouer.voirCalendrier')} →</Link>
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  {matchsAvenir.map(p => (
-                    <CartePari key={p.id} p={p} solde={solde}
-                      selection={selectionnes[p.id]}
-                      onSelection={type => selectionnerCote(p.id, type)}
-                      mise={mises[p.id]}
-                      onMise={v => setMises(prev => ({ ...prev, [p.id]: v }))}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                  {blocs.map(({ comp, journee, rang }) => (
+                    <BlocJournee key={`${comp.cle}-${rang}`} competition={comp.label} journee={journee} rang={rang}
+                      enfants={journee.matchs.map((p, i) => (
+                        <LignePari key={p.id} p={p} solde={solde} premiere={i === 0}
+                          selection={selectionnes[p.id]}
+                          onSelection={type => selectionnerCote(p.id, type)}
+                          mise={mises[p.id]}
+                          onMise={v => setMises(prev => ({ ...prev, [p.id]: v }))}
+                        />
+                      ))}
                     />
                   ))}
+                  <p style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: CLAIR.doux }}>
+                    <Info size={14} /> {t('jouer.cotesIndicatives')}
+                    <Link to="/matchs" style={{ marginLeft: 'auto', color: CLAIR.vert, fontWeight: 800, textDecoration: 'none' }}>{t('jouer.voirCalendrier')} →</Link>
+                  </p>
                 </div>
               )}
             </div>
