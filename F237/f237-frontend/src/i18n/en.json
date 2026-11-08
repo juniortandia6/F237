@@ -142,7 +142,11 @@
     "saisonIndispo": "This season's matches are not available on F237 yet. They're coming soon!",
     "revenirSaison": "Back to the {{s}} season",
     "aucunEnDirect": "No live matches right now.",
-    "aucunCetteDate": "No matches on this date."
+    "aucunCetteDate": "No matches on this date.",
+    "butsSansButeurs_one": "{{count}} goal scored · scorer not yet available.",
+    "butsSansButeurs_other": "{{count}} goals scored · scorers not yet available.",
+    "butsNonAttribues_one": "+ {{count}} goal with no scorer available",
+    "butsNonAttribues_other": "+ {{count}} goals with no scorer available"
   },
   "matchDetail": {
     "buteurInconnu": "Unknown scorer",

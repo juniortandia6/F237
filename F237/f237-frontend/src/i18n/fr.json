@@ -142,7 +142,11 @@
     "saisonIndispo": "Les matchs de cette saison ne sont pas encore disponibles sur F237. Ils arrivent bientôt !",
     "revenirSaison": "Revenir à la saison {{s}}",
     "aucunEnDirect": "Aucun match en direct pour le moment.",
-    "aucunCetteDate": "Aucun match pour cette date."
+    "aucunCetteDate": "Aucun match pour cette date.",
+    "butsSansButeurs_one": "{{count}} but marqué · buteur pas encore communiqué.",
+    "butsSansButeurs_other": "{{count}} buts marqués · buteurs pas encore communiqués.",
+    "butsNonAttribues_one": "+ {{count}} but sans buteur communiqué",
+    "butsNonAttribues_other": "+ {{count}} buts sans buteur communiqué"
   },
   "matchDetail": {
     "buteurInconnu": "Buteur inconnu",

@@ -258,13 +258,19 @@ function ResumeJournee({ matchs, masquer }) {
   const { t } = useTranslation();
   const joues = matchs.filter(m => m.statut === 2 || m.statut === 1);
   const totalButs = joues.reduce((s, m) => s + (m.scoreDomicile ?? 0) + (m.scoreExterieur ?? 0), 0);
+  // L'API ne donne pas toujours le nom des buteurs : on compte les buts sans buteur connu
+  const inconnu = (nom) => !nom || /inconnu|unknown/i.test(nom);
   const buteurs = {};
+  let butsAttribues = 0; // buts avec un buteur connu (ou contre son camp)
   for (const m of joues) for (const b of m.buts ?? []) {
-    if (b.estButCSC || !b.nomJoueur || b.nomJoueur === 'Inconnu') continue;
+    if (b.estButCSC) { butsAttribues++; continue; }
+    if (inconnu(b.nomJoueur)) continue;
+    butsAttribues++;
     const cle = `${b.nomJoueur}|${b.nomEquipe}`;
     buteurs[cle] = { nom: b.nomJoueur, equipe: b.nomEquipe, buts: (buteurs[cle]?.buts ?? 0) + 1 };
   }
   const topButeurs = Object.values(buteurs).sort((a, b) => b.buts - a.buts).slice(0, 5);
+  const butsSansButeur = Math.max(0, totalButs - butsAttribues);
 
   const chiffres = [
     [t('matchs.chiffres.matchs'), matchs.length],
@@ -293,7 +299,10 @@ function ResumeJournee({ matchs, masquer }) {
         {masquer ? (
           <p style={{ fontSize: '13px', color: CLAIR.doux }}>{t('matchs.masqueSurprise')}</p>
         ) : topButeurs.length === 0 ? (
-          <p style={{ fontSize: '13px', color: CLAIR.doux }}>{t('matchs.aucunBut')}</p>
+          /* Aucun nom de buteur : soit il n'y a pas eu de but, soit l'API ne les a pas encore donnés */
+          <p style={{ fontSize: '13px', color: CLAIR.doux, lineHeight: 1.5 }}>
+            {totalButs > 0 ? t('matchs.butsSansButeurs', { count: totalButs }) : t('matchs.aucunBut')}
+          </p>
         ) : topButeurs.map((j, i) => (
           <div key={`${j.nom}|${j.equipe}`} style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px',
@@ -306,6 +315,12 @@ function ResumeJournee({ matchs, masquer }) {
             <span style={{ fontSize: '18px', fontWeight: 800, color: CLAIR.vert }}>{j.buts}</span>
           </div>
         ))}
+        {/* Une partie des buts sans buteur connu */}
+        {!masquer && topButeurs.length > 0 && butsSansButeur > 0 && (
+          <p style={{ fontSize: '12px', color: CLAIR.doux, paddingTop: '8px', borderTop: `1px solid ${CLAIR.bord}` }}>
+            {t('matchs.butsNonAttribues', { count: butsSansButeur })}
+          </p>
+        )}
       </div>
     </aside>
   );
