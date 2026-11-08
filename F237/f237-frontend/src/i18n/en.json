@@ -197,7 +197,8 @@
       "apercu": "Overview",
       "chrono": "Timeline",
       "h2h": "Head-to-head"
-    }
+    },
+    "detailIndispo": "Goal details (scorers, minutes) are not available yet for this match."
   },
   "classement": {
     "aucunBut": "No goals recorded yet.",

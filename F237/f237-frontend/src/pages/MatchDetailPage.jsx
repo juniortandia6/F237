@@ -169,8 +169,12 @@ function TableauMiTemps({ m }) {
   ];
   // On ne montre le détail par mi-temps que si les buts enregistrés collent au score
   const fiable = lignes.every(l => l.buts.length === l.total);
-  const mt1 = (l) => l.buts.filter(b => b.minute <= 45).length;
-  const mt2 = (l) => l.buts.filter(b => b.minute > 45).length;
+  // Sinon (ex. Elite Two, sans détail des buts) : score à la mi-temps donné par l'API
+  const miTemps = [m.scoreMiTempsDomicile, m.scoreMiTempsExterieur];
+  const avecMiTemps = !fiable && miTemps.every(v => v != null);
+  const connu = fiable || avecMiTemps;
+  const mt1 = (l) => fiable ? l.buts.filter(b => b.minute <= 45).length : miTemps[lignes.indexOf(l)];
+  const mt2 = (l) => fiable ? l.buts.filter(b => b.minute > 45).length : Math.max(0, l.total - miTemps[lignes.indexOf(l)]);
   // 2e mi-temps commencée ? (match terminé, minute > 45 ou but marqué après la 45e)
   const deuxiemeMtCommencee = m.statut === 2 || (m.minute ?? 0) > 45
     || lignes.some(l => l.buts.some(b => b.minute > 45));
@@ -200,8 +204,8 @@ function TableauMiTemps({ m }) {
                   {l.equipe?.logoUrl && <img src={l.equipe.logoUrl} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />}
                   {abrev(l.equipe?.nom)}
                 </td>
-                <td style={{ ...cellule, ...(fiable ? gras(mt1(l), mt1(autre)) : {}) }}>{fiable ? mt1(l) : '–'}</td>
-                <td style={{ ...cellule, ...(fiable && deuxiemeMtCommencee ? gras(mt2(l), mt2(autre)) : {}) }}>{fiable && deuxiemeMtCommencee ? mt2(l) : '–'}</td>
+                <td style={{ ...cellule, ...(connu ? gras(mt1(l), mt1(autre)) : {}) }}>{connu ? mt1(l) : '–'}</td>
+                <td style={{ ...cellule, ...(connu && deuxiemeMtCommencee ? gras(mt2(l), mt2(autre)) : {}) }}>{connu && deuxiemeMtCommencee ? mt2(l) : '–'}</td>
                 <td style={{ ...cellule, fontFamily: CHIFFRES, fontSize: '22px', ...(termine ? gras(l.total, autre.total) : {}) }}>{termine ? l.total : '–'}</td>
               </tr>
             );
@@ -337,12 +341,17 @@ function Chronologie({ m }) {
         <span style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', width: '2px', marginLeft: '-1px', backgroundColor: CLAIR.bord }} />
         <Jalon texte={t('matchDetail.coupEnvoiMaj')} />
         {premiereMT.map((ev, i) => <Evenement key={`a${i}`} ev={ev} />)}
-        {(m.statut === 2 || deuxiemeMT.length > 0) && <Jalon texte={t('matchDetail.miTempsMaj')} />}
+        {(m.statut === 2 || deuxiemeMT.length > 0) && (
+          <Jalon texte={m.scoreMiTempsDomicile != null && m.scoreMiTempsExterieur != null
+            ? `${t('matchDetail.miTempsMaj')} · ${m.scoreMiTempsDomicile}-${m.scoreMiTempsExterieur}`
+            : t('matchDetail.miTempsMaj')} />
+        )}
         {deuxiemeMT.map((ev, i) => <Evenement key={`b${i}`} ev={ev} />)}
         {m.statut === 2 && <Jalon texte={`${t('matchDetail.finMaj')} · ${m.scoreDomicile}-${m.scoreExterieur}`} />}
         {evenements.length === 0 && (
           <p style={{ textAlign: 'center', color: CLAIR.doux, position: 'relative', zIndex: 1, backgroundColor: '#fff', padding: '8px' }}>
-            {t('matchDetail.aucunBut')}
+            {/* Des buts au score mais aucun détail : l'API ne fournit pas les buteurs pour ce match */}
+            {(m.scoreDomicile ?? 0) + (m.scoreExterieur ?? 0) > 0 ? t('matchDetail.detailIndispo') : t('matchDetail.aucunBut')}
           </p>
         )}
       </div>

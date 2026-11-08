@@ -260,12 +260,17 @@ namespace F237.BLL.Services.Implementations
                 var statut = ConvertirStatut(fixtureInfo.GetProperty("status").GetProperty("short").GetString());
                 var scoreDomicile = EntierOuNull(goals.GetProperty("home"));
                 var scoreExterieur = EntierOuNull(goals.GetProperty("away"));
+                var (miTempsDomicile, miTempsExterieur) = ScoreMiTemps(fixture);
+                var journee = NumeroJournee(fixture);
 
                 if (matchsExistants.TryGetValue(apiFixtureId, out var matchExistant))
                 {
                     matchExistant.Statut = statut;
                     matchExistant.ScoreDomicile = scoreDomicile;
                     matchExistant.ScoreExterieur = scoreExterieur;
+                    matchExistant.ScoreMiTempsDomicile = miTempsDomicile;
+                    matchExistant.ScoreMiTempsExterieur = miTempsExterieur;
+                    matchExistant.Journee = journee ?? matchExistant.Journee;
                     matchExistant.SaisonId = saisonId;
                     // Heure du match : on garde une heure corrigée à la main par l'admin, SAUF si
                     // l'API a changé son heure depuis (elle a enfin la vraie heure, ou le match est reporté)
@@ -291,6 +296,9 @@ namespace F237.BLL.Services.Implementations
                         SaisonId = saisonId,
                         ScoreDomicile = scoreDomicile,
                         ScoreExterieur = scoreExterieur,
+                        ScoreMiTempsDomicile = miTempsDomicile,
+                        ScoreMiTempsExterieur = miTempsExterieur,
+                        Journee = journee,
                     });
                 }
                 total++;
@@ -438,6 +446,27 @@ namespace F237.BLL.Services.Implementations
             equipe.LogoApi = null;
             await _context.SaveChangesAsync();
             return equipe;
+        }
+
+        // Score à la mi-temps : "score": { "halftime": { "home": 0, "away": 1 } } (null si l'API ne l'a pas)
+        private static (int?, int?) ScoreMiTemps(JsonElement fixture)
+        {
+            if (!fixture.TryGetProperty("score", out var score)
+                || !score.TryGetProperty("halftime", out var mt)
+                || mt.ValueKind != JsonValueKind.Object)
+                return (null, null);
+            return (EntierOuNull(mt.GetProperty("home")), EntierOuNull(mt.GetProperty("away")));
+        }
+
+        // Numéro de journée : "league": { "round": "Regular Season - 3" } -> 3 (null pour les autres phases)
+        private static int? NumeroJournee(JsonElement fixture)
+        {
+            if (!fixture.TryGetProperty("league", out var league)
+                || !league.TryGetProperty("round", out var round)
+                || round.ValueKind != JsonValueKind.String)
+                return null;
+            var m = System.Text.RegularExpressions.Regex.Match(round.GetString() ?? "", @"^Regular Season\s*-\s*(\d+)$");
+            return m.Success ? int.Parse(m.Groups[1].Value) : null;
         }
 
         // Date d'un match en UTC. L'API envoie "2026-11-04T14:30:00+00:00" : on garde

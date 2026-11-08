@@ -197,7 +197,8 @@
       "apercu": "Aperçu",
       "chrono": "Chronologie",
       "h2h": "Face-à-face"
-    }
+    },
+    "detailIndispo": "Le détail des buts (buteurs, minutes) n'est pas encore disponible pour ce match."
   },
   "classement": {
     "aucunBut": "Aucun but enregistré pour l'instant.",

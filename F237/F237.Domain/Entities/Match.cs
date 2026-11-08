@@ -17,6 +17,14 @@ namespace F237.Domain.Entities
         public DateTime? DateApi { get; set; }
         public bool HeureManuelle { get; set; } = false;
 
+        // Score à la mi-temps (API : score.halftime). Utile quand l'API ne donne pas
+        // le détail des buts (ex. Elite Two) : 1re MT = mi-temps, 2e MT = final - mi-temps.
+        public int? ScoreMiTempsDomicile { get; set; }
+        public int? ScoreMiTempsExterieur { get; set; }
+
+        // Numéro de journée (API : league.round, "Regular Season - 3" -> 3). Null si inconnu.
+        public int? Journee { get; set; }
+
         // Navigation
         public Equipe EquipeDomicile { get; set; } = null!;
         public Equipe EquipeExterieur { get; set; } = null!;

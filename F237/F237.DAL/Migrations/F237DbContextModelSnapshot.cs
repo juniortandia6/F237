@@ -356,6 +356,9 @@ namespace F237.DAL.Migrations
                     b.Property<bool>("HeureManuelle")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("Journee")
+                        .HasColumnType("int");
+
                     b.Property<int>("SaisonId")
                         .HasColumnType("int");
 
@@ -363,6 +366,12 @@ namespace F237.DAL.Migrations
                         .HasColumnType("int");
 
                     b.Property<int?>("ScoreExterieur")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ScoreMiTempsDomicile")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ScoreMiTempsExterieur")
                         .HasColumnType("int");
 
                     b.Property<int>("Statut")

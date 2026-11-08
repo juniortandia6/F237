@@ -8,6 +8,9 @@
         public int Statut { get; set; }
         public int? ScoreDomicile { get; set; }
         public int? ScoreExterieur { get; set; }
+        public int? ScoreMiTempsDomicile { get; set; }
+        public int? ScoreMiTempsExterieur { get; set; }
+        public int? Journee { get; set; }
         public int SaisonId { get; set; }
         public int? MinuteLive { get; set; }
         public EquipeSimpleDto? EquipeDomicile { get; set; }

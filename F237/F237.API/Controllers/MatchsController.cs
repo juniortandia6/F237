@@ -2,6 +2,7 @@
 using F237.BLL.Services.Interfaces;
 using F237.Domain.Entities;
 using F237.Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace F237.API.Controllers
@@ -24,6 +25,9 @@ namespace F237.API.Controllers
             Statut = (int)m.Statut,
             ScoreDomicile = m.ScoreDomicile,
             ScoreExterieur = m.ScoreExterieur,
+            ScoreMiTempsDomicile = m.ScoreMiTempsDomicile,
+            ScoreMiTempsExterieur = m.ScoreMiTempsExterieur,
+            Journee = m.Journee,
             SaisonId = m.SaisonId,
             EquipeDomicile = m.EquipeDomicile == null ? null : new EquipeSimpleDto
             {
@@ -128,6 +132,8 @@ namespace F237.API.Controllers
             return Ok(ToDto(match));
         }
 
+        // ── Écriture : réservée aux admins (sinon n'importe qui pourrait changer un score) ──
+        [Authorize(Roles = Roles.Admin)]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Match match)
         {
@@ -135,6 +141,7 @@ namespace F237.API.Controllers
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
+        [Authorize(Roles = Roles.Admin)]
         [HttpPut("{id}/score")]
         public async Task<IActionResult> UpdateScore(int id, [FromBody] ScoreUpdateDto dto)
         {
@@ -142,6 +149,7 @@ namespace F237.API.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = Roles.Admin)]
         [HttpPut("{id}/terminer")]
         public async Task<IActionResult> Terminer(int id)
         {
