@@ -28,6 +28,10 @@ namespace F237.BLL.Services.Interfaces
 
         /// <summary>Annule la correction : retour à l'heure de l'API (null si introuvable).</summary>
         Task<Match?> AnnulerCorrectionHeureAsync(int apiFootballId);
+
+        // Logo d'un club remplacé à la main (protégé de l'import)
+        Task<Equipe?> DefinirLogoEquipeAsync(int equipeId, string logoUrl);
+        Task<Equipe?> AnnulerLogoEquipeAsync(int equipeId);
     }
 
     public class ResultatImportSaison

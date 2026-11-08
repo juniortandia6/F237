@@ -13,6 +13,11 @@ namespace F237.Domain.Entities
         public DivisionEnum Division { get; set; }
         public bool EstActive { get; set; } = true;
 
+        // Logo remplacé à la main (ex. "/logos/victoria-united.png") : l'import ne le touche plus.
+        public bool LogoManuel { get; set; } = false;
+        // Logo d'origine de l'API-Football, gardé pour pouvoir annuler le remplacement
+        public string? LogoApi { get; set; }
+
         // Navigation
         public ICollection<Joueur> Joueurs { get; set; } = new List<Joueur>();
         public ICollection<Match> MatchsDomicile { get; set; } = new List<Match>();

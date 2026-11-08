@@ -198,7 +198,9 @@ namespace F237.BLL.Services.Implementations
                 if (equipeExistante != null)
                 {
                     equipeExistante.Nom = nom;
-                    equipeExistante.LogoUrl = logo;
+                    // Un logo remplacé à la main n'est pas écrasé (on garde juste celui de l'API à côté)
+                    if (equipeExistante.LogoManuel) equipeExistante.LogoApi = logo;
+                    else equipeExistante.LogoUrl = logo;
                     equipeExistante.Division = division;
                     equipeExistante.EstActive = true;
                     _context.Equipes.Update(equipeExistante);
@@ -411,6 +413,31 @@ namespace F237.BLL.Services.Implementations
             match.HeureManuelle = false;
             await _context.SaveChangesAsync();
             return match;
+        }
+
+        // Remplace le logo d'un club (ex. "/logos/victoria-united.png").
+        // L'import ne le touchera plus ; l'ancien logo de l'API est gardé dans LogoApi.
+        public async Task<Equipe?> DefinirLogoEquipeAsync(int equipeId, string logoUrl)
+        {
+            var equipe = await _context.Equipes.FirstOrDefaultAsync(e => e.Id == equipeId);
+            if (equipe == null) return null;
+            if (!equipe.LogoManuel) equipe.LogoApi = equipe.LogoUrl; // on retient le logo de l'API une seule fois
+            equipe.LogoUrl = logoUrl.Trim();
+            equipe.LogoManuel = true;
+            await _context.SaveChangesAsync();
+            return equipe;
+        }
+
+        // Annule le remplacement : on revient au logo de l'API
+        public async Task<Equipe?> AnnulerLogoEquipeAsync(int equipeId)
+        {
+            var equipe = await _context.Equipes.FirstOrDefaultAsync(e => e.Id == equipeId);
+            if (equipe == null) return null;
+            if (equipe.LogoManuel) equipe.LogoUrl = equipe.LogoApi;
+            equipe.LogoManuel = false;
+            equipe.LogoApi = null;
+            await _context.SaveChangesAsync();
+            return equipe;
         }
 
         // Date d'un match en UTC. L'API envoie "2026-11-04T14:30:00+00:00" : on garde

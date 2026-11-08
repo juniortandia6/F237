@@ -258,6 +258,12 @@ namespace F237.DAL.Migrations
                     b.Property<bool>("EstActive")
                         .HasColumnType("bit");
 
+                    b.Property<string>("LogoApi")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("LogoManuel")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LogoUrl")
                         .HasColumnType("nvarchar(max)");
 

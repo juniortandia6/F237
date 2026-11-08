@@ -71,6 +71,33 @@ namespace F237.API.Controllers
                 : Ok(new { match.Id, match.ApiFootballId, match.DateMatch, match.HeureManuelle });
         }
 
+        // PUT /api/sync/equipe/12/logo   corps : { "logoUrl": "/logos/victoria-united.png" }
+        // Remplace le logo d'un club (image du dossier public/logos du frontend, ou une adresse https).
+        [HttpPut("equipe/{equipeId:int}/logo")]
+        public async Task<IActionResult> DefinirLogo(int equipeId, [FromBody] LogoEquipeDto dto)
+        {
+            var url = dto.LogoUrl?.Trim() ?? string.Empty;
+            var valide = (url.StartsWith("/logos/") && !url.Contains(".."))
+                         || (Uri.TryCreate(url, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps);
+            if (!valide || url.Length > 300)
+                return BadRequest(new { message = "logoUrl doit commencer par /logos/ ou être une adresse https (300 caractères max)." });
+
+            var equipe = await _apiFootballService.DefinirLogoEquipeAsync(equipeId, url);
+            return equipe == null
+                ? NotFound($"Aucune équipe avec l'id {equipeId}.")
+                : Ok(new { equipe.Id, equipe.Nom, equipe.LogoUrl, equipe.LogoManuel, equipe.LogoApi });
+        }
+
+        // DELETE /api/sync/equipe/12/logo — revient au logo de l'API-Football
+        [HttpDelete("equipe/{equipeId:int}/logo")]
+        public async Task<IActionResult> AnnulerLogo(int equipeId)
+        {
+            var equipe = await _apiFootballService.AnnulerLogoEquipeAsync(equipeId);
+            return equipe == null
+                ? NotFound($"Aucune équipe avec l'id {equipeId}.")
+                : Ok(new { equipe.Id, equipe.Nom, equipe.LogoUrl, equipe.LogoManuel });
+        }
+
         [HttpPost("equipes")]
         public async Task<IActionResult> SyncEquipes()
         {
@@ -140,5 +167,10 @@ namespace F237.API.Controllers
     public class CorrectionHeureDto
     {
         public DateTimeOffset Heure { get; set; }
+    }
+
+    public class LogoEquipeDto
+    {
+        public string? LogoUrl { get; set; }
     }
 }
