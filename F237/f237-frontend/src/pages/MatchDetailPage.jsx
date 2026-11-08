@@ -212,6 +212,12 @@ function TableauMiTemps({ m }) {
           })}
         </tbody>
       </table>
+      {/* Détail par mi-temps inconnu (pas de buteurs, pas de score à la mi-temps) */}
+      {!connu && (
+        <p style={{ padding: '10px 20px', borderTop: `1px solid ${CLAIR.bord}`, fontSize: '12px', color: CLAIR.doux }}>
+          {t('matchDetail.miTempsALaFin')}
+        </p>
+      )}
     </Carte>
   );
 }

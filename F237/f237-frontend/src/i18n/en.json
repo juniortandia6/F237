@@ -198,7 +198,8 @@
       "chrono": "Timeline",
       "h2h": "Head-to-head"
     },
-    "detailIndispo": "Goal details (scorers, minutes) are not available yet for this match."
+    "detailIndispo": "Goal details (scorers, minutes) are not available yet for this match.",
+    "miTempsALaFin": "The score is shown at the end of the match."
   },
   "classement": {
     "aucunBut": "No goals recorded yet.",

@@ -198,7 +198,8 @@
       "chrono": "Chronologie",
       "h2h": "Face-à-face"
     },
-    "detailIndispo": "Le détail des buts (buteurs, minutes) n'est pas encore disponible pour ce match."
+    "detailIndispo": "Le détail des buts (buteurs, minutes) n'est pas encore disponible pour ce match.",
+    "miTempsALaFin": "Le score est affiché à la fin du match."
   },
   "classement": {
     "aucunBut": "Aucun but enregistré pour l'instant.",
