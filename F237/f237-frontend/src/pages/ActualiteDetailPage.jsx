@@ -72,7 +72,7 @@ function ActualiteDetailPage() {
               }}>{t(`actualites.tags.${actu.tag}`, { defaultValue: actu.tag })}</span>
               <span style={{ fontSize: '14px', color: 'rgba(255,255,255,0.8)' }}>{formatDateActu(actu.date)}</span>
             </div>
-            <h1 style={{ color: '#fff', fontSize: '40px', fontWeight: 400, lineHeight: 1.2, fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
+            <h1 style={{ color: '#fff', fontSize: '40px', fontWeight: 400, lineHeight: 1.2, fontFamily: 'var(--font-titres)' }}>
               {texteActu(actu, 'titre')}
             </h1>
           </div>
@@ -89,7 +89,7 @@ function ActualiteDetailPage() {
 
       {/* À lire aussi */}
       {autres.length > 0 && <div style={{ maxWidth: '1150px', margin: '0 auto', padding: '0 60px 72px', boxSizing: 'content-box' }}>
-        <h2 style={{ color: theme.text, fontSize: '24px', fontWeight: 400, fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif', marginBottom: '18px' }}>
+        <h2 style={{ color: theme.text, fontSize: '24px', fontWeight: 400, fontFamily: 'var(--font-titres)', marginBottom: '18px' }}>
           {t('actualites.aLireAussi')}
         </h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>

@@ -10,10 +10,28 @@
   --color-f237-green-bright: #3ccf7a;
   --color-f237-red: #e1252b;
   --color-f237-yellow: #fcd116;
+
+  /* Polices : texte, chiffres, grands titres */
+  --font-texte: "Outfit", "Segoe UI", Arial, sans-serif;
+  --font-chiffres: "Barlow Condensed", Arial, sans-serif;
+  --font-titres: "Permanent Marker", "Outfit", Arial, sans-serif;
 }
 
+/* Police de tout le site (les chiffres et les titres la remplacent là où il faut).
+   font-size-adjust : Outfit a des minuscules assez petites ; on les agrandit d'environ 10 %
+   partout d'un coup, sans toucher aux tailles écrites dans les pages.
+   Plus le chiffre est grand, plus le texte est grand (0.50 = taille d'origine d'Outfit). */
 * {
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-texte);
+  font-size-adjust: 0.54;
+}
+
+/* ...mais pas pour les chiffres (Barlow Condensed) ni les grands titres (Permanent Marker) */
+[style*="Barlow"],
+[style*="--font-chiffres"],
+[style*="Permanent"],
+[style*="--font-titres"] {
+  font-size-adjust: none;
 }
 
 html {

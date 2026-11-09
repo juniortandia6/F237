@@ -518,7 +518,7 @@ function ClassementPage() {
             {/* Gauche : saison, titre, championnat, légende */}
             <div>
               <SelecteurSaison annee={annee} onChange={setAnnee} />
-              <h1 style={{ color: '#fff', fontSize: '56px', fontWeight: 400, lineHeight: 1.05, margin: '14px 0 10px', fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
+              <h1 style={{ color: '#fff', fontSize: '56px', fontWeight: 400, lineHeight: 1.05, margin: '14px 0 10px', fontFamily: 'var(--font-titres)' }}>
                 {t('classement.titre')}
               </h1>
               <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '15px', marginBottom: '24px', maxWidth: '420px', lineHeight: 1.5 }}>

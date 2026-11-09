@@ -319,7 +319,7 @@ function SectionDirect({ matchsLive, matchsAVenir, matchsTermines, isConnected, 
           <h2 style={{
             display: 'flex', alignItems: 'center', gap: '12px',
             color: '#fff', fontSize: '28px', fontWeight: 400,
-            fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif',
+            fontFamily: 'var(--font-titres)',
           }}>
             {live && <span className="animate-pulse" style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: theme.red, boxShadow: `0 0 12px ${theme.red}` }} />}
             {TITRES[mode]}
@@ -724,7 +724,7 @@ function BlocButeurs({ matchs, live, competition, comp }) {
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <h3 style={{ color: '#fff', fontSize: '28px', fontWeight: 400, fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
+          <h3 style={{ color: '#fff', fontSize: '28px', fontWeight: 400, fontFamily: 'var(--font-titres)' }}>
             {t('accueil.buteurs.titre')}
           </h3>
           {competition && (
@@ -839,7 +839,7 @@ function SectionClassement({ signatureLive = '', live = false }) {
      <div style={{ maxWidth: '1150px', margin: '0 auto', padding: '0 60px', boxSizing: 'content-box' }}>
       {/* En-tête */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
-        <h2 style={{ color: CLAIRE.text, fontSize: '28px', fontWeight: 400, fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
+        <h2 style={{ color: CLAIRE.text, fontSize: '28px', fontWeight: 400, fontFamily: 'var(--font-titres)' }}>
           {t('accueil.classements.titre')}
         </h2>
         <Link to="/classement" className="flex items-center gap-1 transition-opacity hover:opacity-80"
@@ -1019,7 +1019,7 @@ function SectionNouvelles({ articles }) {
       {/* En-tête */}
       <div style={{ position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '0 60px', boxSizing: 'content-box' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '22px' }}>
-          <h2 style={{ color: '#141414', fontSize: '28px', fontWeight: 400, fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
+          <h2 style={{ color: '#141414', fontSize: '28px', fontWeight: 400, fontFamily: 'var(--font-titres)' }}>
             {t('accueil.nouvelles.titre')}
           </h2>
           <Link to="/actualites" className="flex items-center gap-1 transition-opacity hover:opacity-80"
@@ -1276,7 +1276,7 @@ const AccueilPage = () => {
             <h2 style={{
               color: '#fff', fontWeight: 400, fontSize: '42px',
               lineHeight: 1.15, maxWidth: '820px', marginBottom: '24px',
-              fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif',
+              fontFamily: 'var(--font-titres)',
               textShadow: '0 3px 16px rgba(0,0,0,0.5)',
               display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
             }}>
@@ -1322,7 +1322,7 @@ const AccueilPage = () => {
                       <span style={{
                         display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden',
                         fontSize: '16px', lineHeight: 1.4,
-                        fontFamily: '"Raleway", Arial, sans-serif',
+                        fontFamily: 'var(--font-texte)',
                         color: active ? '#ffffff' : 'rgba(235,235,235,0.6)',
                         fontWeight: active ? 700 : 500,
                         textShadow: '0 1px 4px rgba(0,0,0,0.6)',

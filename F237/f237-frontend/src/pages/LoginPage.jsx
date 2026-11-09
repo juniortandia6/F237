@@ -110,7 +110,7 @@ function LoginPage() {
           <p style={{ color: theme.yellow, fontSize: "13px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", marginBottom: "10px" }}>
             {t('auth.login.surtitre')}
           </p>
-          <h1 style={{ color: "#fff", fontSize: "60px", fontWeight: 400, lineHeight: 1.05, marginBottom: "14px", fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
+          <h1 style={{ color: "#fff", fontSize: "60px", fontWeight: 400, lineHeight: 1.05, marginBottom: "14px", fontFamily: 'var(--font-titres)' }}>
             {t('auth.login.titre')}
           </h1>
           <p style={{ color: "rgba(255,255,255,0.72)", fontSize: "17px", lineHeight: 1.55, maxWidth: "460px", marginBottom: "32px" }}>

@@ -436,7 +436,7 @@ const MatchsPage = () => {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '20px', flexWrap: 'wrap', marginBottom: '28px' }}>
             <div>
               <SelecteurSaison annee={annee} onChange={a => changerSelection(a, comp)} />
-              <h1 style={{ color: '#fff', fontSize: '42px', fontWeight: 400, lineHeight: 1.1, fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
+              <h1 style={{ color: '#fff', fontSize: '42px', fontWeight: 400, lineHeight: 1.1, fontFamily: 'var(--font-titres)' }}>
                 {t('matchs.titre')}
               </h1>
             </div>

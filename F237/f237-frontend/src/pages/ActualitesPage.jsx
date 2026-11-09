@@ -63,7 +63,7 @@ function ActualitesPage() {
 
   return (
     <div style={{ maxWidth: '1150px', margin: '0 auto', padding: '48px 60px 72px', boxSizing: 'content-box' }}>
-      <h1 style={{ color: theme.text, fontSize: '40px', fontWeight: 400, fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif', marginBottom: '20px' }}>
+      <h1 style={{ color: theme.text, fontSize: '40px', fontWeight: 400, fontFamily: 'var(--font-titres)', marginBottom: '20px' }}>
         {t('actualites.titre')}
       </h1>
 
@@ -99,7 +99,7 @@ function ActualitesPage() {
               <Tag>{une.tag}</Tag>
               <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.75)' }}>{formatDateActu(une.date)}</span>
             </div>
-            <h2 style={{ color: '#fff', fontSize: '34px', fontWeight: 400, lineHeight: 1.2, maxWidth: '780px', fontFamily: '"Permanent Marker", "Raleway", Arial, sans-serif' }}>
+            <h2 style={{ color: '#fff', fontSize: '34px', fontWeight: 400, lineHeight: 1.2, maxWidth: '780px', fontFamily: 'var(--font-titres)' }}>
               {texteActu(une, 'titre')}
             </h2>
             <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '15px', marginTop: '10px', maxWidth: '640px' }}>{texteActu(une, 'resume')}</p>
