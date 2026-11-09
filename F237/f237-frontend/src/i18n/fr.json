@@ -244,6 +244,15 @@
       "up": "Monte depuis la dernière journée",
       "down": "Descend depuis la dernière journée",
       "same": "Même place qu'à la dernière journée"
+    },
+    "vue": {
+      "global": "Global",
+      "domicile": "Domicile",
+      "exterieur": "Extérieur"
+    },
+    "vueNote": {
+      "domicile": "Classement des matchs joués à domicile uniquement.",
+      "exterieur": "Classement des matchs joués à l'extérieur uniquement."
     }
   },
   "equipes": {

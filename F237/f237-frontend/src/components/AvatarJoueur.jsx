@@ -1,111 +1,106 @@
 // f237-frontend/src/components/AvatarJoueur.jsx
-// Avatar d'un joueur : sa photo si on en a une, sinon une silhouette générique
-// (dessinée en SVG, aucune image à charger). En option, le logo du club en
-// petite pastille dans le coin bas-gauche.
-// variante="buste" : grand buste détouré, sans cercle, pour le bas des cartes.
+// Avatar d'un joueur : sa photo si on en a une (avec l'accord du club), sinon un
+// buste générique SANS visage reconnaissable, habillé du maillot de son club :
+// couleurs du club, numéro (ou initiales) sur la poitrine. Aucune image à charger.
+//
+//   <AvatarJoueur club="Colombe" nom="M. Williams" numero={9} />          rond (listes)
+//   <AvatarJoueur club="Colombe" nom="M. Williams" variante="buste" />     grand buste (cartes)
+//
+// En variante ronde, le logo du club peut s'afficher en petite pastille (prop logo).
 
 import { useId, useState } from 'react';
+import { couleursClub, texteSur, initialesJoueur } from '../data/couleursClubs';
 
-function Silhouette() {
+// Buste dessiné en SVG (viewBox 120 x 130), posé sur le bas
+function Buste({ principale, secondaire, inscription }) {
   const id = useId().replace(/:/g, '');
-  return (
-    <svg viewBox="0 0 100 100" width="100%" height="100%" aria-hidden="true" style={{ display: 'block' }}>
-      <defs>
-        <clipPath id={`rond-${id}`}><circle cx="50" cy="50" r="50" /></clipPath>
-        <pattern id={`points-${id}`} width="9" height="9" patternUnits="userSpaceOnUse">
-          <circle cx="4.5" cy="4.5" r="1" fill="#dfe3e1" />
-        </pattern>
-        <linearGradient id={`maillot-${id}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#d5d9d7" />
-          <stop offset="1" stopColor="#c3c8c5" />
-        </linearGradient>
-      </defs>
-
-      <circle cx="50" cy="50" r="50" fill="#f5f6f6" />
-      <g clipPath={`url(#rond-${id})`}>
-        <rect width="100" height="100" fill={`url(#points-${id})`} />
-        {/* Cou */}
-        <path d="M43 50 h14 v13 q-7 5 -14 0 z" fill="#c4c8c6" />
-        {/* Épaules + maillot */}
-        <path d="M10 104 C12 80 26 69 41 64 L50 75 L59 64 C74 69 88 80 90 104 Z" fill={`url(#maillot-${id})`} />
-        {/* Col en V */}
-        <path d="M41 64 L50 76 L59 64" fill="none" stroke="#ffffff" strokeWidth="2.6" strokeLinejoin="round" />
-        {/* Écusson */}
-        <path d="M65 78 h8 v5.5 q-4 4.5 -8 0 z" fill="#ffffff" />
-        {/* Tête */}
-        <ellipse cx="50" cy="37" rx="13.5" ry="16.5" fill="#cdd1cf" />
-        {/* Cheveux */}
-        <path d="M36.5 34 q-1 -17 14 -17.5 q14.5 0 14 15.5 q-3 -7.5 -13.5 -8 q-9.5 0 -14.5 10 z" fill="#b9bebb" />
-      </g>
-      <circle cx="50" cy="50" r="48.8" fill="none" stroke="#e1e5e3" strokeWidth="2.4" />
-    </svg>
-  );
-}
-
-// Buste "détouré" (sans cercle), posé sur le bas d'une carte comme les photos FIBA
-function Buste() {
-  const id = useId().replace(/:/g, '');
+  const couleurTexte = texteSur(principale);
+  const long = String(inscription).length;
   return (
     <svg viewBox="0 0 120 130" width="100%" height="100%" preserveAspectRatio="xMidYMax meet" aria-hidden="true" style={{ display: 'block' }}>
       <defs>
-        <linearGradient id={`maillot-${id}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#eef1ef" />
-          <stop offset="1" stopColor="#cdd4d0" />
+        {/* Léger volume sur le maillot */}
+        <linearGradient id={`volume-${id}`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#000" stopOpacity="0.18" />
+          <stop offset="0.35" stopColor="#fff" stopOpacity="0.10" />
+          <stop offset="0.65" stopColor="#fff" stopOpacity="0" />
+          <stop offset="1" stopColor="#000" stopOpacity="0.22" />
         </linearGradient>
         <linearGradient id={`peau-${id}`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#dde2df" />
           <stop offset="1" stopColor="#c6cdc9" />
         </linearGradient>
+        <clipPath id={`maillot-${id}`}>
+          <path d="M2 130 C4 103 21 91 42 86 L60 100 L78 86 C99 91 116 103 118 130 Z" />
+        </clipPath>
       </defs>
-      {/* Épaules + maillot */}
-      <path d="M2 130 C4 103 21 91 42 86 L60 100 L78 86 C99 91 116 103 118 130 Z" fill={`url(#maillot-${id})`} />
-      {/* Ombre du cou sur le maillot */}
-      <path d="M45 86 L60 99 L75 86 Q60 92 45 86 Z" fill="rgba(0,0,0,0.08)" />
-      {/* Cou */}
+
+      {/* Maillot aux couleurs du club */}
+      <g clipPath={`url(#maillot-${id})`}>
+        <rect x="0" y="80" width="120" height="50" fill={principale} />
+        {/* Épaules (raglan) dans la couleur secondaire */}
+        <path d="M0 98 C14 90 28 86 42 86 L36 97 C24 99 12 104 0 112 Z" fill={secondaire} opacity="0.9" />
+        <path d="M120 98 C106 90 92 86 78 86 L84 97 C96 99 108 104 120 112 Z" fill={secondaire} opacity="0.9" />
+        <rect x="0" y="80" width="120" height="50" fill={`url(#volume-${id})`} />
+      </g>
+
+      {/* Cou (ombre sur le maillot puis peau) */}
+      <path d="M45 86 L60 99 L75 86 Q60 92 45 86 Z" fill="rgba(0,0,0,0.18)" />
       <path d="M50 70 h20 v17 q-10 7 -20 0 z" fill="#bfc6c2" />
-      {/* Oreilles */}
+
+      {/* Col en V dans la couleur secondaire */}
+      <path d="M42 86 L60 101 L78 86" fill="none" stroke={secondaire} strokeWidth="3.4" strokeLinejoin="round" />
+
+      {/* Numéro (ou initiales) sur la poitrine */}
+      <text x="60" y="124" textAnchor="middle"
+        fontFamily='"Barlow Condensed", Arial, sans-serif' fontWeight="800"
+        fontSize={long > 2 ? 16 : 22} fill={couleurTexte} opacity="0.95">
+        {inscription}
+      </text>
+
+      {/* Tête : silhouette neutre, sans traits (aucune ressemblance) */}
       <ellipse cx="41.5" cy="52" rx="3.2" ry="5.5" fill="#c9d0cc" />
       <ellipse cx="78.5" cy="52" rx="3.2" ry="5.5" fill="#c9d0cc" />
-      {/* Tête */}
       <ellipse cx="60" cy="49" rx="18" ry="22" fill={`url(#peau-${id})`} />
-      {/* Cheveux */}
       <path d="M41.6 45 q-1.6 -23 18.4 -23.6 q19.6 0 18.4 21.4 q-4 -10.5 -18.2 -11 q-12.4 0 -18.6 13.2 z" fill="#aab2ad" />
-      {/* Col en V */}
-      <path d="M42 86 L60 101 L78 86" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinejoin="round" />
-      {/* Écusson */}
-      <path d="M86 105 h10 v7 q-5 6 -10 0 z" fill="#ffffff" opacity="0.9" />
     </svg>
   );
 }
 
-export default function AvatarJoueur({ photo, logo, taille = 96, ombre = true, variante = 'rond' }) {
+export default function AvatarJoueur({ photo, logo, club, nom, numero, taille = 96, ombre = true, variante = 'rond' }) {
   const [photoKo, setPhotoKo] = useState(false);
   const [logoKo, setLogoKo] = useState(false);
+  const { principale, secondaire } = couleursClub(club);
+  const inscription = numero ?? initialesJoueur(nom);
+  const avecPhoto = photo && !photoKo;
 
   // Variante "buste" : grande image détourée, alignée en bas (cartes de l'accueil)
   if (variante === 'buste') {
     return (
       <span style={{ display: 'block', width: '100%', height: '100%' }}>
-        {photo && !photoKo
+        {avecPhoto
           ? <img src={photo} alt="" onError={() => setPhotoKo(true)}
               style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'bottom' }} />
-          : <Buste />}
+          : <Buste principale={principale} secondaire={secondaire} inscription={inscription} />}
       </span>
     );
   }
 
+  // Variante ronde (listes, classement des buteurs)
   const badge = Math.max(14, Math.round(taille * 0.32));
-
   return (
     <span style={{ position: 'relative', display: 'inline-block', width: `${taille}px`, height: `${taille}px`, flexShrink: 0 }}>
       <span style={{
         display: 'block', width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden',
-        backgroundColor: '#f5f6f6',
-        boxShadow: ombre ? '0 6px 18px rgba(0,0,0,0.25)' : 'none',
+        background: avecPhoto ? '#f5f6f6' : 'radial-gradient(circle at 50% 30%, #ffffff 0%, #eef1ef 70%)',
+        boxShadow: ombre ? '0 6px 18px rgba(0,0,0,0.25)' : `inset 0 0 0 1.5px ${principale}33`,
       }}>
-        {photo && !photoKo
+        {avecPhoto
           ? <img src={photo} alt="" onError={() => setPhotoKo(true)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          : <Silhouette />}
+          // Buste zoomé pour bien voir le maillot dans le petit rond
+          : <span style={{ display: 'block', width: '136%', height: '100%', marginLeft: '-18%', paddingTop: '6%', boxSizing: 'border-box' }}>
+              <Buste principale={principale} secondaire={secondaire} inscription={inscription} />
+            </span>}
       </span>
 
       {logo && !logoKo && (

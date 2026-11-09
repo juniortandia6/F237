@@ -607,7 +607,7 @@ function CarteButeur({ j, rang, lien }) {
             transformOrigin: 'bottom center', filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.25))',
           }}>
           {/* Pas de photo dans l'API pour l'instant : silhouette */}
-          <AvatarJoueur photo={j.photo} variante="buste" />
+          <AvatarJoueur photo={j.photo} club={j.equipe} nom={j.nom} variante="buste" />
         </span>
 
         <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', height: '100%', padding: '16px 18px', maxWidth: '60%', boxSizing: 'border-box' }}>

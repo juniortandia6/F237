@@ -26,6 +26,11 @@ namespace F237.BLL.Services.Implementations
         // Nombre max de matchs par appel /fixtures?ids=... (limite API-Football)
         private const int TAILLE_LOT = 20;
 
+        // L'API complète souvent les buteurs après coup : on relit les buts des matchs
+        // récents (ce nombre de jours) tant qu'il leur manque un buteur ou un but.
+        private const int JOURS_RELECTURE_BUTS = 30;
+        private const string BUTEUR_INCONNU = "Inconnu";
+
         // Plan Pro : on garde une petite pause entre deux appels (si l'API répond 429,
         // le code attend et réessaie tout seul)
         private static readonly TimeSpan DELAI_MIN_ENTRE_REQUETES = TimeSpan.FromMilliseconds(300);
@@ -146,7 +151,7 @@ namespace F237.BLL.Services.Implementations
                 await _context.ButsMatch.AddAsync(new ButMatch
                 {
                     MatchId = matchId,
-                    NomJoueur = joueur.GetProperty("name").GetString() ?? "Inconnu",
+                    NomJoueur = TexteOuNull(joueur, "name") ?? BUTEUR_INCONNU,
                     NomEquipe = evt.GetProperty("team").GetProperty("name").GetString() ?? "",
                     ApiJoueurId = EntierOuNull(joueur.GetProperty("id")) ?? 0,
                     Minute = EntierOuNull(evt.GetProperty("time").GetProperty("elapsed")) ?? 0,
@@ -156,6 +161,20 @@ namespace F237.BLL.Services.Implementations
                 ajoutes++;
             }
             return ajoutes;
+        }
+
+        // Compte les buts d'un tableau "events" : (total, avec un buteur connu)
+        private static (int total, int connus) CompterButs(JsonElement events)
+        {
+            int total = 0, connus = 0;
+            foreach (var evt in events.EnumerateArray())
+            {
+                if (evt.GetProperty("type").GetString() != "Goal") continue;
+                if (evt.GetProperty("detail").GetString() == "Missed Penalty") continue;
+                total++;
+                if (TexteOuNull(evt.GetProperty("player"), "name") != null) connus++;
+            }
+            return (total, connus);
         }
 
         // ── Méthodes existantes (inchangées sauf mention) ──────────────────
@@ -619,11 +638,28 @@ namespace F237.BLL.Services.Implementations
                 && (m.ScoreDomicile ?? 0) + (m.ScoreExterieur ?? 0) > 0
                 && !_context.ButsMatch.Any(b => b.MatchId == m.Id));
 
+        // Matchs terminés récemment dont les buts enregistrés sont incomplets :
+        // un buteur "Inconnu", ou moins de buts enregistrés que le score final
+        private IQueryable<Match> RequeteMatchsButsIncomplets(int saisonId, DateTime depuisUtc) =>
+            _context.Matchs.Where(m =>
+                m.SaisonId == saisonId
+                && m.Statut == StatutMatchEnum.Terminé
+                && m.DateMatch >= depuisUtc
+                && _context.ButsMatch.Any(b => b.MatchId == m.Id)
+                && (_context.ButsMatch.Any(b => b.MatchId == m.Id && (b.NomJoueur == BUTEUR_INCONNU || b.NomJoueur == ""))
+                    || _context.ButsMatch.Count(b => b.MatchId == m.Id) < (m.ScoreDomicile ?? 0) + (m.ScoreExterieur ?? 0)));
+
+        // Importe les buts manquants ET relit les buts incomplets des matchs récents
+        // (l'API donne souvent le nom du buteur quelques heures ou jours après le match)
         private async Task<int> ImporterButsParLotsAsync(int saisonId)
         {
-            var aTraiter = await RequeteMatchsSansButs(saisonId)
+            var sansButs = await RequeteMatchsSansButs(saisonId)
                 .Select(m => new { m.Id, m.ApiFootballId })
                 .ToListAsync();
+            var incomplets = await RequeteMatchsButsIncomplets(saisonId, DateTime.UtcNow.AddDays(-JOURS_RELECTURE_BUTS))
+                .Select(m => new { m.Id, m.ApiFootballId })
+                .ToListAsync();
+            var aTraiter = sansButs.Concat(incomplets).DistinctBy(m => m.Id).ToList();
 
             var total = 0;
             foreach (var lot in aTraiter.Chunk(TAILLE_LOT))
@@ -641,7 +677,22 @@ namespace F237.BLL.Services.Implementations
                     var match = lot.FirstOrDefault(m => m.ApiFootballId == apiId);
                     if (match == null || !fixture.TryGetProperty("events", out var events)) continue;
 
-                    total += await AjouterButsAsync(match.Id, events);
+                    var existants = await _context.ButsMatch.Where(b => b.MatchId == match.Id).ToListAsync();
+                    if (existants.Count == 0)
+                    {
+                        total += await AjouterButsAsync(match.Id, events);
+                        continue;
+                    }
+
+                    // Déjà des buts : on ne les remplace que si l'API en sait PLUS qu'avant
+                    // (plus de buts, ou plus de buteurs connus). Sinon on ne touche à rien.
+                    var (nouveauxTotal, nouveauxConnus) = CompterButs(events);
+                    var anciensConnus = existants.Count(b => !string.IsNullOrWhiteSpace(b.NomJoueur) && b.NomJoueur != BUTEUR_INCONNU);
+                    if (nouveauxTotal > existants.Count || (nouveauxTotal == existants.Count && nouveauxConnus > anciensConnus))
+                    {
+                        _context.ButsMatch.RemoveRange(existants);
+                        total += await AjouterButsAsync(match.Id, events);
+                    }
                 }
                 await _context.SaveChangesAsync(); // on sauvegarde à chaque lot : reprise possible
             }

@@ -244,6 +244,15 @@
       "up": "Up since the last matchday",
       "down": "Down since the last matchday",
       "same": "Same place as the last matchday"
+    },
+    "vue": {
+      "global": "Overall",
+      "domicile": "Home",
+      "exterieur": "Away"
+    },
+    "vueNote": {
+      "domicile": "Standings based on home matches only.",
+      "exterieur": "Standings based on away matches only."
     }
   },
   "equipes": {

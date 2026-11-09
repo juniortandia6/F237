@@ -137,6 +137,70 @@ function evolutionsDepuisMatchs(matchs) {
   return evolutions;
 }
 
+// ── Classement Domicile / Extérieur ──────────────────────────────────────
+// L'API ne fournit que le classement global : on recalcule à partir des
+// matchs terminés, en ne gardant pour chaque équipe que ses matchs joués
+// à domicile (cote = 'domicile') ou à l'extérieur (cote = 'exterieur').
+const VUES = ['global', 'domicile', 'exterieur'];
+
+function statsLieu(matchs, nom, cote) {
+  const joues = matchs
+    .filter(m => m.statut === 2 && (cote === 'domicile' ? m.equipeDomicile?.nom === nom : m.equipeExterieur?.nom === nom))
+    .sort((a, b) => new Date(a.dateMatch) - new Date(b.dateMatch));
+  const s = { j: 0, v: 0, n: 0, d: 0, bp: 0, bc: 0, pts: 0 };
+  for (const m of joues) {
+    const pour = (cote === 'domicile' ? m.scoreDomicile : m.scoreExterieur) ?? 0;
+    const contre = (cote === 'domicile' ? m.scoreExterieur : m.scoreDomicile) ?? 0;
+    s.j++; s.bp += pour; s.bc += contre;
+    if (pour > contre) { s.v++; s.pts += 3; } else if (pour < contre) s.d++; else { s.n++; s.pts++; }
+  }
+  return { ...s, db: s.bp - s.bc, forme: joues.slice(-5) };
+}
+
+// Lignes du tableau pour une vue Domicile / Extérieur, à partir des lignes du
+// classement global (logo, lien, poule conservés). Le rang est recalculé dans
+// chaque poule ; pas de flèche d'évolution ni de description de zone.
+function lignesParLieu(lignes, matchs, cote) {
+  const parGroupe = new Map();
+  for (const l of lignes) {
+    const s = statsLieu(matchs, l.nom, cote);
+    const ligne = { ...l, ...s, evolution: null, description: null };
+    const g = l.groupe ?? '';
+    if (!parGroupe.has(g)) parGroupe.set(g, []);
+    parGroupe.get(g).push(ligne);
+  }
+  return [...parGroupe.values()].flatMap(liste => liste
+    .sort((x, y) => y.pts - x.pts || y.db - x.db || y.bp - x.bp || x.nom.localeCompare(y.nom, 'fr'))
+    .map((l, i) => ({ ...l, position: i + 1 })));
+}
+
+// Sélecteur Global / Domicile / Extérieur (zone claire, au-dessus du tableau)
+function SelecteurVue({ vue, onChange }) {
+  const { t } = useTranslation();
+  return (
+    <div role="tablist" style={{
+      display: 'inline-flex', padding: '4px', borderRadius: '999px',
+      backgroundColor: CLAIR.carte, border: `1px solid ${CLAIR.bord}`, boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+    }}>
+      {VUES.map(v => {
+        const actif = v === vue;
+        return (
+          <button key={v} role="tab" aria-selected={actif} onClick={() => onChange(v)}
+            style={{
+              padding: '9px 20px', borderRadius: '999px', border: 'none', cursor: 'pointer',
+              fontSize: '13px', fontWeight: 800, letterSpacing: '0.5px', textTransform: 'uppercase',
+              backgroundColor: actif ? CLAIR.vert : 'transparent',
+              color: actif ? '#fff' : CLAIR.doux,
+              transition: 'all 0.2s ease',
+            }}>
+            {t(`classement.vue.${v}`)}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 // Meilleurs buteurs à partir des buts des matchs (sans CSC ni buteurs inconnus)
 function calculerButeurs(matchs) {
   const parJoueur = new Map();
@@ -190,7 +254,7 @@ function CarteButeurs({ buteurs, logos, chargement, competition, surligne }) {
               width: '30px', height: '30px', borderRadius: '50%', backgroundColor: '#f5c542', color: '#3a2c00',
               display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px', flexShrink: 0,
             }}>1</span>
-            <AvatarJoueur logo={logos.get(leader.equipe)} taille={52} />
+            <AvatarJoueur logo={logos.get(leader.equipe)} club={leader.equipe} nom={leader.nom} taille={52} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: '18px', fontWeight: 800, color: CLAIR.texte, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{leader.nom}</div>
               <div style={{ fontSize: '12px', color: CLAIR.doux }}>
@@ -210,7 +274,7 @@ function CarteButeurs({ buteurs, logos, chargement, competition, surligne }) {
               ...(indexSurligne === i + 1 && { backgroundColor: '#e8f3ec', boxShadow: `inset 4px 0 0 ${CLAIR.vert}` }),
             }}>
               <span style={{ width: '30px', textAlign: 'center', fontWeight: 800, fontSize: '14px', color: CLAIR.doux, flexShrink: 0 }}>{i + 2}</span>
-              <AvatarJoueur logo={logos.get(j.equipe)} taille={36} ombre={false} />
+              <AvatarJoueur logo={logos.get(j.equipe)} club={j.equipe} nom={j.nom} taille={36} ombre={false} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: '14px', fontWeight: 700, color: CLAIR.texte, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{j.nom}</div>
                 <div style={{ fontSize: '11px', color: CLAIR.doux, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{j.equipe}</div>
@@ -305,11 +369,12 @@ function Evolution({ valeur }) {
 // ── Tableau du classement ───────────────────────────────────────────────
 const COLONNES = '76px minmax(200px, 1fr) repeat(4, 46px) repeat(3, 52px) 60px 140px';
 
-function TableauClassement({ lignes, zones, annee }) {
+function TableauClassement({ lignes, zones, annee, avecZones = true }) {
   const { t } = useTranslation();
   const total = lignes.length;
   const parDescription = lignes.some(l => l.description);
-  const zonesLignes = lignes.map((l, i) => zoneDe(l, l.position ?? i + 1, total, zones, parDescription));
+  // Vues Domicile / Extérieur : les zones (titre, relégation) n'ont pas de sens
+  const zonesLignes = lignes.map((l, i) => (avecZones ? zoneDe(l, l.position ?? i + 1, total, zones, parDescription) : null));
   const entete = { fontSize: '11px', fontWeight: 800, color: CLAIR.doux, letterSpacing: '0.5px', textAlign: 'center' };
 
   return (
@@ -397,6 +462,7 @@ function ClassementPage() {
   const blocButeursRef = useRef(null);
   const dejaDefile = useRef(false);
   const [donnees, setDonnees] = useState(null); // { cle, classement, matchs }
+  const [vue, setVue] = useState('global'); // 'global' | 'domicile' | 'exterieur'
   const { matchsLive } = useLiveScores();
 
   const saisonId = SAISONS_DB[annee]?.[comp] ?? null; // null = saison pas encore importée
@@ -478,16 +544,22 @@ function ClassementPage() {
       .map((l, i) => ({ ...l, position: i + 1 }));
   }, [donnees, cle]);
 
+  // Lignes affichées selon la vue choisie (Global / Domicile / Extérieur)
+  const lignesVue = useMemo(
+    () => (vue === 'global' ? lignes : lignesParLieu(lignes, matchs, vue)),
+    [lignes, matchs, vue],
+  );
+
   // Saisons en plusieurs poules / phases : un tableau par groupe (dans l'ordre de l'API)
   const groupes = useMemo(() => {
     const parGroupe = new Map();
-    for (const l of lignes) {
+    for (const l of lignesVue) {
       const cleGroupe = l.groupe ?? '';
       if (!parGroupe.has(cleGroupe)) parGroupe.set(cleGroupe, []);
       parGroupe.get(cleGroupe).push(l);
     }
     return [...parGroupe.entries()].map(([nom, liste]) => ({ nom, lignes: liste }));
-  }, [lignes]);
+  }, [lignesVue]);
 
   const buteurs = useMemo(() => calculerButeurs(matchs), [matchs]);
 
@@ -588,7 +660,13 @@ function ClassementPage() {
             </div>
           ) : (
             <>
-              {classementCalcule && (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                <SelecteurVue vue={vue} onChange={setVue} />
+                {vue !== 'global' && (
+                  <span style={{ fontSize: '13px', color: CLAIR.doux }}>{t(`classement.vueNote.${vue}`)}</span>
+                )}
+              </div>
+              {classementCalcule && vue === 'global' && (
                 <div style={{ marginBottom: '12px', padding: '10px 14px', borderRadius: '10px', backgroundColor: '#fdf6dc', border: '1px solid #f1e2a6', color: '#6b5510', fontSize: '13px' }}>
                   {t('classement.calcule')}
                 </div>
@@ -601,12 +679,12 @@ function ClassementPage() {
                         <span style={{ width: '6px', height: '22px', borderRadius: '3px', background: `linear-gradient(${theme.green}, ${theme.red}, ${theme.yellow})` }} />
                         {titreGroupe(g.nom, t)}
                       </h2>
-                      <TableauClassement lignes={g.lignes} zones={zones} annee={annee} />
+                      <TableauClassement lignes={g.lignes} zones={zones} annee={annee} avecZones={vue === 'global'} />
                     </div>
                   ))}
                 </div>
               ) : (
-                <TableauClassement lignes={lignes} zones={zones} annee={annee} />
+                <TableauClassement lignes={lignesVue} zones={zones} annee={annee} avecZones={vue === 'global'} />
               )}
               <p style={{ marginTop: '12px', fontSize: '12px', color: CLAIR.doux }}>
                 {t('classement.legende')}
