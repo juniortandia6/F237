@@ -44,6 +44,9 @@ namespace F237.BLL.Services.Interfaces
         public int Matchs { get; set; }
         public int EquipesClassement { get; set; }
         public int ButsImportes { get; set; }
+
+        /// <summary>False si l'API ne fournit pas les buteurs de cette ligue (ex. Elite Two) : étape des buts sautée.</summary>
+        public bool ButsFournis { get; set; } = true;
         public int MatchsSansButsRestants { get; set; }
         public int RequetesUtilisees { get; set; }
         public int? RequetesRestantes { get; set; }

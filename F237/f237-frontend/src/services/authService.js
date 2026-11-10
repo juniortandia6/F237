@@ -1,8 +1,12 @@
 // f237-frontend/src/services/authService.js
 
-const BASE_URL = "http://localhost:5257/api";
+const API_URL = (import.meta.env?.VITE_API_URL ?? "http://localhost:5257").replace(/\/$/, "");
+const BASE_URL = `${API_URL}/api`;
 const TOKEN_KEY = "f237_token";
 const USER_KEY = "f237_user";
+
+// Nom du claim de rôle écrit par .NET (ClaimTypes.Role)
+const CLAIM_ROLE = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
 
 // ── Helpers stockage ──────────────────────────────────────────────────────────
 
@@ -27,6 +31,31 @@ const getToken = () => localStorage.getItem(TOKEN_KEY);
 const getUser = () => {
   const user = localStorage.getItem(USER_KEY);
   return user ? JSON.parse(user) : null;
+};
+
+// Contenu (payload) du JWT, sans vérifier la signature : sert seulement à
+// l'AFFICHAGE (lien Admin, accès aux pages). La vraie protection reste côté API
+// avec [Authorize(Roles = "Admin")] : un faux token serait refusé par le serveur.
+const lirePayload = (token) => {
+  try {
+    const partie = token.split(".")[1];
+    const base64 = partie.replace(/-/g, "+").replace(/_/g, "/");
+    const json = decodeURIComponent(
+      atob(base64).split("").map(c => "%" + c.charCodeAt(0).toString(16).padStart(2, "0")).join("")
+    );
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+};
+
+/** Rôle de l'utilisateur connecté ("Utilisateur", "Admin") ou null. */
+const getRole = () => {
+  const token = getToken();
+  if (!token) return null;
+  const payload = lirePayload(token);
+  const role = payload?.[CLAIM_ROLE] ?? payload?.role ?? null;
+  return Array.isArray(role) ? (role.includes("Admin") ? "Admin" : role[0]) : role;
 };
 
 const estConnecte = () => {
@@ -105,6 +134,7 @@ export const authService = {
   getProfil,
   getToken,
   getUser,
+  getRole,
   estConnecte,
   getAuthHeader,
 };

@@ -6,30 +6,29 @@ import { authService } from "../services/authService";
 
 export const AuthContext = createContext(null);
 
+// Utilisateur de la session + son rôle (lu dans le token JWT)
+const depuisSession = (data) => ({
+  nom: data.nom,
+  prenom: data.prenom,
+  email: data.email,
+  soldePoints: data.soldePoints,
+  role: authService.getRole(),
+});
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() =>
-    authService.estConnecte() ? authService.getUser() : null
+    authService.estConnecte() ? depuisSession(authService.getUser()) : null
   );
 
   const login = async (email, motDePasse) => {
     const data = await authService.login(email, motDePasse);
-    setUser({
-      nom: data.nom,
-      prenom: data.prenom,
-      email: data.email,
-      soldePoints: data.soldePoints,
-    });
+    setUser(depuisSession(data));
     return data;
   };
 
   const register = async (nom, prenom, email, motDePasse) => {
     const data = await authService.register(nom, prenom, email, motDePasse);
-    setUser({
-      nom: data.nom,
-      prenom: data.prenom,
-      email: data.email,
-      soldePoints: data.soldePoints,
-    });
+    setUser(depuisSession(data));
     return data;
   };
 
@@ -42,8 +41,11 @@ export function AuthProvider({ children }) {
     setUser(prev => prev ? { ...prev, soldePoints: nouveauSolde } : prev);
   };
 
+  // Sert seulement à l'affichage : l'API vérifie elle-même le rôle à chaque requête
+  const estAdmin = user?.role === "Admin";
+
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, updateSolde }}>
+    <AuthContext.Provider value={{ user, estAdmin, login, register, logout, updateSolde }}>
       {children}
     </AuthContext.Provider>
   );

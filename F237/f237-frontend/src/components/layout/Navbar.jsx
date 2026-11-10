@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import {
     Home, LayoutList, Trophy, Dices, Newspaper,
-    UserCircle, Globe, ChevronDown, Shield, Check
+    UserCircle, Globe, ChevronDown, Shield, Check, LayoutDashboard
 } from 'lucide-react';
 import LogoF237 from './LogoF237';
 import { LANGUES, locale } from '../../i18n';
@@ -91,7 +91,7 @@ const Navbar = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { t } = useTranslation();
-    const { user, logout } = useAuth();
+    const { user, estAdmin, logout } = useAuth();
 
     // "/" seulement sur l'accueil ; les autres onglets restent actifs sur leurs
     // sous-pages (ex. /actualites/mon-article, /equipes/12)
@@ -159,6 +159,24 @@ const Navbar = () => {
             <div className="flex items-center gap-3" style={{ minWidth: '200px', justifyContent: 'flex-end', paddingRight: '50px' }}>
                 {user ? (
                     <>
+                        {/* Lien vers l'espace admin, visible seulement par les admins */}
+                        {estAdmin && (
+                            <Link
+                                to="/admin"
+                                title="Espace admin"
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-semibold transition-colors"
+                                style={{
+                                    fontSize: '13px',
+                                    color: isActive('/admin') ? '#1a1a1a' : theme.yellow,
+                                    backgroundColor: isActive('/admin') ? theme.yellow : 'transparent',
+                                    border: `1px solid ${theme.yellow}66`,
+                                }}
+                            >
+                                <LayoutDashboard size={14} />
+                                Admin
+                            </Link>
+                        )}
+
                         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
                             style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}` }}>
                             <Trophy size={13} style={{ color: theme.yellow }} />

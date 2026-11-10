@@ -561,6 +561,10 @@ namespace F237.BLL.Services.Implementations
                 var dateFin = DateTime.Parse(infosSaison.GetProperty("end").GetString()!);
                 var nomLigue = ligues[0].GetProperty("league").GetProperty("name").GetString() ?? "";
 
+                // L'API fournit-elle les événements (buts) pour cette ligue / saison ?
+                // Ex. Elite Two : non -> inutile de demander les buts match par match.
+                resultat.ButsFournis = ButsFournisParApi(infosSaison);
+
                 // 2. Saison dans F237Db (créée si elle n'existe pas)
                 var division = DivisionDe(leagueId);
                 var entiteSaison = await _context.Saisons
@@ -619,22 +623,38 @@ namespace F237.BLL.Services.Implementations
                 var standings = await GetApiAsync($"/standings?league={leagueId}&season={saison}");
                 resultat.EquipesClassement = await EnregistrerClassementAsync(standings, entiteSaison.Id);
 
-                // 6. Buts, par lots de 20 matchs (≈ 1 requête pour 20 matchs)
-                resultat.ButsImportes = await ImporterButsParLotsAsync(entiteSaison.Id);
+                // 6. Buts, par lots de 20 matchs (≈ 1 requête pour 20 matchs),
+                //    seulement si l'API fournit les événements de cette ligue
+                if (resultat.ButsFournis)
+                    resultat.ButsImportes = await ImporterButsParLotsAsync(entiteSaison.Id);
             }
             catch (ApiFootballException ex)
             {
                 resultat.Erreur = ex.Message;
             }
 
-            // Ce qui reste à faire (si le quota s'est épuisé en route)
-            if (resultat.SaisonId != 0)
+            // Ce qui reste à faire (si le quota s'est épuisé en route).
+            // Ligue sans buteurs chez l'API : rien à attendre, donc rien "en retard".
+            if (resultat.SaisonId != 0 && resultat.ButsFournis)
                 resultat.MatchsSansButsRestants = await RequeteMatchsSansButs(resultat.SaisonId).CountAsync();
 
             resultat.RequetesUtilisees = _requetesUtilisees;
             resultat.RequetesRestantes = _requetesRestantes;
             resultat.Termine = resultat.Erreur == null && resultat.MatchsSansButsRestants == 0;
             return resultat;
+        }
+
+        // Couverture de l'API pour une saison (bloc "coverage" de GET /leagues) :
+        // coverage.fixtures.events = true si les buts sont fournis match par match.
+        // En cas de doute (champ absent), on considère qu'ils sont fournis.
+        private static bool ButsFournisParApi(JsonElement infosSaison)
+        {
+            if (infosSaison.TryGetProperty("coverage", out var coverage)
+                && coverage.TryGetProperty("fixtures", out var fixtures)
+                && fixtures.TryGetProperty("events", out var events)
+                && (events.ValueKind == JsonValueKind.True || events.ValueKind == JsonValueKind.False))
+                return events.GetBoolean();
+            return true;
         }
 
         // Matchs terminés avec au moins un but marqué, mais aucun but enregistré

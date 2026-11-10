@@ -7,12 +7,15 @@ import MatchsPage from './pages/MatchsPage';
 import MatchDetailPage from './pages/MatchDetailPage';
 import EquipesPage from './pages/EquipesPage';
 import EquipeDetailPage from './pages/EquipeDetailPage';
-import JouerPage from './pages/JouerPage';  
+import JouerPage from './pages/JouerPage';
 import ActualitesPage from './pages/ActualitesPage';
 import ActualiteDetailPage from './pages/ActualiteDetailPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProfilPage from './pages/ProfilPage';
+import RouteAdmin from './components/admin/RouteAdmin';
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminTableauBordPage from './pages/admin/AdminTableauBordPage';
 
 function App() {
   return (
@@ -32,6 +35,11 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/profil" element={<ProfilPage />} />
+
+            {/* Espace admin (rôle Admin) : les prochaines sections s'ajoutent ici */}
+            <Route path="/admin" element={<RouteAdmin><AdminLayout /></RouteAdmin>}>
+              <Route index element={<AdminTableauBordPage />} />
+            </Route>
           </Routes>
         </Layout>
       </AuthProvider>
