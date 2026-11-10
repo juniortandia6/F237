@@ -12,6 +12,7 @@
         public int? ScoreMiTempsExterieur { get; set; }
         public int? Journee { get; set; }
         public int SaisonId { get; set; }
+        public bool HeureManuelle { get; set; }          // heure corrigée à la main par l'admin
         public int? MinuteLive { get; set; }
         public EquipeSimpleDto? EquipeDomicile { get; set; }
         public EquipeSimpleDto? EquipeExterieur { get; set; }
@@ -28,6 +29,7 @@
 
     public class ButDto
     {
+        public int Id { get; set; }                      // sert à l'admin (modifier / supprimer un but)
         public int Minute { get; set; }
         public string NomJoueur { get; set; } = string.Empty;
         public string NomEquipe { get; set; } = string.Empty;

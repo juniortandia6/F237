@@ -50,15 +50,17 @@ const abrev = (nom) => (nom ?? '???').replace(/[^A-Za-zÀ-ÿ]/g, '').substring(0
 const dateLongue = (d) => new Date(d).toLocaleDateString(locale(), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 const heure = (d) => new Date(d).toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
 const nomButeur = (b) => (b.nomJoueur && b.nomJoueur !== 'Inconnu' ? b.nomJoueur : i18n.t('matchDetail.buteurInconnu'));
-// Minute d'un but : 23' ou 45+2'
-const minuteBut = (b) => `${b.minute}${b.minuteAdditionnelle ? `+${b.minuteAdditionnelle}` : ''}'`;
+// Minute d'un but : 23' ou 45+2'. Minute 0 = minute inconnue (saisie admin sans source) -> ''
+const minuteConnue = (b) => (b.minute ?? 0) > 0;
+const minuteBut = (b) => (minuteConnue(b) ? `${b.minute}${b.minuteAdditionnelle ? `+${b.minuteAdditionnelle}` : ''}'` : '');
+const ordreMinute = (b) => (minuteConnue(b) ? b.minute : 999); // minutes inconnues à la fin
 const journeeDe = (m) => m.journee ?? m.numeroJournee ?? m.round ?? null;
 const stadeDe = (m) => m.stade ?? m.nomStade ?? m.lieu ?? m.venue ?? null;
 
 // Buts d'un côté (nomEquipe = équipe créditée du but, même convention que MatchsPage)
 const butsDe = (m, cote) => {
   const nom = cote === 'dom' ? m.equipeDomicile?.nom : m.equipeExterieur?.nom;
-  return (m.buts ?? []).filter(b => b.nomEquipe === nom).sort((a, b) => a.minute - b.minute);
+  return (m.buts ?? []).filter(b => b.nomEquipe === nom).sort((a, b) => ordreMinute(a) - ordreMinute(b));
 };
 
 // Résultat d'un match du point de vue d'une équipe : 'V', 'N' ou 'D'
@@ -172,7 +174,8 @@ function TableauMiTemps({ m }) {
     { equipe: m.equipeExterieur, buts: butsDe(m, 'ext'), total: m.scoreExterieur ?? 0 },
   ];
   // On ne montre le détail par mi-temps que si les buts enregistrés collent au score
-  const fiable = lignes.every(l => l.buts.length === l.total);
+  // (et si chaque but a sa minute : sans minute, impossible de savoir dans quelle mi-temps il tombe)
+  const fiable = lignes.every(l => l.buts.length === l.total && l.buts.every(minuteConnue));
   // Sinon (ex. Elite Two, sans détail des buts) : score à la mi-temps donné par l'API
   const miTemps = [m.scoreMiTempsDomicile, m.scoreMiTempsExterieur];
   const avecMiTemps = !fiable && miTemps.every(v => v != null);
@@ -226,7 +229,9 @@ function TableauMiTemps({ m }) {
   );
 }
 
-// ── Onglet Aperçu : forme récente (5 derniers matchs de la saison) ──────
+// ── Onglet Aperçu : forme récente (5 derniers matchs joués avant celui-ci) ──
+// Toutes saisons confondues : en début de saison (J1, J2...), on complète avec
+// les derniers matchs de la saison précédente, affichés en plus pâle.
 function FormeRecente({ m, tous }) {
   const { t } = useTranslation();
   const forme = (equipe) => tous
@@ -235,10 +240,13 @@ function FormeRecente({ m, tous }) {
     .sort((a, b) => new Date(b.dateMatch) - new Date(a.dateMatch))
     .slice(0, 5);
 
+  const listes = [m.equipeDomicile, m.equipeExterieur].map(forme);
+  const avecPrecedente = listes.some(l => l.some(x => x.saisonId !== m.saisonId));
+
   return (
     <Carte titre={t('matchDetail.formeRecente')}>
       {[m.equipeDomicile, m.equipeExterieur].map((equipe, i) => {
-        const liste = forme(equipe);
+        const liste = listes[i];
         return (
           <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', padding: '14px 20px', borderTop: i ? `1px solid ${CLAIR.bord}` : 'none' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, fontWeight: 700, color: CLAIR.texte }}>
@@ -251,10 +259,12 @@ function FormeRecente({ m, tous }) {
                 : liste.map(x => {
                   const r = resultatPour(x, equipe?.nom);
                   const adv = x.equipeDomicile?.nom === equipe?.nom ? x.equipeExterieur : x.equipeDomicile;
+                  const precedente = x.saisonId !== m.saisonId;
                   return (
                     <Link key={x.id} to={`/matchs/${x.id}`} state={{ match: x }}
-                      title={`${x.equipeDomicile?.nom} ${x.scoreDomicile}-${x.scoreExterieur} ${x.equipeExterieur?.nom} (vs ${adv?.nom})`}
+                      title={`${x.equipeDomicile?.nom} ${x.scoreDomicile}-${x.scoreExterieur} ${x.equipeExterieur?.nom} (vs ${adv?.nom})${precedente ? ` · ${t('matchDetail.saisonPrecedente')}` : ''}`}
                       style={{
+                        opacity: precedente ? 0.5 : 1,
                         width: '28px', height: '28px', borderRadius: '6px', backgroundColor: COULEUR_RESULTAT[r],
                         color: '#fff', fontSize: '13px', fontWeight: 800, textDecoration: 'none',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -267,6 +277,11 @@ function FormeRecente({ m, tous }) {
           </div>
         );
       })}
+      {avecPrecedente && (
+        <p style={{ padding: '10px 20px', borderTop: `1px solid ${CLAIR.bord}`, fontSize: '12px', color: CLAIR.doux, margin: 0 }}>
+          {t('matchDetail.formePrecedente')}
+        </p>
+      )}
     </Carte>
   );
 }
@@ -292,7 +307,7 @@ function Evenement({ ev }) {
         {ev.estPenalty && <span style={{ color: theme.green, fontSize: '12px', fontWeight: 700 }}> ({t('matchDetail.pen')})</span>}
         {ev.estButCSC && <span style={{ color: theme.red, fontSize: '12px', fontWeight: 700 }}> ({t('matchDetail.csc')})</span>}
       </div>
-      <div style={{ fontSize: '12px', color: CLAIR.doux }}>{ev.nomEquipe} · {ev.score}</div>
+      <div style={{ fontSize: '12px', color: CLAIR.doux }}>{ev.nomEquipe}{ev.score ? ` · ${ev.score}` : ''}</div>
     </div>
   );
   return (
@@ -303,7 +318,7 @@ function Evenement({ ev }) {
         backgroundColor: '#fff', border: `2px solid ${gauche ? CLAIR.vert : theme.red}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontFamily: CHIFFRES, fontWeight: 800, fontSize: '18px', color: CLAIR.texte,
-      }}>{minuteBut(ev)}</span>
+      }}>{minuteBut(ev) || '–'}</span>
       <div>{!gauche && bloc}</div>
     </div>
   );
@@ -316,17 +331,20 @@ function Chronologie({ m }) {
   const evenements = [
     ...butsDe(m, 'dom').map(b => ({ ...b, cote: 'dom' })),
     ...butsDe(m, 'ext').map(b => ({ ...b, cote: 'ext' })),
-  ].sort((a, b) => a.minute - b.minute);
+  ].sort((a, b) => ordreMinute(a) - ordreMinute(b));
+  const sansMinute = evenements.filter(ev => !minuteConnue(ev));
+  const avecMinute = evenements.filter(minuteConnue);
 
   if (!joue) {
     return <Carte><p style={{ padding: '40px 20px', textAlign: 'center', color: CLAIR.doux }}>{t('matchDetail.chronoBientot')}</p></Carte>;
   }
 
-  // Score courant après chaque but
+  // Score courant après chaque but (seulement si toutes les minutes sont connues :
+  // sinon l'ordre des buts, donc le score à chaque instant, n'est pas sûr)
   let d = 0, e = 0;
-  const avecScore = evenements.map(ev => {
+  const avecScore = avecMinute.map(ev => {
     if (ev.cote === 'dom') d++; else e++;
-    return { ...ev, score: `${d}-${e}` };
+    return { ...ev, score: sansMinute.length ? null : `${d}-${e}` };
   });
   const premiereMT = avecScore.filter(ev => ev.minute <= 45);
   const deuxiemeMT = avecScore.filter(ev => ev.minute > 45);
@@ -358,6 +376,12 @@ function Chronologie({ m }) {
         )}
         {deuxiemeMT.map((ev, i) => <Evenement key={`b${i}`} ev={ev} />)}
         {m.statut === 2 && <Jalon texte={`${t('matchDetail.finMaj')} · ${m.scoreDomicile}-${m.scoreExterieur}`} />}
+        {sansMinute.length > 0 && (
+          <>
+            <Jalon texte={t('matchDetail.minuteInconnueMaj')} />
+            {sansMinute.map((ev, i) => <Evenement key={`c${i}`} ev={ev} />)}
+          </>
+        )}
         {evenements.length === 0 && (
           <p style={{ textAlign: 'center', color: CLAIR.doux, position: 'relative', zIndex: 1, backgroundColor: '#fff', padding: '8px' }}>
             {/* Des buts au score mais aucun détail : l'API ne fournit pas les buteurs pour ce match */}
@@ -533,12 +557,6 @@ function MatchDetailPage() {
     return l ? { ...brut, statut: 1, scoreDomicile: l.scoreDomicile, scoreExterieur: l.scoreExterieur, minute: l.minuteLive ?? l.minute ?? brut.minuteLive ?? brut.minute, statutCourt: l.statutCourt, minuteExtra: l.minuteExtra, buts: l.buts ?? brut.buts } : brut;
   }, [brut, matchsLive]);
 
-  // Matchs de la même saison (pour la forme récente)
-  const tousSaison = useMemo(
-    () => (donnees?.tous ?? []).filter(x => !m || x.saisonId === m.saisonId),
-    [donnees, m],
-  );
-
   if (!m) {
     return (
       <div style={{ backgroundColor: CLAIR.fond, minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 20px' }}>
@@ -626,7 +644,7 @@ function MatchDetailPage() {
               {onglet === 'apercu' && (
                 <>
                   <TableauMiTemps m={m} />
-                  <FormeRecente m={m} tous={tousSaison} />
+                  <FormeRecente m={m} tous={donnees?.tous ?? []} />
                 </>
               )}
               {onglet === 'chrono' && <Chronologie m={m} />}

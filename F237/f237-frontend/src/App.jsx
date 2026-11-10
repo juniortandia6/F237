@@ -16,6 +16,10 @@ import ProfilPage from './pages/ProfilPage';
 import RouteAdmin from './components/admin/RouteAdmin';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminTableauBordPage from './pages/admin/AdminTableauBordPage';
+import AdminArticlesPage from './pages/admin/AdminArticlesPage';
+import AdminArticleEditionPage from './pages/admin/AdminArticleEditionPage';
+import AdminMatchsPage from './pages/admin/AdminMatchsPage';
+import AdminMatchEditionPage from './pages/admin/AdminMatchEditionPage';
 
 function App() {
   return (
@@ -39,6 +43,11 @@ function App() {
             {/* Espace admin (rôle Admin) : les prochaines sections s'ajoutent ici */}
             <Route path="/admin" element={<RouteAdmin><AdminLayout /></RouteAdmin>}>
               <Route index element={<AdminTableauBordPage />} />
+              <Route path="articles" element={<AdminArticlesPage />} />
+              <Route path="articles/nouveau" element={<AdminArticleEditionPage />} />
+              <Route path="articles/:id" element={<AdminArticleEditionPage />} />
+              <Route path="matchs" element={<AdminMatchsPage />} />
+              <Route path="matchs/:id" element={<AdminMatchEditionPage />} />
             </Route>
           </Routes>
         </Layout>

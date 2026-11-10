@@ -29,6 +29,7 @@ namespace F237.API.Controllers
             ScoreMiTempsExterieur = m.ScoreMiTempsExterieur,
             Journee = m.Journee,
             SaisonId = m.SaisonId,
+            HeureManuelle = m.HeureManuelle,
             EquipeDomicile = m.EquipeDomicile == null ? null : new EquipeSimpleDto
             {
                 Id = m.EquipeDomicile.Id,
@@ -45,6 +46,7 @@ namespace F237.API.Controllers
             },
             Buts = m.Buts.Select(b => new ButDto
             {
+                Id = b.Id,
                 Minute = b.Minute,
                 NomJoueur = b.NomJoueur,
                 NomEquipe = b.NomEquipe,

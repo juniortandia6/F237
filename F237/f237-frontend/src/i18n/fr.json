@@ -204,7 +204,10 @@
     "detailIndispo": "Le détail des buts (buteurs, minutes) n'est pas encore disponible pour ce match.",
     "miTempsALaFin": "Le score est affiché à la fin du match.",
     "annuleMaj": "ANNULÉ",
-    "nonDisputeMaj": "NON DISPUTÉ"
+    "nonDisputeMaj": "NON DISPUTÉ",
+    "minuteInconnueMaj": "MINUTE INCONNUE",
+    "saisonPrecedente": "Saison précédente",
+    "formePrecedente": "Les pastilles pâles viennent de la saison précédente."
   },
   "classement": {
     "aucunBut": "Aucun but enregistré pour l'instant.",

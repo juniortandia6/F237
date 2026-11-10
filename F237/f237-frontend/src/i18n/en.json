@@ -204,7 +204,10 @@
     "detailIndispo": "Goal details (scorers, minutes) are not available yet for this match.",
     "miTempsALaFin": "The score is shown at the end of the match.",
     "annuleMaj": "CANCELLED",
-    "nonDisputeMaj": "NOT PLAYED"
+    "nonDisputeMaj": "NOT PLAYED",
+    "minuteInconnueMaj": "MINUTE UNKNOWN",
+    "saisonPrecedente": "Previous season",
+    "formePrecedente": "Faded badges are from the previous season."
   },
   "classement": {
     "aucunBut": "No goals recorded yet.",

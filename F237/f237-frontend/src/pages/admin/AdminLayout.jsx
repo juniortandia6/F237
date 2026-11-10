@@ -12,8 +12,8 @@ const CONTENEUR = { maxWidth: '1150px', margin: '0 auto', padding: '0 60px', box
 
 const SECTIONS = [
   { to: '/admin', label: 'Tableau de bord', Icone: LayoutDashboard, fin: true },
-  { to: '/admin/articles', label: 'Articles', Icone: Newspaper, bientot: true },
-  { to: '/admin/matchs', label: 'Matchs et buteurs', Icone: CalendarDays, bientot: true },
+  { to: '/admin/articles', label: 'Articles', Icone: Newspaper },
+  { to: '/admin/matchs', label: 'Matchs et buteurs', Icone: CalendarDays },
   { to: '/admin/equipes', label: 'Équipes', Icone: Shield, bientot: true },
   { to: '/admin/effectifs', label: 'Effectifs', Icone: Users, bientot: true },
 ];

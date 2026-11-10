@@ -295,8 +295,13 @@ namespace F237.BLL.Services.Implementations
                     matchExistant.Statut = statut;
                     matchExistant.ScoreDomicile = scoreDomicile;
                     matchExistant.ScoreExterieur = scoreExterieur;
-                    matchExistant.ScoreMiTempsDomicile = miTempsDomicile;
-                    matchExistant.ScoreMiTempsExterieur = miTempsExterieur;
+                    // Score à la mi-temps : l'API n'en a pas toujours (ex. Elite Two). Si elle n'en
+                    // donne pas, on garde celui de la base (éventuellement saisi à la main dans l'admin).
+                    if (miTempsDomicile != null && miTempsExterieur != null)
+                    {
+                        matchExistant.ScoreMiTempsDomicile = miTempsDomicile;
+                        matchExistant.ScoreMiTempsExterieur = miTempsExterieur;
+                    }
                     matchExistant.Journee = journee ?? matchExistant.Journee;
                     matchExistant.SaisonId = saisonId;
                     // Heure du match : on garde une heure corrigée à la main par l'admin, SAUF si

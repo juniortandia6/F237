@@ -35,7 +35,60 @@ export const adminService = {
 
   /** Import complet d'une saison (league 411 = Elite One, 813 = Elite Two). */
   importerSaison: (league, season) => appel(`/api/sync/saison?league=${league}&season=${season}`, { method: 'POST' }),
+
+  // ── Articles (brouillons compris) ──────────────────────────────────────
+  articles: {
+    /** Tous les articles, du plus récent au plus ancien. */
+    liste: () => appel('/api/articles/admin').then(l => l ?? []),
+    /** Un article complet (contenu brut, FR + EN). */
+    get: (id) => appel(`/api/articles/admin/${id}`),
+    /** Création : renvoie l'article créé (avec son id et son slug). */
+    creer: (saisie) => appel('/api/articles', { method: 'POST', body: JSON.stringify(saisie) }),
+    /** Modification complète (même corps que la création). */
+    modifier: (id, saisie) => appel(`/api/articles/${id}`, { method: 'PUT', body: JSON.stringify(saisie) }),
+    supprimer: (id) => appel(`/api/articles/${id}`, { method: 'DELETE' }),
+  },
+
+  // ── Matchs : buteurs, mi-temps, heure ──────────────────────────────────
+  matchs: {
+    /** Matchs d'une saison (route publique, avec les buts et leur id). */
+    saison: (saisonId) => appel(`/api/matchs/saison/${saisonId}`).then(l => l ?? []),
+    /** Un match (route publique). */
+    get: (id) => appel(`/api/matchs/${id}`),
+    /** but = { nomJoueur, nomEquipe (équipe créditée), minute, estPenalty, estButCSC } */
+    ajouterBut: (matchId, but) => appel(`/api/admin/matchs/${matchId}/buts`, { method: 'POST', body: JSON.stringify(but) }),
+    modifierBut: (butId, but) => appel(`/api/admin/buts/${butId}`, { method: 'PUT', body: JSON.stringify(but) }),
+    supprimerBut: (butId) => appel(`/api/admin/buts/${butId}`, { method: 'DELETE' }),
+    /** null + null = effacer le score à la mi-temps */
+    miTemps: (matchId, domicile, exterieur) => appel(`/api/admin/matchs/${matchId}/mi-temps`, { method: 'PUT', body: JSON.stringify({ domicile, exterieur }) }),
+    /** heure = chaîne ISO avec fuseau, ex. "2026-11-14T15:30:00+01:00" (heure du Cameroun) */
+    corrigerHeure: (apiFootballId, heure) => appel(`/api/sync/match/${apiFootballId}/heure`, { method: 'PUT', body: JSON.stringify({ heure }) }),
+    annulerHeure: (apiFootballId) => appel(`/api/sync/match/${apiFootballId}/heure`, { method: 'DELETE' }),
+  },
 };
+
+// Catégories acceptées par l'API (TagsArticle.Tous côté backend)
+export const TAGS_ARTICLE = ['Elite One', 'Elite Two', 'Transfert', 'Talents', 'Compétition'];
+
+/** Article admin (ArticleAdminDto) -> corps attendu par POST / PUT (SaisieArticle). */
+export const versSaisie = (a, changements = {}) => ({
+  slug: a.slug ?? null,
+  tag: a.tag,
+  imageUrl: a.imageUrl ?? null,
+  titreFr: a.titreFr,
+  resumeFr: a.resumeFr,
+  contenuFr: a.contenuFr,
+  titreEn: a.titreEn ?? null,
+  resumeEn: a.resumeEn ?? null,
+  contenuEn: a.contenuEn ?? null,
+  estPublie: a.estPublie,
+  aLaUne: a.aLaUne,
+  datePublication: a.datePublication ?? null,
+  ...changements,
+});
+
+/** Date renvoyée par l'API : sans fuseau = UTC (dates EF Core). */
+export const dateApi = (s) => (s ? new Date(/Z$|[+-]\d\d:\d\d$/.test(s) ? s : `${s}Z`) : null);
 
 // Identifiants API-Football des compétitions F237
 export const LIGUES_API = { one: 411, two: 813 };
