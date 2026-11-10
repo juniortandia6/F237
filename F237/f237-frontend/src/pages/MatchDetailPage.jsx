@@ -13,6 +13,7 @@ import { matchService } from '../services/matchService';
 import { useLiveScores } from '../hooks/useLiveScores';
 import { TOUS_LES_SAISON_IDS, infosSaison, libelleSaison } from '../data/saisons';
 import theme from '../theme';
+import { etatMatch } from '../data/statutMatch';
 
 // ── Couleurs de la zone claire (mêmes que MatchsPage) ───────────────────
 const CLAIR = {
@@ -108,7 +109,8 @@ function EquipeHero({ equipe, buts, alignement }) {
 // ── Boîte du score au centre ────────────────────────────────────────────
 function BoiteScore({ m }) {
   const { t } = useTranslation();
-  const termine = m.statut === 2, live = m.statut === 1, reporte = m.statut === 3;
+  const etat = etatMatch(m);
+  const termine = etat === 'termine', live = etat === 'live';
   const joue = termine || live;
   const domGagne = joue && m.scoreDomicile > m.scoreExterieur;
   const extGagne = joue && m.scoreExterieur > m.scoreDomicile;
@@ -116,7 +118,9 @@ function BoiteScore({ m }) {
   const bandeau = live
     ? { texte: m.statutCourt === 'HT' ? t('commun.miTempsMaj') : `${t('commun.enDirectMaj')}${m.minute ? ` · ${m.minute}${m.minuteExtra ? `+${m.minuteExtra}` : ''}'` : ''}`, fond: theme.red, couleur: '#fff' }
     : termine ? { texte: t('matchDetail.termineMaj'), fond: '#d9dedb', couleur: '#5b625e' }
-    : reporte ? { texte: t('matchDetail.reporteMaj'), fond: theme.yellow, couleur: '#1a1a1a' }
+    : etat === 'reporte' ? { texte: t('matchDetail.reporteMaj'), fond: theme.yellow, couleur: '#1a1a1a' }
+    : etat === 'annule' ? { texte: t('matchDetail.annuleMaj'), fond: theme.red, couleur: '#fff' }
+    : etat === 'nonDispute' ? { texte: t('matchDetail.nonDisputeMaj'), fond: '#5b625e', couleur: '#fff' }
     : { texte: t('matchDetail.aVenirMaj'), fond: '#d9dedb', couleur: '#5b625e' };
 
   // Petit triangle rouge sur le côté du gagnant (comme chez FIBA)
@@ -460,7 +464,7 @@ function InfosMatch({ m, saison }) {
         ))}
       </Carte>
 
-      {m.statut === 0 && (
+      {etatMatch(m) === 'aVenir' && (
         <Carte style={{ padding: '18px' }}>
           <div style={{ fontWeight: 800, fontSize: '16px', color: CLAIR.texte, marginBottom: '6px' }}>{t('matchDetail.tonPronostic')}</div>
           <p style={{ fontSize: '13px', color: CLAIR.doux, marginBottom: '14px', lineHeight: 1.5 }}>

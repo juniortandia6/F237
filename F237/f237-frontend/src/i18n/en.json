@@ -27,7 +27,10 @@
     "but_other": "goals",
     "reporte": "Postponed",
     "miTemps": "Half-time",
-    "miTempsMaj": "HALF-TIME"
+    "miTempsMaj": "HALF-TIME",
+    "annule": "Cancelled",
+    "nonDispute": "Not played",
+    "live": "Live"
   },
   "accueil": {
     "enSavoirPlus": "Read more",
@@ -199,7 +202,9 @@
       "h2h": "Head-to-head"
     },
     "detailIndispo": "Goal details (scorers, minutes) are not available yet for this match.",
-    "miTempsALaFin": "The score is shown at the end of the match."
+    "miTempsALaFin": "The score is shown at the end of the match.",
+    "annuleMaj": "CANCELLED",
+    "nonDisputeMaj": "NOT PLAYED"
   },
   "classement": {
     "aucunBut": "No goals recorded yet.",

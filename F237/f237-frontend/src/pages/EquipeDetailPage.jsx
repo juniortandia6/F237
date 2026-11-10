@@ -19,6 +19,7 @@ import { COMPETITIONS, SAISONS_DB, ANNEE_ACTUELLE, libelleSaison } from '../data
 import SelecteurSaison from '../components/SelecteurSaison';
 import { getInfosClub } from '../data/clubsInfos';
 import theme from '../theme';
+import { estAVenir } from '../data/statutMatch';
 
 // ── Couleurs de la zone claire (mêmes que les autres pages) ─────────────
 const CLAIR = {
@@ -602,9 +603,9 @@ function EquipeDetailPage() {
       };
     }), [matchsSaison, idClub]);
 
-  // Prochains matchs du club (statut 0 = à venir)
+  // Prochains matchs du club (à venir, date pas encore dépassée)
   const aVenir = useMemo(() => matchsSaison
-    .filter(m => m.statut === 0)
+    .filter(estAVenir)
     .sort((a, b) => new Date(a.dateMatch) - new Date(b.dateMatch)), [matchsSaison]);
 
   // Buteurs du club (sans CSC ni inconnus), top 5

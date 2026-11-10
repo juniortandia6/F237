@@ -124,11 +124,19 @@ namespace F237.BLL.Services.Implementations
         private static int? EntierOuNull(JsonElement e) =>
             e.ValueKind == JsonValueKind.Number ? e.GetInt32() : null;
 
-        // Statut API -> statut F237
-        private static StatutMatchEnum ConvertirStatut(string? statutCourt) => statutCourt switch
+        // Statut API -> statut F237.
+        // L'API n'est pas constante sur la casse (ex. "Canc" au lieu de "CANC") :
+        // on compare toujours en majuscules.
+        //   NS, TBD                -> Planifié (TBD = date à fixer, le match reste à venir)
+        //   PST, SUSP              -> Reporté
+        //   CANC, ABD              -> Annulé  (annulé, ou arrêté et jamais repris)
+        //   FT, AET, PEN, AWD, WO  -> Terminé (AWD / WO = sur tapis vert)
+        private static StatutMatchEnum ConvertirStatut(string? statutCourt) => statutCourt?.Trim().ToUpperInvariant() switch
         {
             "FT" or "AET" or "PEN" or "AWD" or "WO" => StatutMatchEnum.Terminé,
             "LIVE" or "1H" or "2H" or "HT" or "ET" or "BT" or "P" or "INT" => StatutMatchEnum.EnCours,
+            "PST" or "SUSP" => StatutMatchEnum.Reporté,
+            "CANC" or "ABD" => StatutMatchEnum.Annulé,
             _ => StatutMatchEnum.Planifié
         };
 

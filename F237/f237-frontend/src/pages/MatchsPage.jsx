@@ -13,6 +13,7 @@ import { COMPETITIONS, ANNEE_ACTUELLE, SAISONS_DB, libelleSaison } from '../data
 import SelecteurSaison from '../components/SelecteurSaison';
 import { useLiveScores } from '../hooks/useLiveScores';
 import theme from '../theme';
+import { etatMatch } from '../data/statutMatch';
 
 // ── Couleurs de la zone claire ──────────────────────────────────────────
 const CLAIR = {
@@ -171,10 +172,12 @@ function LigneEquipe({ equipe, score, gagnant, perdant, masquer, aVenir }) {
 function CarteMatch({ m, competition, masquer }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const termine = m.statut === 2;
-  const live = m.statut === 1;
-  const aVenir = m.statut === 0;
-  const reporte = m.statut === 3;
+  // 'live' | 'termine' | 'aVenir' | 'reporte' | 'annule' | 'nonDispute'
+  const etat = etatMatch(m);
+  const termine = etat === 'termine';
+  const live = etat === 'live';
+  const aVenir = etat === 'aVenir';
+  const sansScore = !termine && !live; // à venir, reporté, annulé ou non disputé
   const dom = m.scoreDomicile, ext = m.scoreExterieur;
   const domGagne = (termine || live) && dom > ext;
   const extGagne = (termine || live) && ext > dom;
@@ -209,12 +212,12 @@ function CarteMatch({ m, competition, masquer }) {
               </span>
             ) : (
               <span style={{ fontSize: '12px', fontWeight: 700, color: CLAIR.doux, textTransform: 'uppercase' }}>
-                {termine ? t('commun.termine') : reporte ? t('commun.reporte') : t('commun.aVenir')}
+                {t(`commun.${etat}`)}
               </span>
             )}
           </div>
-          <LigneEquipe equipe={m.equipeDomicile} score={dom} gagnant={domGagne} perdant={extGagne} masquer={masquer} aVenir={aVenir || reporte} />
-          <LigneEquipe equipe={m.equipeExterieur} score={ext} gagnant={extGagne} perdant={domGagne} masquer={masquer} aVenir={aVenir || reporte} />
+          <LigneEquipe equipe={m.equipeDomicile} score={dom} gagnant={domGagne} perdant={extGagne} masquer={masquer} aVenir={sansScore} />
+          <LigneEquipe equipe={m.equipeExterieur} score={ext} gagnant={extGagne} perdant={domGagne} masquer={masquer} aVenir={sansScore} />
         </div>
 
         {/* Droite : séparateur + heure ou bouton détail */}
@@ -222,9 +225,11 @@ function CarteMatch({ m, competition, masquer }) {
           borderLeft: `1px solid ${CLAIR.bord}`, paddingLeft: '20px', minWidth: '120px',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px',
         }}>
-          {aVenir || reporte ? (
+          {sansScore ? (
             <>
-              <span style={{ backgroundColor: CLAIR.texte, color: '#fff', fontWeight: 800, fontSize: '16px', padding: '8px 14px', borderRadius: '8px' }}>
+              <span style={{
+                backgroundColor: aVenir || etat === 'reporte' ? CLAIR.texte : '#c9cfcc', color: '#fff',
+                textDecoration: etat === 'annule' ? 'line-through' : 'none', fontWeight: 800, fontSize: '16px', padding: '8px 14px', borderRadius: '8px' }}>
                 {heure(m.dateMatch)}
               </span>
               {aVenir && (

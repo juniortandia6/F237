@@ -224,13 +224,15 @@ namespace F237.API.Services
                     var teams = item.GetProperty("teams");
                     var statusEl = fix.GetProperty("status");
 
-                    // NS=0, en cours=1, terminé=2, reporté/annulé=3, suspendu=4
-                    var statut = statusEl.GetProperty("short").GetString() switch
+                    // Mêmes valeurs que StatutMatchEnum :
+                    // 0 = Planifié, 1 = EnCours, 2 = Terminé, 3 = Reporté, 4 = Annulé.
+                    // (INT = interrompu quelques minutes : le match est toujours en cours.)
+                    var statut = statusEl.GetProperty("short").GetString()?.Trim().ToUpperInvariant() switch
                     {
-                        "1H" or "HT" or "2H" or "ET" or "BT" or "P" or "LIVE" => 1,
+                        "1H" or "HT" or "2H" or "ET" or "BT" or "P" or "LIVE" or "INT" => 1,
                         "FT" or "AET" or "PEN" or "AWD" or "WO" => 2,
-                        "PST" or "CANC" or "ABD" => 3,
-                        "SUSP" or "INT" => 4,
+                        "PST" or "SUSP" => 3,
+                        "CANC" or "ABD" => 4,
                         _ => 0,
                     };
 
