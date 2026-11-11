@@ -9,7 +9,7 @@
 // En variante ronde, le logo du club peut s'afficher en petite pastille (prop logo).
 
 import { useId, useState } from 'react';
-import { couleursClub, texteSur, initialesJoueur } from '../data/couleursClubs';
+import { couleursClub, texteSur, initialesJoueur, useCouleursClubs } from '../data/couleursClubs';
 
 // Buste dessiné en SVG (viewBox 120 x 130), posé sur le bas
 function Buste({ principale, secondaire, inscription }) {
@@ -67,10 +67,12 @@ function Buste({ principale, secondaire, inscription }) {
   );
 }
 
-export default function AvatarJoueur({ photo, logo, club, nom, numero, taille = 96, ombre = true, variante = 'rond' }) {
+// couleurs = { principale, secondaire } pour forcer des couleurs (aperçu de l'admin)
+export default function AvatarJoueur({ photo, logo, club, nom, numero, taille = 96, ombre = true, variante = 'rond', couleurs }) {
   const [photoKo, setPhotoKo] = useState(false);
   const [logoKo, setLogoKo] = useState(false);
-  const { principale, secondaire } = couleursClub(club);
+  useCouleursClubs(); // se redessine quand les couleurs saisies dans l'admin sont chargées
+  const { principale, secondaire } = couleurs ?? couleursClub(club);
   const inscription = numero ?? initialesJoueur(nom);
   const avecPhoto = photo && !photoKo;
 

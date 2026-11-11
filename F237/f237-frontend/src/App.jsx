@@ -20,6 +20,9 @@ import AdminArticlesPage from './pages/admin/AdminArticlesPage';
 import AdminArticleEditionPage from './pages/admin/AdminArticleEditionPage';
 import AdminMatchsPage from './pages/admin/AdminMatchsPage';
 import AdminMatchEditionPage from './pages/admin/AdminMatchEditionPage';
+import AdminEquipesPage from './pages/admin/AdminEquipesPage';
+import AdminEffectifsPage from './pages/admin/AdminEffectifsPage';
+import AdminUtilisateursPage from './pages/admin/AdminUtilisateursPage';
 
 function App() {
   return (
@@ -48,6 +51,9 @@ function App() {
               <Route path="articles/:id" element={<AdminArticleEditionPage />} />
               <Route path="matchs" element={<AdminMatchsPage />} />
               <Route path="matchs/:id" element={<AdminMatchEditionPage />} />
+              <Route path="equipes" element={<AdminEquipesPage />} />
+              <Route path="effectifs" element={<AdminEffectifsPage />} />
+              <Route path="utilisateurs" element={<AdminUtilisateursPage />} />
             </Route>
           </Routes>
         </Layout>

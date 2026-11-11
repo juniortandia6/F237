@@ -1,5 +1,6 @@
 ﻿using F237.BLL.Services.Interfaces;
 using F237.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace F237.API.Controllers
@@ -59,7 +60,10 @@ namespace F237.API.Controllers
             return Ok(joueur);
         }
 
+        // Écritures réservées à l'admin (avant : ouvertes à tout le monde).
+        // L'admin du site passe par /api/admin/... (validation complète) ; ces routes restent pour compatibilité.
         [HttpPost]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Create([FromBody] Joueur joueur)
         {
             var created = await _joueurService.CreerJoueurAsync(joueur);
@@ -67,6 +71,7 @@ namespace F237.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Update(int id, [FromBody] Joueur joueur)
         {
             if (id != joueur.Id) return BadRequest();
@@ -75,6 +80,7 @@ namespace F237.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Delete(int id)
         {
             await _joueurService.DeleteJoueurAsync(id);

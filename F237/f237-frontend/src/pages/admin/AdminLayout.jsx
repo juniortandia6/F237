@@ -3,7 +3,7 @@
 // Les sections pas encore construites sont affichées "Bientôt" (non cliquables).
 
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Newspaper, CalendarDays, Shield, Users } from 'lucide-react';
+import { LayoutDashboard, Newspaper, CalendarDays, Shield, Users, UserCog } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import theme from '../../theme';
 import { CLAIR } from './styleAdmin';
@@ -14,8 +14,9 @@ const SECTIONS = [
   { to: '/admin', label: 'Tableau de bord', Icone: LayoutDashboard, fin: true },
   { to: '/admin/articles', label: 'Articles', Icone: Newspaper },
   { to: '/admin/matchs', label: 'Matchs et buteurs', Icone: CalendarDays },
-  { to: '/admin/equipes', label: 'Équipes', Icone: Shield, bientot: true },
-  { to: '/admin/effectifs', label: 'Effectifs', Icone: Users, bientot: true },
+  { to: '/admin/equipes', label: 'Équipes', Icone: Shield },
+  { to: '/admin/effectifs', label: 'Effectifs', Icone: Users },
+  { to: '/admin/utilisateurs', label: 'Utilisateurs', Icone: UserCog },
 ];
 
 function LienSection({ section }) {

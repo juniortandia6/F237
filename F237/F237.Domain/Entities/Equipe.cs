@@ -18,6 +18,12 @@ namespace F237.Domain.Entities
         // Logo d'origine de l'API-Football, gardé pour pouvoir annuler le remplacement
         public string? LogoApi { get; set; }
 
+        // Couleurs du maillot (format "#c62828"), saisies dans l'admin.
+        // Null = le site utilise ses couleurs par défaut (couleursClubs.js).
+        // L'API-Football ne fournit pas de couleurs : l'import n'y touche jamais.
+        public string? CouleurPrincipale { get; set; }
+        public string? CouleurSecondaire { get; set; }
+
         // Navigation
         public ICollection<Joueur> Joueurs { get; set; } = new List<Joueur>();
         public ICollection<Match> MatchsDomicile { get; set; } = new List<Match>();

@@ -4,6 +4,8 @@
 // Couleurs tirées des logos des clubs : ajuste-les librement (code hexadécimal).
 // Un club absent de la liste reçoit une couleur automatique, toujours la même pour lui.
 
+import { useSyncExternalStore } from 'react';
+
 const COULEURS = {
   // ── MTN Elite One ──
   'colombe':                 { principale: '#c62828', secondaire: '#ffffff' },
@@ -44,9 +46,54 @@ const PALETTE = [
 
 const normaliser = (s) => (s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 
-/** Couleurs du maillot d'un club (toujours les mêmes pour un même nom). */
+// ── Couleurs saisies dans l'admin (base de données) ─────────────────────
+// Chargées une fois depuis GET /api/clubs/couleurs ; elles passent AVANT la table
+// ci-dessus. Les composants qui veulent se mettre à jour au chargement appellent
+// useCouleursClubs() (voir AvatarJoueur).
+const API_URL = (import.meta.env?.VITE_API_URL ?? 'http://localhost:5257').replace(/\/$/, '');
+let couleursBase = new Map();   // nom normalisé -> { principale, secondaire }
+let versionBase = 0;
+let chargement = null;
+const abonnes = new Set();
+
+/** (Re)charge les couleurs de la base. force = true après une modification dans l'admin. */
+export function chargerCouleursClubs(force = false) {
+  if (chargement && !force) return chargement;
+  chargement = fetch(`${API_URL}/api/clubs/couleurs`, { cache: force ? 'reload' : 'default' })
+    .then(r => (r.ok ? r.json() : []))
+    .then(liste => {
+      couleursBase = new Map((liste ?? []).map(c => [normaliser(c.nom), { principale: c.principale, secondaire: c.secondaire }]));
+      versionBase++;
+      abonnes.forEach(f => f());
+    })
+    .catch(() => { /* API injoignable : on garde les couleurs par défaut */ });
+  return chargement;
+}
+
+function abonner(f) {
+  abonnes.add(f);
+  chargerCouleursClubs();
+  return () => abonnes.delete(f);
+}
+
+/** Hook : re-rend le composant quand les couleurs de la base arrivent. */
+export function useCouleursClubs() {
+  return useSyncExternalStore(abonner, () => versionBase, () => versionBase);
+}
+
+/** Couleurs par défaut du site (table ci-dessus ou palette), sans celles de la base. */
+export function couleursParDefaut(nomClub) {
+  const cle = normaliser(nomClub);
+  if (COULEURS[cle]) return COULEURS[cle];
+  let h = 0;
+  for (const c of cle) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return PALETTE[h % PALETTE.length];
+}
+
+/** Couleurs du maillot d'un club : celles de l'admin si elles existent, sinon celles par défaut. */
 export function couleursClub(nomClub) {
   const cle = normaliser(nomClub);
+  if (couleursBase.has(cle)) return couleursBase.get(cle);
   if (COULEURS[cle]) return COULEURS[cle];
   let h = 0;
   for (const c of cle) h = (h * 31 + c.charCodeAt(0)) >>> 0;

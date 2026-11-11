@@ -13,6 +13,10 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Dossier des fichiers téléversés depuis l'admin (logos des clubs).
+// Créé AVANT le démarrage : wwwroot doit exister pour que UseStaticFiles le serve.
+Directory.CreateDirectory(Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "uploads", "logos"));
+
 // Controllers
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -136,6 +140,9 @@ if (app.Environment.IsDevelopment())
 // app.UseHttpsRedirection();
 
 app.UseCors("AllowReact");
+
+// Fichiers de wwwroot (ex. /uploads/logos/37-union-abong-mbang-....png)
+app.UseStaticFiles();
 
 //  Authentication AVANT Authorization
 app.UseAuthentication();

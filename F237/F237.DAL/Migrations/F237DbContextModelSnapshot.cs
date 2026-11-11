@@ -252,6 +252,12 @@ namespace F237.DAL.Migrations
                     b.Property<int>("ApiFootballId")
                         .HasColumnType("int");
 
+                    b.Property<string>("CouleurPrincipale")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CouleurSecondaire")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Division")
                         .HasColumnType("int");
 
@@ -311,6 +317,9 @@ namespace F237.DAL.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("NombrePasses")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Numero")
                         .HasColumnType("int");
 
                     b.Property<string>("PhotoUrl")

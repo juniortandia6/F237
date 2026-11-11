@@ -65,7 +65,68 @@ export const adminService = {
     corrigerHeure: (apiFootballId, heure) => appel(`/api/sync/match/${apiFootballId}/heure`, { method: 'PUT', body: JSON.stringify({ heure }) }),
     annulerHeure: (apiFootballId) => appel(`/api/sync/match/${apiFootballId}/heure`, { method: 'DELETE' }),
   },
+
+  // ── Équipes : logos et couleurs ────────────────────────────────────────
+  equipes: {
+    /** Toutes les équipes (avec nbMatchs, couleurs, état du logo). */
+    liste: () => appel('/api/admin/equipes').then(l => l ?? []),
+    /** Téléverse un logo (PNG, JPG ou WebP, 2 Mo max). */
+    televerserLogo: async (id, fichier) => {
+      const donnees = new FormData();
+      donnees.append('fichier', fichier);
+      // Pas de Content-Type : le navigateur met multipart/form-data avec sa frontière
+      const reponse = await fetch(`${API_URL}/api/admin/equipes/${id}/logo`, {
+        method: 'POST', headers: { ...authService.getAuthHeader() }, body: donnees,
+      });
+      const corps = await reponse.json().catch(() => null);
+      if (!reponse.ok) {
+        const erreur = new Error(corps?.message ?? corps?.title ?? `Erreur ${reponse.status}`);
+        erreur.statut = reponse.status;
+        throw erreur;
+      }
+      return corps;
+    },
+    /** Retour au logo fourni par l'API-Football. */
+    retablirLogo: (id) => appel(`/api/admin/equipes/${id}/logo`, { method: 'DELETE' }),
+    /** couleurs = { principale: '#c62828', secondaire: '#ffffff' }, ou nulls pour revenir aux couleurs par défaut */
+    couleurs: (id, principale, secondaire) => appel(`/api/admin/equipes/${id}/couleurs`, { method: 'PUT', body: JSON.stringify({ principale, secondaire }) }),
+  },
+
+  // ── Effectifs ───────────────────────────────────────────────────────────
+  joueurs: {
+    /** Joueurs d'une équipe (actifs et anciens). */
+    liste: (equipeId) => appel(`/api/admin/equipes/${equipeId}/joueurs`).then(l => l ?? []),
+    /** joueur = { prenom, nom, numero, poste, nationalite, dateNaissance } */
+    ajouter: (equipeId, joueur) => appel(`/api/admin/equipes/${equipeId}/joueurs`, { method: 'POST', body: JSON.stringify(joueur) }),
+    /** Saisie rapide : un joueur par ligne ("9 Mathew Williams"). Renvoie { ajoutes, ignores }. */
+    /** Copie l'effectif de l'API-Football dans F237 (1 requête). Renvoie { ajoutes, ignores, message? }. */
+    importerApi: (equipeId) => appel(`/api/admin/equipes/${equipeId}/joueurs/importer-api`, { method: 'POST' }),
+    ajouterLot: (equipeId, lignes, poste) => appel(`/api/admin/equipes/${equipeId}/joueurs/lot`, { method: 'POST', body: JSON.stringify({ lignes, poste }) }),
+    /** Même corps que ajouter, + estActif (false = a quitté le club) */
+    modifier: (id, joueur) => appel(`/api/admin/joueurs/${id}`, { method: 'PUT', body: JSON.stringify(joueur) }),
+    supprimer: (id) => appel(`/api/admin/joueurs/${id}`, { method: 'DELETE' }),
+  },
+
+  // ── Utilisateurs ────────────────────────────────────────────────────────
+  utilisateurs: {
+    liste: () => appel('/api/admin/utilisateurs').then(l => l ?? []),
+    /** Détail + 50 dernières transactions */
+    get: (id) => appel(`/api/admin/utilisateurs/${id}`),
+    activer: (id, estActif) => appel(`/api/admin/utilisateurs/${id}/actif`, { method: 'PUT', body: JSON.stringify({ estActif }) }),
+    /** role = 'Admin' | 'Utilisateur' (pris en compte à sa prochaine connexion) */
+    role: (id, role) => appel(`/api/admin/utilisateurs/${id}/role`, { method: 'PUT', body: JSON.stringify({ role }) }),
+    /** montant positif (ajout) ou négatif (retrait), motif obligatoire */
+    points: (id, montant, motif) => appel(`/api/admin/utilisateurs/${id}/points`, { method: 'POST', body: JSON.stringify({ montant, motif }) }),
+  },
 };
+
+export const POSTES = ['Gardien', 'Défenseur', 'Milieu', 'Attaquant'];
+
+/** Nom affiché d'un joueur : "Mathew Williams", ou "Williams" sans prénom */
+export const nomJoueur = (j) => [j.prenom, j.nom].filter(Boolean).join(' ');
+
+/** Nom au format des buteurs ("M. Williams"), pour garder la même orthographe que les buts */
+export const nomButeur = (j) => (j.prenom ? `${j.prenom[0].toUpperCase()}. ${j.nom}` : j.nom);
 
 // Catégories acceptées par l'API (TagsArticle.Tous côté backend)
 export const TAGS_ARTICLE = ['Elite One', 'Elite Two', 'Transfert', 'Talents', 'Compétition'];

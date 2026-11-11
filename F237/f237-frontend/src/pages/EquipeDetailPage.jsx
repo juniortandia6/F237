@@ -20,6 +20,7 @@ import SelecteurSaison from '../components/SelecteurSaison';
 import { getInfosClub } from '../data/clubsInfos';
 import theme from '../theme';
 import { estAVenir } from '../data/statutMatch';
+import AvatarJoueur from '../components/AvatarJoueur';
 
 // ── Couleurs de la zone claire (mêmes que les autres pages) ─────────────
 const CLAIR = {
@@ -51,6 +52,23 @@ function EclatsBande() {
 
 // ── Données ─────────────────────────────────────────────────────────────
 const POSTES_ORDRE = ['Goalkeeper', 'Defender', 'Midfielder', 'Attacker'];
+// Postes saisis dans l'admin (français) -> clés ci-dessus (celles de l'API-Football)
+const POSTE_ADMIN = { Gardien: 'Goalkeeper', Défenseur: 'Defender', Milieu: 'Midfielder', Attaquant: 'Attacker' };
+const CHARGE_LE = Date.now();
+const ageDepuis = (date) => {
+  if (!date) return null;
+  const d = new Date(/Z$|[+-]\d\d:\d\d$/.test(date) ? date : `${date}Z`);
+  return Number.isNaN(d.getTime()) ? null : Math.floor((CHARGE_LE - d.getTime()) / (365.25 * 24 * 3600 * 1000));
+};
+// Joueur de l'admin -> même forme que ceux de l'API (nom, poste, age, numero, nationalite)
+const versJoueurSite = (j) => ({
+  id: j.id,
+  nom: [j.prenom, j.nom].filter(Boolean).join(' '),
+  poste: POSTE_ADMIN[j.poste] ?? null,
+  numero: j.numero ?? null,
+  nationalite: j.nationalite ?? null,
+  age: ageDepuis(j.dateNaissance),
+});
 // Libellés des postes : equipe.postes.<poste> et equipe.postesCourts.<poste>
 const COULEUR_RESULTAT = { V: theme.green, N: '#a3aaa6', D: theme.red, '?': '#c9cfcc' };
 
@@ -159,19 +177,15 @@ function LigneAVenir({ m, premier }) {
 }
 
 // Carte d'un joueur de l'effectif
-function CarteJoueur({ j }) {
+// Avatar « maillot » aux couleurs du club (pas de photo de joueur sans accord des clubs)
+function CarteJoueur({ j, club }) {
   const { t } = useTranslation();
-  const [photoOk, setPhotoOk] = useState(true);
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: '12px', padding: '12px',
       backgroundColor: CLAIR.carte, border: `1px solid ${CLAIR.bord}`, borderRadius: '12px',
     }}>
-      <span style={{ width: '48px', height: '48px', borderRadius: '50%', overflow: 'hidden', backgroundColor: CLAIR.tuile, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: CLAIR.doux }}>
-        {j.photo && photoOk
-          ? <img src={j.photo} alt="" onError={() => setPhotoOk(false)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          : j.nom?.charAt(0)}
-      </span>
+      <AvatarJoueur club={club} nom={j.nom} numero={j.numero ?? undefined} taille={48} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: '15px', fontWeight: 700, color: CLAIR.texte, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{j.nom}</div>
         <div style={{ fontSize: '12px', color: CLAIR.doux }}>
@@ -234,7 +248,7 @@ function OngletMatchs({ derniersMatchs, aVenir, chargement }) {
   );
 }
 
-function OngletEffectif({ effectif }) {
+function OngletEffectif({ effectif, club }) {
   const { t } = useTranslation();
   if (effectif.length === 0) {
     return <Carte><Vide>{t('equipe.effectifIndispo')}</Vide></Carte>;
@@ -254,7 +268,7 @@ function OngletEffectif({ effectif }) {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {[...g.joueurs]
           .sort((a, b) => (a.numero ?? 999) - (b.numero ?? 999))
-          .map((j, i) => <CarteJoueur key={j.apiId ?? `${j.nom}-${i}`} j={j} />)}
+          .map((j, i) => <CarteJoueur key={j.id ?? j.apiId ?? `${j.nom}-${i}`} j={j} club={club} />)}
       </div>
     </div>
   ));
@@ -558,6 +572,16 @@ function EquipeDetailPage() {
     return () => { ignore = true; };
   }, [id]);
 
+  // Effectif saisi dans l'admin (prioritaire sur celui de l'API-Football)
+  const [effectifF237, setEffectifF237] = useState({ id: null, joueurs: [] });
+  useEffect(() => {
+    let ignore = false;
+    equipeService.getEffectif(id)
+      .then(l => { if (!ignore) setEffectifF237({ id, joueurs: Array.isArray(l) ? l : [] }); })
+      .catch(() => { if (!ignore) setEffectifF237({ id, joueurs: [] }); });
+    return () => { ignore = true; };
+  }, [id]);
+
   // Classements + matchs de la saison choisie, pour les deux championnats
   // (on ne sait pas d'avance dans lequel le club jouait cette saison-là)
   useEffect(() => {
@@ -643,7 +667,9 @@ function EquipeDetailPage() {
   const classement = saisonClub?.classement ?? null;
   const derniersMatchs = resultats.slice(0, 5); // Aperçu + forme récente
   const palmares = data.palmares ?? [];
-  const effectif = data.effectif ?? [];
+  // Effectif : celui de l'admin s'il a été saisi, sinon celui de l'API-Football
+  const saisi = effectifF237.id === id ? effectifF237.joueurs : [];
+  const effectif = saisi.length ? saisi.map(versJoueurSite) : (data.effectif ?? []);
   // Championnat de la saison choisie (à défaut, la division actuelle du club)
   const eliteOne = saisonClub?.comp ? saisonClub.comp === 'one' : data.division === 0;
   // Histoire + palmarès (Wikipédia), dans la langue du site ; null si pas encore rédigé
@@ -778,7 +804,7 @@ function EquipeDetailPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {onglet === 'apercu' && <OngletApercu classement={classement} derniersMatchs={derniersMatchs} annee={annee} chargement={chargementSaison} />}
               {onglet === 'matchs' && <OngletMatchs derniersMatchs={resultats} aVenir={aVenir} chargement={chargementSaison} />}
-              {onglet === 'effectif' && <OngletEffectif effectif={effectif} />}
+              {onglet === 'effectif' && <OngletEffectif effectif={effectif} club={data.nom} />}
               {onglet === 'histoire' && <OngletHistoire club={club} />}
               {onglet === 'palmares' && <OngletPalmares palmares={palmares} club={club} />}
             </div>

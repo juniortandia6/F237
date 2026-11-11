@@ -9,7 +9,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { ArrowLeft, Plus, Pencil, Trash2, Check, X, Clock, ExternalLink, AlertTriangle, CheckCircle2 } from 'lucide-react';
-import { adminService, dateApi } from '../../services/adminService';
+import { adminService, dateApi, nomButeur } from '../../services/adminService';
 import { infosSaison } from '../../data/saisons';
 import { etatMatch } from '../../data/statutMatch';
 import { estInconnu, butsDe, problemesMatch } from './analyseMatch';
@@ -269,16 +269,33 @@ export default function AdminMatchEditionPage() {
     return () => { ignore = true; };
   }, [id, version, saisonConnue]);
 
-  // Noms déjà utilisés dans la saison, par équipe créditée (hors CSC et inconnus)
+  // Effectifs des deux équipes (saisis dans Admin > Effectifs)
+  const [effectifs, setEffectifs] = useState({});  // nomEquipe -> [noms au format "M. Williams"]
+  const idDom = match?.equipeDomicile?.id, idExt = match?.equipeExterieur?.id;
+  const nomDom = match?.equipeDomicile?.nom, nomExt = match?.equipeExterieur?.nom;
+  useEffect(() => {
+    if (!idDom || !idExt) return;
+    let ignore = false;
+    Promise.all([idDom, idExt].map(eid => adminService.joueurs.liste(eid).catch(() => [])))
+      .then(([dom, ext]) => {
+        if (ignore) return;
+        const noms = (l) => l.filter(j => j.estActif).map(nomButeur);
+        setEffectifs({ [nomDom]: noms(dom), [nomExt]: noms(ext) });
+      });
+    return () => { ignore = true; };
+  }, [idDom, idExt, nomDom, nomExt]);
+
+  // Noms proposés : buteurs déjà utilisés dans la saison (hors CSC et inconnus) + effectif du club
   const nomsParEquipe = useMemo(() => {
     const map = new Map();
+    for (const [equipe, liste] of Object.entries(effectifs)) map.set(equipe, new Set(liste));
     for (const m of saison ?? []) for (const b of m.buts ?? []) {
       if (b.estButCSC || estInconnu(b.nomJoueur)) continue;
       if (!map.has(b.nomEquipe)) map.set(b.nomEquipe, new Set());
       map.get(b.nomEquipe).add(b.nomJoueur);
     }
     return map;
-  }, [saison]);
+  }, [saison, effectifs]);
   const noms = (equipe) => [...(nomsParEquipe.get(equipe?.nom) ?? [])].sort((a, b) => a.localeCompare(b, 'fr'));
 
   // Exécute une modification, affiche le message, recharge le match. Renvoie true si ok.
