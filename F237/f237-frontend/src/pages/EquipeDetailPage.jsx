@@ -752,6 +752,16 @@ function EquipeDetailPage() {
                   {(infos.ville ?? club?.ville) && infoHero(MapPin, infos.ville ?? club.ville)}
                   {(infos.anneeCreation ?? club?.fondation) && infoHero(Calendar, t('equipe.fondeEnAnnee', { a: infos.anneeCreation ?? club.fondation }))}
                   {(infos.stadeNom ?? club?.stade) && infoHero(Building2, infos.stadeNom ?? club.stade)}
+                  {/* Site officiel du club (clubsInfos.js : siteWeb) */}
+                  {club?.siteWeb && (
+                    <a href={club.siteWeb} target="_blank" rel="noopener noreferrer"
+                      className="transition-colors"
+                      style={{ display: 'flex', alignItems: 'center', gap: '6px', color: theme.yellow, fontSize: '14px', fontWeight: 700, textDecoration: 'none' }}
+                      onMouseEnter={e => { e.currentTarget.style.color = '#fff'; }}
+                      onMouseLeave={e => { e.currentTarget.style.color = theme.yellow; }}>
+                      <Globe size={15} /> {t('equipe.siteOfficiel')} <ExternalLink size={13} />
+                    </a>
+                  )}
                 </div>
               </div>
             </div>

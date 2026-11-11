@@ -252,6 +252,9 @@ namespace F237.DAL.Migrations
                     b.Property<int>("ApiFootballId")
                         .HasColumnType("int");
 
+                    b.Property<string>("ApiFootballIdsAlias")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("CouleurPrincipale")
                         .HasColumnType("nvarchar(max)");
 

@@ -19,9 +19,9 @@ const COULEURS = {
   'stade renard':            { principale: '#e8742a', secondaire: '#ffffff' },
   'apejes academy':          { principale: '#4b2c91', secondaire: '#35c4e8' },
   'unisport bafang':         { principale: '#f2c230', secondaire: '#d32f2f' },
-  'victoria united':         { principale: '#0f5aa8', secondaire: '#f2c230' },
+  'victoria united':         { principale: '#1c1c1c', secondaire: '#ffffff' },   // noir, col et liserés blancs
   'union abong-mbang':       { principale: '#2e7d32', secondaire: '#f2c230' },
-  'gazelle':                 { principale: '#f2c230', secondaire: '#1b8a3a' },
+  'gazelle':                 { principale: '#3a96dc', secondaire: '#ffffff' },   // bleu ciel et blanc (maillot domicile)
 
   // ── MTN Elite Two ──
   'bamboutos':               { principale: '#b71c1c', secondaire: '#1c2a5a' },

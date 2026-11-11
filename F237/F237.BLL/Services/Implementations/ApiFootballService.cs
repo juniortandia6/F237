@@ -220,7 +220,7 @@ namespace F237.BLL.Services.Implementations
                 var pays = teamInfo.GetProperty("country").GetString() ?? string.Empty;
                 var division = DivisionDe(leagueId);
 
-                var equipeExistante = equipesExistantes.FirstOrDefault(e => e.ApiFootballId == apiId);
+                var equipeExistante = equipesExistantes.FirstOrDefault(e => e.CorrespondA(apiId));
 
                 if (equipeExistante != null)
                 {
@@ -279,8 +279,8 @@ namespace F237.BLL.Services.Implementations
                 var apiIdDomicile = teams.GetProperty("home").GetProperty("id").GetInt32();
                 var apiIdExterieur = teams.GetProperty("away").GetProperty("id").GetInt32();
 
-                var equipeDomicile = equipes.FirstOrDefault(e => e.ApiFootballId == apiIdDomicile);
-                var equipeExterieur = equipes.FirstOrDefault(e => e.ApiFootballId == apiIdExterieur);
+                var equipeDomicile = equipes.FirstOrDefault(e => e.CorrespondA(apiIdDomicile));
+                var equipeExterieur = equipes.FirstOrDefault(e => e.CorrespondA(apiIdExterieur));
                 if (equipeDomicile == null || equipeExterieur == null) continue;
 
                 var apiFixtureId = fixtureInfo.GetProperty("id").GetInt32();
@@ -401,7 +401,7 @@ namespace F237.BLL.Services.Implementations
                 foreach (var entry in groupe.EnumerateArray())
                 {
                     var apiTeamId = entry.GetProperty("team").GetProperty("id").GetInt32();
-                    var equipe = equipes.FirstOrDefault(e => e.ApiFootballId == apiTeamId);
+                    var equipe = equipes.FirstOrDefault(e => e.CorrespondA(apiTeamId));
                     if (equipe == null) continue;
 
                     var all = entry.GetProperty("all");
@@ -599,7 +599,9 @@ namespace F237.BLL.Services.Implementations
                 // 3. Équipes (1 requête) — on AJOUTE seulement les clubs manquants,
                 //    sans toucher à la division / EstActive des clubs actuels
                 var equipesApi = await GetApiAsync($"/teams?league={leagueId}&season={saison}");
-                var idsExistants = (await _context.Equipes.Select(e => e.ApiFootballId).ToListAsync()).ToHashSet();
+                // Ids principaux ET alias : un club connu sous un autre id n'est pas recréé
+                var idsExistants = (await _context.Equipes.AsNoTracking().ToListAsync())
+                    .SelectMany(e => e.TousLesIdsApi()).ToHashSet();
                 foreach (var team in equipesApi.EnumerateArray())
                 {
                     var t = team.GetProperty("team");

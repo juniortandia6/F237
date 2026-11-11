@@ -153,14 +153,20 @@ export const CLUBS_INFOS = {
     ville: 'Garoua',
     fondation: 2015,
     stade: 'Stade Roumdé-Adjia',
+    siteWeb: 'https://gazellefa-officiel.com/',
     histoire: [
-      "Jeune club créé en 2015 à Garoua, Gazelle FA monte très vite les échelons.",
-      "En juillet 2022, il remporte l'Elite Two en battant l'Aigle Royal de la Menoua 2-1 en finale, avec un but décisif dans les dernières secondes des prolongations. Il rejoint alors Coton Sport en Elite One et donne à Garoua un deuxième club parmi l'élite.",
+      "Jeune club créé en 2015 à Garoua, Gazelle FA (Gazelle Football Academy) s'est donné pour mission de développer le football dans la région du Nord et d'y former les jeunes talents dans un cadre professionnel. Sa devise : « Plus vite, plus haut, plus fort ».",
+      "Le club monte très vite les échelons : champion départemental en 2017, champion régional du Nord en 2018, 2019 et 2021, puis vainqueur des interpoules nationales en 2021, qui lui ouvrent les portes de l'Elite Two.",
+      "En juillet 2022, il remporte l'Elite Two en battant l'Aigle Royal de la Menoua 2-1 en finale, avec un but décisif dans les dernières secondes des prolongations. Il rejoint alors Coton Sport en Elite One et donne à Garoua un deuxième club parmi l'élite. Il s'est depuis qualifié deux fois pour les play-offs de l'Elite One.",
+      "Gazelle joue en bleu ciel et blanc, et reçoit au stade Roumdé-Adjia de Garoua.",
     ],
     palmares: [
       { competition: 'Elite Two', type: 'titre', annees: ['2021-22'] },
+      { competition: 'Interpoules nationales', type: 'titre', annees: [2021] },
+      { competition: 'Championnat régional du Nord', type: 'titre', annees: [2018, 2019, 2021] },
+      { competition: 'Championnat départemental', type: 'titre', annees: [2017] },
     ],
-    sources: ['https://cameroon-tribune.cm/article.html/49492/fr.html/mtn-elite-two-gazelle-fa'],
+    sources: ['https://cameroon-tribune.cm/article.html/49492/fr.html/mtn-elite-two-gazelle-fa', 'https://gazellefa-officiel.com/a-propos/'],
   },
 
   'panthère': {
@@ -809,8 +815,10 @@ const CLUBS_INFOS_EN = {
   },
   "gazelle": {
     "histoire": [
-      "A young club created in 2015 in Garoua, Gazelle FA climbed the divisions very quickly.",
-      "In July 2022, it won Elite Two by beating Aigle Royal de la Menoua 2-1 in the final, with a decisive goal in the last seconds of extra time. It then joined Coton Sport in Elite One, giving Garoua a second top-flight club."
+      "A young club created in 2015 in Garoua, Gazelle FA (Gazelle Football Academy) has made it its mission to develop football in the North Region and to train young talent in a professional setting. Its motto: \"Faster, higher, stronger\".",
+      "The club climbed the divisions very quickly: departmental champion in 2017, North regional champion in 2018, 2019 and 2021, then winner of the National Inter-pools in 2021, which earned it promotion to Elite Two.",
+      "In July 2022, it won Elite Two by beating Aigle Royal de la Menoua 2-1 in the final, with a decisive goal in the last seconds of extra time. It then joined Coton Sport in Elite One, giving Garoua a second top-flight club. It has since qualified twice for the Elite One play-offs.",
+      "Gazelle plays in sky blue and white, and hosts its matches at the Roumdé-Adjia stadium in Garoua."
     ]
   },
   "panthère": {
@@ -1057,6 +1065,8 @@ const COMPETITIONS_EN = {
   'Super Coupe Roger Milla': 'Roger Milla Super Cup',
   'Elite Two': 'Elite Two',
   'Interpoules nationales': 'National Inter-pools',
+  'Championnat régional du Nord': 'North Regional Championship',
+  'Championnat départemental': 'Departmental Championship',
   "Coupe d'Afrique des clubs champions": 'African Cup of Champions Clubs',
   "Coupe d'Afrique des vainqueurs de coupe": "African Cup Winners' Cup",
   'Ligue des champions de la CAF': 'CAF Champions League',

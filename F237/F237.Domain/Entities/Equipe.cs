@@ -24,6 +24,26 @@ namespace F237.Domain.Entities
         public string? CouleurPrincipale { get; set; }
         public string? CouleurSecondaire { get; set; }
 
+        // Autres identifiants API-Football du même club, séparés par des virgules (ex. "15566").
+        // L'API donne parfois un nouvel id à un club selon la saison (ex. Gazelle : 15566 puis 28568) ;
+        // l'import reconnaît le club par son ApiFootballId OU par l'un de ces alias, sans créer de doublon.
+        public string? ApiFootballIdsAlias { get; set; }
+
+        /// <summary>Vrai si cet identifiant API-Football désigne ce club (id principal ou alias).</summary>
+        public bool CorrespondA(int apiId) =>
+            ApiFootballId == apiId
+            || (!string.IsNullOrWhiteSpace(ApiFootballIdsAlias)
+                && ApiFootballIdsAlias.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Contains(apiId.ToString()));
+
+        /// <summary>Tous les identifiants API-Football de ce club (principal + alias).</summary>
+        public IEnumerable<int> TousLesIdsApi() =>
+            new[] { ApiFootballId }.Concat(
+                (ApiFootballIdsAlias ?? string.Empty)
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(s => int.TryParse(s, out var id) ? id : 0)
+                    .Where(id => id > 0));
+
         // Navigation
         public ICollection<Joueur> Joueurs { get; set; } = new List<Joueur>();
         public ICollection<Match> MatchsDomicile { get; set; } = new List<Match>();
