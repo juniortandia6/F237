@@ -67,12 +67,27 @@ function Buste({ principale, secondaire, inscription }) {
   );
 }
 
+// Maillot de gardien : noir, avec le col et les épaules à la couleur du club
+// (la couleur secondaire si la principale du club est déjà sombre, ex. Victoria United).
+const NOIR_GARDIEN = '#1c1c1c';
+function couleursGardien({ principale, secondaire }) {
+  // Accent = couleur principale du club, sauf si elle est trop sombre pour se voir sur le noir
+  const accent = luminosite(principale) >= 60 ? principale : luminosite(secondaire) >= 60 ? secondaire : '#f2c230';
+  return { principale: NOIR_GARDIEN, secondaire: accent };
+}
+function luminosite(hex) {
+  const n = parseInt((hex ?? '#000').replace('#', ''), 16);
+  return 0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255);
+}
+
 // couleurs = { principale, secondaire } pour forcer des couleurs (aperçu de l'admin)
-export default function AvatarJoueur({ photo, logo, club, nom, numero, taille = 96, ombre = true, variante = 'rond', couleurs }) {
+// gardien = true : maillot noir de gardien
+export default function AvatarJoueur({ photo, logo, club, nom, numero, taille = 96, ombre = true, variante = 'rond', couleurs, gardien = false }) {
   const [photoKo, setPhotoKo] = useState(false);
   const [logoKo, setLogoKo] = useState(false);
   useCouleursClubs(); // se redessine quand les couleurs saisies dans l'admin sont chargées
-  const { principale, secondaire } = couleurs ?? couleursClub(club);
+  const duClub = couleurs ?? couleursClub(club);
+  const { principale, secondaire } = gardien ? couleursGardien(duClub) : duClub;
   const inscription = numero ?? initialesJoueur(nom);
   const avecPhoto = photo && !photoKo;
 

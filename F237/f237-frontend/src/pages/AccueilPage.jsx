@@ -8,6 +8,7 @@ import { classementService } from '../services/classementService';
 import { matchService } from '../services/matchService';
 import theme from '../theme';
 import AvatarJoueur from '../components/AvatarJoueur';
+import { regrouperButeurs, classerButeurs } from '../data/buteurs';
 import { texteActu, articlesHero, IMAGES_DEFAUT } from '../data/actualites';
 import { useActualites } from '../hooks/useActualites';
 import { UTILISER_DEMO, construireMatchsDemo } from '../data/matchsDemo';
@@ -524,30 +525,13 @@ function CartePodium({ e, rang }) {
 
 function calculerJoueurs(matchs = []) {
   const logos = new Map();
-  const parJoueur = new Map();
-
   for (const m of matchs) {
     for (const e of [m.equipeDomicile, m.equipeExterieur]) {
       if (e?.nom && e.logoUrl) logos.set(e.nom, e.logoUrl);
     }
-    for (const b of m.buts ?? []) {
-      if (b.estButCSC) continue;                                   // un CSC ne compte pas pour le buteur
-      const nom = (b.nomJoueur ?? '').trim();
-      if (!nom || nom === 'Inconnu') continue;
-      const cle = `${nom}|${b.nomEquipe}`;
-      const j = parJoueur.get(cle) ?? { nom, equipe: b.nomEquipe, buts: 0, penaltys: 0, matchs: new Set() };
-      j.buts += 1;
-      if (b.estPenalty) j.penaltys += 1;
-      j.matchs.add(m.id);
-      parJoueur.set(cle, j);
-    }
   }
-  return [...parJoueur.values()].map(j => ({ ...j, matchs: j.matchs.size, logo: logos.get(j.equipe) }));
+  return regrouperButeurs(matchs).map(j => ({ ...j, logo: logos.get(j.equipe) }));
 }
-
-// Classement des buteurs : plus de buts > moins de penaltys > ordre alphabétique
-const classerButeurs = (joueurs) =>
-  [...joueurs].sort((a, b) => b.buts - a.buts || a.penaltys - b.penaltys || a.nom.localeCompare(b.nom));
 
 // "C. Ndongo" -> { prenom: "C.", nom: "Ndongo" }
 function decouperNom(complet) {

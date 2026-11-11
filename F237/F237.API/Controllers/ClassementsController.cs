@@ -1,5 +1,7 @@
 ﻿using F237.BLL.Services.Interfaces;
+using F237.Domain.Entities;
 using F237.Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace F237.API.Controllers
@@ -37,7 +39,9 @@ namespace F237.API.Controllers
             return Ok(classement);
         }
 
+        // Réservé à l'admin : recalcule et remplace tout le classement d'une saison
         [HttpPost("recalculer/{saisonId}")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Recalculer(int saisonId)
         {
             await _classementService.RecalculerClassementAsync(saisonId);

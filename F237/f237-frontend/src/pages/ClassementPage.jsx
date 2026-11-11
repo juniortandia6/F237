@@ -14,6 +14,7 @@ import { COMPETITIONS, ANNEE_ACTUELLE, SAISONS_DB, libelleSaison } from '../data
 import SelecteurSaison from '../components/SelecteurSaison';
 import theme from '../theme';
 import AvatarJoueur from '../components/AvatarJoueur';
+import { regrouperButeurs, classerButeurs } from '../data/buteurs';
 
 // ── Couleurs de la zone claire (mêmes que MatchsPage) ───────────────────
 const CLAIR = {
@@ -201,24 +202,8 @@ function SelecteurVue({ vue, onChange }) {
   );
 }
 
-// Meilleurs buteurs à partir des buts des matchs (sans CSC ni buteurs inconnus)
-function calculerButeurs(matchs) {
-  const parJoueur = new Map();
-  for (const m of matchs) {
-    for (const b of m.buts ?? []) {
-      if (b.estButCSC || !b.nomJoueur || b.nomJoueur === 'Inconnu') continue;
-      const cle = `${b.nomJoueur}|${b.nomEquipe}`;
-      const j = parJoueur.get(cle) ?? { nom: b.nomJoueur, equipe: b.nomEquipe, buts: 0, penalties: 0, matchs: new Set() };
-      j.buts++;
-      if (b.estPenalty) j.penalties++;
-      j.matchs.add(m.id);
-      parJoueur.set(cle, j);
-    }
-  }
-  return [...parJoueur.values()]
-    .map(j => ({ ...j, matchs: j.matchs.size }))
-    .sort((a, b) => b.buts - a.buts || a.penalties - b.penalties || a.nom.localeCompare(b.nom));
-}
+// Meilleurs buteurs à partir des buts des matchs (sans CSC ni buteurs inconnus) : voir data/buteurs.js
+const calculerButeurs = (matchs) => classerButeurs(regrouperButeurs(matchs));
 
 // ── Carte "Meilleurs buteurs" (dans la zone haute) ──────────────────────
 function CarteButeurs({ buteurs, logos, chargement, competition, surligne }) {
@@ -258,7 +243,7 @@ function CarteButeurs({ buteurs, logos, chargement, competition, surligne }) {
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: '18px', fontWeight: 800, color: CLAIR.texte, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{leader.nom}</div>
               <div style={{ fontSize: '12px', color: CLAIR.doux }}>
-                {leader.equipe} · {t('matchs.nbMatchs', { count: leader.matchs })}{leader.penalties ? ` · ${leader.penalties} ${t('matchDetail.pen')}` : ''}
+                {leader.equipe} · {t('matchs.nbMatchs', { count: leader.matchs })}{leader.penaltys ? ` · ${leader.penaltys} ${t('matchDetail.pen')}` : ''}
               </div>
             </div>
             <div style={{ textAlign: 'center' }}>

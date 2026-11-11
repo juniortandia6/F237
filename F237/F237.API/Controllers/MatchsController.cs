@@ -48,6 +48,7 @@ namespace F237.API.Controllers
             {
                 Id = b.Id,
                 Minute = b.Minute,
+                JoueurId = b.JoueurId,
                 NomJoueur = b.NomJoueur,
                 NomEquipe = b.NomEquipe,
                 EstButCSC = b.EstButCSC,

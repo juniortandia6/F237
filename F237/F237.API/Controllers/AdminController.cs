@@ -3,6 +3,7 @@
 // Les imports, le quota, les logos et les heures restent dans SyncController ;
 // ici : ce qui sert à l'affichage de l'espace admin (tableau de bord...).
 
+using F237.BLL.Services;
 using F237.DAL.Data;
 using F237.Domain.Entities;
 using F237.Domain.Enums;
@@ -103,6 +104,7 @@ namespace F237.API.Controllers
 
             var but = new ButMatch { MatchId = matchId };
             Appliquer(but, saisie);
+            await RelierJoueurAsync(but, match);
             await _context.ButsMatch.AddAsync(but);
             await _context.SaveChangesAsync();
             return Ok(VersDto(but));
@@ -122,6 +124,7 @@ namespace F237.API.Controllers
             if (erreur != null) return BadRequest(new { message = erreur });
 
             Appliquer(but, saisie);
+            await RelierJoueurAsync(but, match);
             await _context.SaveChangesAsync();
             return Ok(VersDto(but));
         }
@@ -435,6 +438,8 @@ namespace F237.API.Controllers
                 return NotFound(new { message = "Équipe introuvable." });
             var poste = string.IsNullOrWhiteSpace(saisie.Poste) ? null : saisie.Poste.Trim();
             if (poste != null && !POSTES.Contains(poste)) return BadRequest(new { message = "Poste inconnu." });
+            var nationalite = string.IsNullOrWhiteSpace(saisie.Nationalite) ? null : saisie.Nationalite.Trim();
+            if ((nationalite?.Length ?? 0) > 60) return BadRequest(new { message = "Nationalité trop longue." });
 
             var existants = await _context.Joueurs.Where(j => j.EquipeId == equipeId)
                 .Select(j => (j.Prenom + " " + j.Nom).ToLower()).ToListAsync();
@@ -461,6 +466,7 @@ namespace F237.API.Controllers
                     Nom = nom,
                     Numero = numero is >= 1 and <= 99 ? numero : null,
                     Poste = poste,
+                    Nationalite = nationalite,
                     EstActif = true,
                 });
                 ajoutes++;
@@ -682,11 +688,36 @@ namespace F237.API.Controllers
             b.Id,
             b.MatchId,
             b.Minute,
+            b.JoueurId,
             b.NomJoueur,
             b.NomEquipe,
             b.EstPenalty,
             b.EstButCSC,
         };
+
+        // Relie le but au joueur de l'effectif de l'équipe créditée quand UN SEUL joueur correspond
+        // au nom saisi ("Samuel Tagbor", "S. Tagbor" ou "Tagbor", sans tenir compte des accents ni de la casse).
+        // Sinon (CSC, inconnu, aucun ou plusieurs joueurs) : JoueurId = null, le but reste compté par nom.
+        // Mêmes règles de nom que RattachementButeurs (import et direct).
+        private async Task RelierJoueurAsync(ButMatch but, Match match)
+        {
+            but.JoueurId = null;
+            if (but.EstButCSC) return;                 // le buteur d'un CSC joue dans l'autre équipe
+            var cle = RattachementButeurs.NormaliserNom(but.NomJoueur);
+            if (cle.Length == 0 || cle == "inconnu") return;
+
+            var equipeId = match.EquipeDomicile?.Nom == but.NomEquipe ? match.EquipeDomicileId : match.EquipeExterieurId;
+            var joueurs = await _context.Joueurs
+                .Where(j => j.EquipeId == equipeId)
+                .Select(j => new { j.Id, j.Prenom, j.Nom })
+                .ToListAsync();
+
+            var trouves = joueurs
+                .Where(j => RattachementButeurs.FormesDuNom(j.Prenom, j.Nom).Any(f => f == cle))
+                .Select(j => j.Id)
+                .ToList();
+            if (trouves.Count == 1) but.JoueurId = trouves[0];
+        }
     }
 
     public class SaisieButDto
@@ -729,6 +760,7 @@ namespace F237.API.Controllers
     {
         public string? Lignes { get; set; }
         public string? Poste { get; set; }
+        public string? Nationalite { get; set; }   // appliquée à toute la liste
     }
 
     public class SaisieCouleursDto

@@ -2,6 +2,7 @@
 
 using F237.API.DTOs;
 using F237.API.Hubs;
+using F237.BLL.Services;
 using F237.DAL.Data;
 using F237.Domain.Entities;
 using F237.Domain.Enums;
@@ -120,9 +121,13 @@ namespace F237.API.Services
             // 2. Mise à jour en base
 
             var aDiffuser = new List<(int Id, object Donnees)>();
+            var matchsMaj = new List<int>();
             foreach (var fixture in enCours.Concat(finis))
             {
-                var match = await context.Matchs.FirstOrDefaultAsync(m => m.ApiFootballId == fixture.ApiFootballId, ct);
+                var match = await context.Matchs
+                    .Include(m => m.EquipeDomicile)
+                    .Include(m => m.EquipeExterieur)
+                    .FirstOrDefaultAsync(m => m.ApiFootballId == fixture.ApiFootballId, ct);
                 if (match == null)
                 {
                     _logger.LogWarning("Match API {Id} en direct mais absent de la base (saison pas importée ?)", fixture.ApiFootballId);
@@ -151,7 +156,7 @@ namespace F237.API.Services
                     {
                         MatchId = match.Id,
                         NomJoueur = b.NomJoueur,
-                        NomEquipe = b.NomEquipe,
+                        NomEquipe = RattachementButeurs.NomEquipeCreditee(match, b.ApiEquipeId, b.NomEquipe),
                         ApiJoueurId = b.ApiJoueurId,
                         Minute = b.Minute,
                         EstButCSC = b.EstButCSC,
@@ -162,6 +167,22 @@ namespace F237.API.Services
                 // Infos de notre base pour les navigateurs
                 fixture.Id = match.Id;
                 fixture.SaisonId = match.SaisonId;
+
+                // Logos : ceux de NOTRE base (logo remplacé à la main compris), pas ceux de l'API
+                // (l'API renvoie parfois une image "image not available"). Les noms restent ceux de l'API,
+                // car les buts diffusés en direct utilisent ces noms pour savoir de quel côté les afficher.
+                if (fixture.EquipeDomicile != null && match.EquipeDomicile != null)
+                {
+                    fixture.EquipeDomicile.Id = match.EquipeDomicile.Id;
+                    fixture.EquipeDomicile.LogoUrl = match.EquipeDomicile.LogoUrl ?? fixture.EquipeDomicile.LogoUrl;
+                    fixture.EquipeDomicile.Division = (int)match.EquipeDomicile.Division;
+                }
+                if (fixture.EquipeExterieur != null && match.EquipeExterieur != null)
+                {
+                    fixture.EquipeExterieur.Id = match.EquipeExterieur.Id;
+                    fixture.EquipeExterieur.LogoUrl = match.EquipeExterieur.LogoUrl ?? fixture.EquipeExterieur.LogoUrl;
+                    fixture.EquipeExterieur.Division = (int)match.EquipeExterieur.Division;
+                }
                 if (fixture.Statut == 1)
                 {
                     aDiffuser.Add((match.Id, new
@@ -184,8 +205,12 @@ namespace F237.API.Services
 
                 _logger.LogInformation("⚽ Match {Id}: {Ancien} → {Nouveau} ({Minute}', statut {Statut})",
                     match.Id, ancienScore, $"{match.ScoreDomicile}-{match.ScoreExterieur}", fixture.MinuteLive, match.Statut);
+                matchsMaj.Add(match.Id);
             }
             await context.SaveChangesAsync(ct);
+
+            // Buts recréés à chaque tour : on les relie aussitôt aux joueurs de l'effectif
+            await RattachementButeurs.RelierButsAsync(context, matchsMaj, ct);
 
             // 4. Diffusion
             DernierEtat = aDiffuser.Select(x => x.Donnees).ToList();
@@ -255,6 +280,7 @@ namespace F237.API.Services
                                 NomJoueur = joueur.TryGetProperty("name", out var nom) && nom.ValueKind == JsonValueKind.String
                                     ? nom.GetString() ?? "Inconnu" : "Inconnu",
                                 NomEquipe = evt.GetProperty("team").GetProperty("name").GetString() ?? "",
+                                ApiEquipeId = evt.GetProperty("team").TryGetProperty("id", out var eid) && eid.ValueKind == JsonValueKind.Number ? eid.GetInt32() : 0,
                                 ApiJoueurId = joueur.TryGetProperty("id", out var jid) && jid.ValueKind == JsonValueKind.Number ? jid.GetInt32() : 0,
                                 Minute = time.GetProperty("elapsed").ValueKind == JsonValueKind.Number ? time.GetProperty("elapsed").GetInt32() : 0,
                                 MinuteAdditionnelle = time.TryGetProperty("extra", out var ex) && ex.ValueKind == JsonValueKind.Number ? ex.GetInt32() : null,
@@ -304,6 +330,8 @@ namespace F237.API.Services
         public string NomJoueur { get; set; } = "Inconnu";
         public string NomEquipe { get; set; } = "";
         public int ApiJoueurId { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore]
+        public int ApiEquipeId { get; set; }          // sert à créditer le but sous NOTRE nom d'équipe (non diffusé)
         public int Minute { get; set; }
         public int? MinuteAdditionnelle { get; set; } // ex. 45+2
         public bool EstButCSC { get; set; }

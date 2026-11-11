@@ -185,7 +185,7 @@ function CarteJoueur({ j, club }) {
       display: 'flex', alignItems: 'center', gap: '12px', padding: '12px',
       backgroundColor: CLAIR.carte, border: `1px solid ${CLAIR.bord}`, borderRadius: '12px',
     }}>
-      <AvatarJoueur club={club} nom={j.nom} numero={j.numero ?? undefined} taille={48} />
+      <AvatarJoueur club={club} nom={j.nom} numero={j.numero ?? undefined} taille={48} gardien={j.poste === 'Goalkeeper'} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: '15px', fontWeight: 700, color: CLAIR.texte, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{j.nom}</div>
         <div style={{ fontSize: '12px', color: CLAIR.doux }}>

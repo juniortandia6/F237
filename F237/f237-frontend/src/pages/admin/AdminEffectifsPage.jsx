@@ -87,7 +87,7 @@ function LigneJoueur({ j, club, enEdition, aSupprimer, envoi, onEditer, onAnnule
   const a = age(j.dateNaissance);
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '40px 34px minmax(0, 1fr) auto', alignItems: 'center', gap: '12px', padding: '9px 18px', borderTop: `1px solid ${CLAIR.bord}`, backgroundColor: aSupprimer ? CLAIR.rougeClair : 'transparent', opacity: j.estActif ? 1 : 0.7 }}>
-      <AvatarJoueur club={club} nom={nomJoueur(j)} numero={j.numero ?? undefined} taille={36} />
+      <AvatarJoueur club={club} nom={nomJoueur(j)} numero={j.numero ?? undefined} taille={36} gardien={j.poste === 'Gardien'} />
       <span style={{ fontFamily: CHIFFRES, fontSize: '20px', fontWeight: 800, color: j.numero ? CLAIR.vert : '#c9cfcc', textAlign: 'center' }}>{j.numero ?? '–'}</span>
       <div style={{ minWidth: 0 }}>
         <div style={{ fontSize: '14px', fontWeight: 700, color: CLAIR.texte, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -127,7 +127,7 @@ export default function AdminEffectifsPage() {
   const [message, setMessage] = useState(null);
   const [envoi, setEnvoi] = useState(false);
   const [mode, setMode] = useState('un');          // 'un' | 'lot'
-  const [lot, setLot] = useState({ lignes: '', poste: '' });
+  const [lot, setLot] = useState({ lignes: '', poste: '', nationalite: 'Cameroun' });
   const [edition, setEdition] = useState(null);    // id du joueur modifié
   const [aSupprimer, setASupprimer] = useState(null);
   const [voirAnciens, setVoirAnciens] = useState(false);
@@ -275,9 +275,11 @@ export default function AdminEffectifsPage() {
                     <option value="">Poste : non précisé</option>
                     {POSTES.map(p => <option key={p} value={p}>Poste : {p}</option>)}
                   </select>
+                  <input value={lot.nationalite} onChange={e => setLot(l => ({ ...l, nationalite: e.target.value }))}
+                    placeholder="Nationalité" aria-label="Nationalité de toute la liste" style={{ ...CHAMP, width: '150px' }} />
                   <span style={{ flex: 1, fontSize: '12px', color: CLAIR.doux }}>Le premier mot est le prénom, le reste le nom. Les joueurs déjà présents sont ignorés.</span>
                   <button disabled={envoi || !lot.lignes.trim()}
-                    onClick={() => executer(() => adminService.joueurs.ajouterLot(equipeId, lot.lignes, lot.poste || null),
+                    onClick={() => executer(() => adminService.joueurs.ajouterLot(equipeId, lot.lignes, lot.poste || null, lot.nationalite.trim() || null),
                       r => `${r.ajoutes} joueur(s) ajouté(s)${r.ignores?.length ? ` · ${r.ignores.length} ligne(s) ignorée(s) : ${r.ignores.join(', ')}` : ''}.`)
                       .then(ok => { if (ok) setLot(l => ({ ...l, lignes: '' })); })}
                     style={{ ...BOUTON(CLAIR.vert, '#fff'), opacity: envoi || !lot.lignes.trim() ? 0.5 : 1 }}>

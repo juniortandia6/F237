@@ -146,6 +146,13 @@ namespace F237.BLL.Services.Implementations
         // Ajoute les buts d'un match à partir de son tableau "events"
         private async Task<int> AjouterButsAsync(int matchId, JsonElement events)
         {
+            // Les équipes du match : pour créditer le but sous NOTRE nom d'équipe (voir RattachementButeurs)
+            var match = await _context.Matchs
+                .AsNoTracking()
+                .Include(m => m.EquipeDomicile)
+                .Include(m => m.EquipeExterieur)
+                .FirstOrDefaultAsync(m => m.Id == matchId);
+
             var ajoutes = 0;
             foreach (var evt in events.EnumerateArray())
             {
@@ -160,7 +167,11 @@ namespace F237.BLL.Services.Implementations
                 {
                     MatchId = matchId,
                     NomJoueur = TexteOuNull(joueur, "name") ?? BUTEUR_INCONNU,
-                    NomEquipe = evt.GetProperty("team").GetProperty("name").GetString() ?? "",
+                    NomEquipe = match == null
+                        ? evt.GetProperty("team").GetProperty("name").GetString() ?? ""
+                        : RattachementButeurs.NomEquipeCreditee(match,
+                            EntierOuNull(evt.GetProperty("team").GetProperty("id")),
+                            evt.GetProperty("team").GetProperty("name").GetString()),
                     ApiJoueurId = EntierOuNull(joueur.GetProperty("id")) ?? 0,
                     Minute = EntierOuNull(evt.GetProperty("time").GetProperty("elapsed")) ?? 0,
                     EstButCSC = detail == "Own Goal",
@@ -543,6 +554,7 @@ namespace F237.BLL.Services.Implementations
                 var data = JsonDocument.Parse(json);
                 await AjouterButsAsync(match.Id, data.RootElement.GetProperty("response"));
                 await _context.SaveChangesAsync();
+                await RattachementButeurs.RelierButsAsync(_context, new[] { match.Id });
             }
         }
 
@@ -626,6 +638,25 @@ namespace F237.BLL.Services.Implementations
                 var fixtures = await GetApiAsync($"/fixtures?league={leagueId}&season={saison}");
                 resultat.Matchs = await EnregistrerMatchsAsync(fixtures, entiteSaison.Id);
 
+                // 4 bis. Saison la plus récente de cette ligue : ses clubs SONT les clubs actuels de la division.
+                //        On aligne leur division et on les réactive (promus, relégués, clubs créés inactifs).
+                var estPlusRecente = !await _context.Saisons.AnyAsync(s => s.Division == division && s.Annee > saison);
+                if (estPlusRecente)
+                {
+                    var idsClubs = await _context.Matchs.Where(m => m.SaisonId == entiteSaison.Id).Select(m => m.EquipeDomicileId)
+                        .Union(_context.Matchs.Where(m => m.SaisonId == entiteSaison.Id).Select(m => m.EquipeExterieurId))
+                        .ToListAsync();
+                    var aAligner = await _context.Equipes
+                        .Where(e => idsClubs.Contains(e.Id) && (e.Division != division || !e.EstActive))
+                        .ToListAsync();
+                    foreach (var club in aAligner)
+                    {
+                        club.Division = division;
+                        club.EstActive = true;
+                    }
+                    if (aAligner.Count > 0) await _context.SaveChangesAsync();
+                }
+
                 // 5. Classement (1 requête)
                 var standings = await GetApiAsync($"/standings?league={leagueId}&season={saison}");
                 resultat.EquipesClassement = await EnregistrerClassementAsync(standings, entiteSaison.Id);
@@ -634,6 +665,14 @@ namespace F237.BLL.Services.Implementations
                 //    seulement si l'API fournit les événements de cette ligue
                 if (resultat.ButsFournis)
                     resultat.ButsImportes = await ImporterButsParLotsAsync(entiteSaison.Id);
+
+                // 7. Rattachement des buts encore sans joueur de toute la saison
+                //    (buts arrivés par le direct, joueurs ajoutés depuis à l'effectif...). Aucune requête API.
+                var idsMatchsSaison = await _context.Matchs
+                    .Where(m => m.SaisonId == entiteSaison.Id)
+                    .Select(m => m.Id)
+                    .ToListAsync();
+                await RattachementButeurs.RelierButsAsync(_context, idsMatchsSaison);
             }
             catch (ApiFootballException ex)
             {
@@ -730,6 +769,7 @@ namespace F237.BLL.Services.Implementations
                     }
                 }
                 await _context.SaveChangesAsync(); // on sauvegarde à chaque lot : reprise possible
+                await RattachementButeurs.RelierButsAsync(_context, lot.Select(m => m.Id));
             }
             return total;
         }

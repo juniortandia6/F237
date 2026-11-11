@@ -31,6 +31,7 @@
     {
         public int Id { get; set; }                      // sert à l'admin (modifier / supprimer un but)
         public int Minute { get; set; }
+        public int? JoueurId { get; set; }               // joueur de l'effectif (null = buteur pas encore relié)
         public string NomJoueur { get; set; } = string.Empty;
         public string NomEquipe { get; set; } = string.Empty;
         public bool EstButCSC { get; set; }
