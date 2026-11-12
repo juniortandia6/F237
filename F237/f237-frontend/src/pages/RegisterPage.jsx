@@ -135,7 +135,7 @@ function RegisterPage() {
       <EclatsBande />
 
       <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_480px]"
-        style={{ position: "relative", width: "100%", maxWidth: "1150px", margin: "0 auto", padding: "0 60px", boxSizing: "content-box", alignItems: "center" }}>
+        style={{ position: "relative", width: "100%", maxWidth: "1150px", margin: "0 auto", padding: "0 var(--marge-page)", boxSizing: "content-box", alignItems: "center" }}>
 
         {/* ── Gauche : message + bonus ─────────────────────────────────── */}
         <div>

@@ -27,7 +27,7 @@ const CLAIR = {
   vert: '#14532f',
 };
 const CHIFFRES = '"Barlow Condensed", Arial, sans-serif';
-const CONTENEUR = { position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '0 60px', boxSizing: 'content-box' };
+const CONTENEUR = { position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '0 var(--marge-page)', boxSizing: 'content-box' };
 
 // Zones de fin de saison (labelHaut / labelBas = clés de traduction classement.zones.*) (nombre d'équipes en haut / en bas) — à ajuster selon le règlement
 const ZONES = {

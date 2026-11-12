@@ -1,15 +1,22 @@
 // f237-frontend/src/components/layout/Navbar.jsx
+// Grand écran (≥ 1280px) : logo | 6 onglets centrés | admin, points, profil, langue.
+// Téléphone et tablette : logo | langue + bouton menu ; le menu s'ouvre en panneau
+// plein écran sous la barre (onglets en grandes lignes faciles à toucher + compte).
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import {
     Home, LayoutList, Trophy, Dices, Newspaper,
-    UserCircle, Globe, ChevronDown, Shield, Check, LayoutDashboard
+    UserCircle, Globe, ChevronDown, Shield, Check, LayoutDashboard,
+    Menu, X, LogOut, ChevronRight
 } from 'lucide-react';
 import LogoF237 from './LogoF237';
 import { LANGUES, locale } from '../../i18n';
 import theme from '../../theme';
+
+const HAUTEUR = 68;          // barre sur grand écran
+const HAUTEUR_MOBILE = 60;   // barre sur téléphone / tablette
 
 // ── Menu de choix de la langue (FR / EN) ────────────────────────────────
 const SelecteurLangue = () => {
@@ -39,7 +46,7 @@ const SelecteurLangue = () => {
                 aria-expanded={ouvert}
                 aria-label={t('nav.langue')}
                 className="flex items-center gap-1 font-semibold transition-colors"
-                style={{ color: ouvert ? theme.text : theme.textMuted, fontSize: '13px' }}
+                style={{ color: ouvert ? theme.text : theme.textMuted, fontSize: '13px', padding: '8px 2px' }}
                 onMouseEnter={e => { e.currentTarget.style.color = theme.text; }}
                 onMouseLeave={e => { if (!ouvert) e.currentTarget.style.color = theme.textMuted; }}
             >
@@ -87,11 +94,113 @@ const SelecteurLangue = () => {
     );
 };
 
+// Points du joueur (pastille jaune)
+const PastillePoints = ({ points }) => {
+    const { t } = useTranslation();
+    return (
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+            style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}`, whiteSpace: 'nowrap' }}>
+            <Trophy size={13} style={{ color: theme.yellow }} />
+            <span className="font-bold text-sm" style={{ color: theme.yellow }}>
+                {t('nav.pts', { n: (points ?? 0).toLocaleString(locale()) })}
+            </span>
+        </div>
+    );
+};
+
+// ── Panneau du menu mobile ──────────────────────────────────────────────
+const MenuMobile = ({ navItems, isActive, user, estAdmin, onLogout }) => {
+    const { t } = useTranslation();
+    const ligne = (actif) => ({
+        display: 'flex', alignItems: 'center', gap: '14px', minHeight: '52px', padding: '0 14px',
+        borderRadius: '12px', textDecoration: 'none', fontSize: '16px', fontWeight: 700,
+        color: actif ? theme.text : theme.textMuted,
+        backgroundColor: actif ? theme.surface : 'transparent',
+    });
+
+    return (
+        <div
+            className="xl:hidden"
+            style={{
+                position: 'fixed', top: HAUTEUR_MOBILE, left: 0, right: 0, bottom: 0, zIndex: 49,
+                backgroundColor: theme.bgDeep, overflowY: 'auto', overscrollBehavior: 'contain',
+                padding: '14px 16px 32px',
+            }}
+        >
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {navItems.map(({ to, label, Icon }) => {
+                    const actif = isActive(to);
+                    return (
+                        <Link key={to} to={to} style={ligne(actif)} aria-current={actif ? 'page' : undefined}>
+                            <Icon size={20} style={{ color: actif ? theme.greenBright : 'inherit' }} />
+                            {label}
+                            <ChevronRight size={18} style={{ marginLeft: 'auto', opacity: 0.5 }} />
+                        </Link>
+                    );
+                })}
+            </nav>
+
+            <div style={{ height: '1px', backgroundColor: theme.border, margin: '16px 0' }} />
+
+            {user ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '0 4px' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '16px', fontWeight: 800, color: theme.text }}>
+                            <UserCircle size={22} style={{ color: theme.greenBright }} /> {user.prenom}
+                        </span>
+                        <PastillePoints points={user.soldePoints} />
+                    </div>
+                    <Link to="/profil" style={ligne(isActive('/profil'))}>
+                        <UserCircle size={20} /> {t('nav.monProfil')}
+                        <ChevronRight size={18} style={{ marginLeft: 'auto', opacity: 0.5 }} />
+                    </Link>
+                    {estAdmin && (
+                        <Link to="/admin" style={{ ...ligne(isActive('/admin')), color: theme.yellow }}>
+                            <LayoutDashboard size={20} /> Admin
+                            <ChevronRight size={18} style={{ marginLeft: 'auto', opacity: 0.5 }} />
+                        </Link>
+                    )}
+                    <button onClick={onLogout} style={{ ...ligne(false), border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left' }}>
+                        <LogOut size={20} /> {t('nav.quitter')}
+                    </button>
+                </div>
+            ) : (
+                <Link to="/login"
+                    style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', minHeight: '52px',
+                        borderRadius: '999px', backgroundColor: theme.green, color: '#fff',
+                        fontSize: '16px', fontWeight: 800, textDecoration: 'none',
+                    }}>
+                    <UserCircle size={20} /> {t('nav.connexion')}
+                </Link>
+            )}
+        </div>
+    );
+};
+
 const Navbar = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { user, estAdmin, logout } = useAuth();
+
+    // Menu mobile : ouvert "sur" une page ; changer de page le referme tout seul
+    const [menuOuvertSur, setMenuOuvertSur] = useState(null);
+    const menuOuvert = menuOuvertSur === location.pathname;
+    const basculerMenu = () => setMenuOuvertSur(menuOuvert ? null : location.pathname);
+
+    // Menu ouvert : la page derrière ne défile plus ; Échap le referme
+    useEffect(() => {
+        if (!menuOuvert) return;
+        const avant = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        const touche = (e) => { if (e.key === 'Escape') setMenuOuvertSur(null); };
+        document.addEventListener('keydown', touche);
+        return () => {
+            document.body.style.overflow = avant;
+            document.removeEventListener('keydown', touche);
+        };
+    }, [menuOuvert]);
 
     // "/" seulement sur l'accueil ; les autres onglets restent actifs sur leurs
     // sous-pages (ex. /actualites/mon-article, /equipes/12)
@@ -108,125 +217,151 @@ const Navbar = () => {
     ];
 
     const handleLogout = () => {
+        setMenuOuvertSur(null);
         logout();
         navigate('/');
     };
 
     return (
-        <nav
-            className="sticky top-0 z-50 flex items-center justify-between px-8"
-            style={{
-                height: '68px',
-                backgroundColor: theme.nav,
-                backdropFilter: 'blur(10px)',
-                WebkitBackdropFilter: 'blur(10px)',
-                borderBottom: `1px solid ${theme.border}`,
-            }}
-        >
-            {/* Logo */}
-            <Link to="/" style={{ paddingLeft: '80px', display: 'flex', alignItems: 'center', minWidth: '120px' }}>
-                <LogoF237 size={40} />
-            </Link>
-
-            {/* Navigation centrée */}
-            <div className="flex items-center">
-                {navItems.map(({ to, label, Icon }) => {
-                    const active = isActive(to);
-                    return (
-                        <Link
-                            key={to}
-                            to={to}
-                            className="flex flex-col items-center justify-center px-5 transition-colors"
+        <>
+            <nav
+                className="sticky top-0 z-50"
+                style={{
+                    backgroundColor: theme.nav,
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
+                    borderBottom: `1px solid ${theme.border}`,
+                }}
+            >
+                {/* ── Téléphone / tablette ─────────────────────────────── */}
+                <div className="flex xl:hidden items-center justify-between" style={{ height: HAUTEUR_MOBILE, padding: '0 var(--marge-page)' }}>
+                    <Link to="/" style={{ display: 'flex', alignItems: 'center' }} aria-label={`${t('nav.accueil')} F237`}>
+                        <LogoF237 size={34} />
+                    </Link>
+                    <div className="flex items-center gap-3">
+                        {user && <span className="hidden sm:block"><PastillePoints points={user.soldePoints} /></span>}
+                        <SelecteurLangue />
+                        <button
+                            onClick={basculerMenu}
+                            aria-expanded={menuOuvert}
+                            aria-label={menuOuvert ? t('nav.fermerMenu') : t('nav.ouvrirMenu')}
                             style={{
-                                height: '68px',
-                                color: active ? theme.text : theme.textMuted,
-                                borderBottom: active ? `3px solid ${theme.greenBright}` : '3px solid transparent',
-                                minWidth: '80px',
+                                width: '42px', height: '42px', borderRadius: '12px', border: `1px solid ${theme.border}`,
+                                backgroundColor: menuOuvert ? theme.green : theme.surface, color: '#fff',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
                             }}
-                            onMouseEnter={e => { if (!active) e.currentTarget.style.color = theme.text; }}
-                            onMouseLeave={e => { if (!active) e.currentTarget.style.color = theme.textMuted; }}
                         >
-                            <Icon size={20} style={{ marginBottom: '3px', color: active ? theme.greenBright : 'inherit' }} />
-                            <span className="font-semibold" style={{ fontSize: '12px', letterSpacing: '0.3px' }}>
-                                {label}
-                            </span>
-                        </Link>
-                    );
-                })}
-            </div>
+                            {menuOuvert ? <X size={22} /> : <Menu size={22} />}
+                        </button>
+                    </div>
+                </div>
 
-            {/* Droite */}
-            <div className="flex items-center gap-3" style={{ minWidth: '200px', justifyContent: 'flex-end', paddingRight: '50px' }}>
-                {user ? (
-                    <>
-                        {/* Lien vers l'espace admin, visible seulement par les admins */}
-                        {estAdmin && (
+                {/* ── Grand écran ─────────────────────────────────────── */}
+                <div className="hidden xl:flex items-center justify-between px-8" style={{ height: HAUTEUR }}>
+                    {/* Logo */}
+                    <Link to="/" style={{ paddingLeft: '80px', display: 'flex', alignItems: 'center', minWidth: '120px' }}>
+                        <LogoF237 size={40} />
+                    </Link>
+
+                    {/* Navigation centrée */}
+                    <div className="flex items-center">
+                        {navItems.map(({ to, label, Icon }) => {
+                            const active = isActive(to);
+                            return (
+                                <Link
+                                    key={to}
+                                    to={to}
+                                    className="flex flex-col items-center justify-center px-5 transition-colors"
+                                    style={{
+                                        height: HAUTEUR,
+                                        color: active ? theme.text : theme.textMuted,
+                                        borderBottom: active ? `3px solid ${theme.greenBright}` : '3px solid transparent',
+                                        minWidth: '80px',
+                                    }}
+                                    onMouseEnter={e => { if (!active) e.currentTarget.style.color = theme.text; }}
+                                    onMouseLeave={e => { if (!active) e.currentTarget.style.color = theme.textMuted; }}
+                                >
+                                    <Icon size={20} style={{ marginBottom: '3px', color: active ? theme.greenBright : 'inherit' }} />
+                                    <span className="font-semibold" style={{ fontSize: '12px', letterSpacing: '0.3px' }}>
+                                        {label}
+                                    </span>
+                                </Link>
+                            );
+                        })}
+                    </div>
+
+                    {/* Droite */}
+                    <div className="flex items-center gap-3" style={{ minWidth: '200px', justifyContent: 'flex-end', paddingRight: '50px' }}>
+                        {user ? (
+                            <>
+                                {/* Lien vers l'espace admin, visible seulement par les admins */}
+                                {estAdmin && (
+                                    <Link
+                                        to="/admin"
+                                        title="Espace admin"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-semibold transition-colors"
+                                        style={{
+                                            fontSize: '13px',
+                                            color: isActive('/admin') ? '#1a1a1a' : theme.yellow,
+                                            backgroundColor: isActive('/admin') ? theme.yellow : 'transparent',
+                                            border: `1px solid ${theme.yellow}66`,
+                                        }}
+                                    >
+                                        <LayoutDashboard size={14} />
+                                        Admin
+                                    </Link>
+                                )}
+
+                                <PastillePoints points={user.soldePoints} />
+
+                                <Link
+                                    to="/profil"
+                                    className="flex items-center gap-2 px-4 py-2 rounded-full font-semibold transition-all hover:brightness-110"
+                                    style={{ backgroundColor: theme.green, color: '#fff', fontSize: '13px' }}
+                                >
+                                    <UserCircle size={16} />
+                                    {user.prenom}
+                                </Link>
+
+                                <button
+                                    onClick={handleLogout}
+                                    className="font-semibold transition-colors"
+                                    style={{ color: theme.textMuted, fontSize: '13px' }}
+                                    onMouseEnter={e => { e.currentTarget.style.color = theme.text; }}
+                                    onMouseLeave={e => { e.currentTarget.style.color = theme.textMuted; }}
+                                >
+                                    {t('nav.quitter')}
+                                </button>
+                            </>
+                        ) : (
+                            /* Bouton unique "Connexion" (style FIBA) — l'inscription
+                               se fait depuis la page de connexion */
                             <Link
-                                to="/admin"
-                                title="Espace admin"
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-semibold transition-colors"
+                                to="/login"
+                                className="flex items-center gap-2 rounded-full font-semibold transition-colors"
                                 style={{
-                                    fontSize: '13px',
-                                    color: isActive('/admin') ? '#1a1a1a' : theme.yellow,
-                                    backgroundColor: isActive('/admin') ? theme.yellow : 'transparent',
-                                    border: `1px solid ${theme.yellow}66`,
+                                    backgroundColor: theme.surfaceHover,
+                                    color: theme.text,
+                                    fontSize: '15px',
+                                    padding: '9px 20px 9px 12px',
                                 }}
+                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = theme.green; }}
+                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = theme.surfaceHover; }}
                             >
-                                <LayoutDashboard size={14} />
-                                Admin
+                                <UserCircle size={22} fill="#fff" color={theme.surfaceHover} strokeWidth={1.8} />
+                                {t('nav.connexion')}
                             </Link>
                         )}
 
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-                            style={{ backgroundColor: theme.surface, border: `1px solid ${theme.border}` }}>
-                            <Trophy size={13} style={{ color: theme.yellow }} />
-                            <span className="font-bold text-sm" style={{ color: theme.yellow }}>
-                                {t('nav.pts', { n: (user.soldePoints ?? 0).toLocaleString(locale()) })}
-                            </span>
-                        </div>
+                        <SelecteurLangue />
+                    </div>
+                </div>
+            </nav>
 
-                        <Link
-                            to="/profil"
-                            className="flex items-center gap-2 px-4 py-2 rounded-full font-semibold transition-all hover:brightness-110"
-                            style={{ backgroundColor: theme.green, color: '#fff', fontSize: '13px' }}
-                        >
-                            <UserCircle size={16} />
-                            {user.prenom}
-                        </Link>
-
-                        <button
-                            onClick={handleLogout}
-                            className="font-semibold transition-colors"
-                            style={{ color: theme.textMuted, fontSize: '13px' }}
-                            onMouseEnter={e => { e.currentTarget.style.color = theme.text; }}
-                            onMouseLeave={e => { e.currentTarget.style.color = theme.textMuted; }}
-                        >
-                            {t('nav.quitter')}
-                        </button>
-                    </>
-                ) : (
-                    /* Bouton unique "Connexion" (style FIBA) — l'inscription
-                       se fait depuis la page de connexion */
-                    <Link
-                        to="/login"
-                        className="flex items-center gap-2 rounded-full font-semibold transition-colors"
-                        style={{
-                            backgroundColor: theme.surfaceHover,
-                            color: theme.text,
-                            fontSize: '15px',
-                            padding: '9px 20px 9px 12px',
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = theme.green; }}
-                        onMouseLeave={e => { e.currentTarget.style.backgroundColor = theme.surfaceHover; }}
-                    >
-                        <UserCircle size={22} fill="#fff" color={theme.surfaceHover} strokeWidth={1.8} />
-                        {t('nav.connexion')}
-                    </Link>
-                )}
-
-                <SelecteurLangue />
-            </div>
-        </nav>
+            {menuOuvert && (
+                <MenuMobile navItems={navItems} isActive={isActive} user={user} estAdmin={estAdmin} onLogout={handleLogout} />
+            )}
+        </>
     );
 };
 

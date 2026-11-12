@@ -127,8 +127,9 @@ function Footer() {
         }} />
       </div>
 
-      <div style={{ position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '64px 60px 0', boxSizing: 'content-box' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.1fr) minmax(0, 1.6fr) minmax(0, 1fr)', gap: '56px' }}>
+      <div className="pt-10 xl:pt-16" style={{ position: 'relative', maxWidth: '1150px', margin: '0 auto', paddingLeft: 'var(--marge-page)', paddingRight: 'var(--marge-page)', boxSizing: 'content-box' }}>
+        {/* 1 colonne sur téléphone, 2 sur tablette (marque | liens, compétitions dessous), 3 sur grand écran */}
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1.6fr)_minmax(0,1fr)] xl:gap-14">
 
           {/* ── Colonne marque ── */}
           <div>
@@ -169,7 +170,7 @@ function Footer() {
           </div>
 
           {/* ── Colonne compétitions + infos ── */}
-          <div>
+          <div className="md:col-span-2 xl:col-span-1">
             <p style={TITRE_COLONNE}>{t('footer.competitions')}</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {COMPETITIONS.map(c => (
@@ -203,8 +204,8 @@ function Footer() {
         </div>
 
         {/* ── Barre légale ── */}
-        <div style={{
-          marginTop: '56px', padding: '22px 0 28px', borderTop: `1px solid ${theme.border}`,
+        <div className="mt-10 xl:mt-14" style={{
+          padding: '22px 0 28px', borderTop: `1px solid ${theme.border}`,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>

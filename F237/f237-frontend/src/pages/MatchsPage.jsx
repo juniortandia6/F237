@@ -436,7 +436,7 @@ const MatchsPage = () => {
       <section style={{ position: 'relative', overflow: 'hidden', background: FOND_BANDE, padding: '56px 0 64px' }}>
         <EclatsBande />
 
-        <div style={{ position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '0 60px', boxSizing: 'content-box' }}>
+        <div style={{ position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '0 var(--marge-page)', boxSizing: 'content-box' }}>
           {/* Titre + choix de la compétition */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '20px', flexWrap: 'wrap', marginBottom: '28px' }}>
             <div>
@@ -513,7 +513,7 @@ const MatchsPage = () => {
 
       {/* ── ZONE BASSE : fond clair + matchs ───────────────────────────── */}
       <section style={{ backgroundColor: CLAIR.fond, minHeight: '480px', padding: '36px 0 64px' }}>
-        <div style={{ maxWidth: '1150px', margin: '0 auto', padding: '0 60px', boxSizing: 'content-box' }}>
+        <div style={{ maxWidth: '1150px', margin: '0 auto', padding: '0 var(--marge-page)', boxSizing: 'content-box' }}>
           {/* Date affichée */}
           <h2 style={{ fontSize: '22px', fontWeight: 800, color: CLAIR.texte, marginBottom: '18px', textTransform: 'capitalize' }}>
             {directSeulement

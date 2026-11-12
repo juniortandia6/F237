@@ -88,7 +88,7 @@ function ActualiteDetailPage() {
       </div>
 
       {/* À lire aussi */}
-      {autres.length > 0 && <div style={{ maxWidth: '1150px', margin: '0 auto', padding: '0 60px 72px', boxSizing: 'content-box' }}>
+      {autres.length > 0 && <div style={{ maxWidth: '1150px', margin: '0 auto', padding: '0 var(--marge-page) 72px', boxSizing: 'content-box' }}>
         <h2 style={{ color: theme.text, fontSize: '24px', fontWeight: 400, fontFamily: 'var(--font-titres)', marginBottom: '18px' }}>
           {t('actualites.aLireAussi')}
         </h2>

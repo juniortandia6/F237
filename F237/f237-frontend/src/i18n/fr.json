@@ -9,7 +9,10 @@
     "connexion": "Connexion",
     "quitter": "Quitter",
     "pts": "{{n}} pts",
-    "langue": "Langue"
+    "langue": "Langue",
+    "monProfil": "Mon profil",
+    "ouvrirMenu": "Ouvrir le menu",
+    "fermerMenu": "Fermer le menu"
   },
   "commun": {
     "precedent": "Précédent",

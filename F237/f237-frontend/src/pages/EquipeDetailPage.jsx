@@ -35,7 +35,7 @@ const CLAIR = {
 };
 const CHIFFRES = '"Barlow Condensed", Arial, sans-serif';
 const MARQUEUR = 'var(--font-titres)';
-const CONTENEUR = { position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '0 60px', boxSizing: 'content-box' };
+const CONTENEUR = { position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '0 var(--marge-page)', boxSizing: 'content-box' };
 const FOND_BANDE = `linear-gradient(120deg, ${theme.greenDeep} 0%, #12462c 45%, #0f3a25 100%)`;
 
 function EclatsBande() {

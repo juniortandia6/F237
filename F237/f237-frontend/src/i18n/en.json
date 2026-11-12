@@ -9,7 +9,10 @@
     "connexion": "Log in",
     "quitter": "Log out",
     "pts": "{{n}} pts",
-    "langue": "Language"
+    "langue": "Language",
+    "monProfil": "My profile",
+    "ouvrirMenu": "Open menu",
+    "fermerMenu": "Close menu"
   },
   "commun": {
     "precedent": "Previous",

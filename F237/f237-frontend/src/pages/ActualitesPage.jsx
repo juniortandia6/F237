@@ -62,7 +62,7 @@ function ActualitesPage() {
   const [une, ...reste] = liste;
 
   return (
-    <div style={{ maxWidth: '1150px', margin: '0 auto', padding: '48px 60px 72px', boxSizing: 'content-box' }}>
+    <div style={{ maxWidth: '1150px', margin: '0 auto', padding: '48px var(--marge-page) 72px', boxSizing: 'content-box' }}>
       <h1 style={{ color: theme.text, fontSize: '40px', fontWeight: 400, fontFamily: 'var(--font-titres)', marginBottom: '20px' }}>
         {t('actualites.titre')}
       </h1>

@@ -28,8 +28,8 @@ function formatDateCourte(dateStr) {
 
 // ── Barre de matchs ─────────────────────────────────────────────────────
 const LARGEUR_CARTE = 360;
-// La première carte s'aligne sur le contenu du hero (1150px centrés, 60px de marge min)
-const DEBUT_RANGEE = 'max(60px, calc((100% - 1150px) / 2))';
+// La première carte s'aligne sur le contenu du hero (1150px centrés, marge --marge-page min)
+const DEBUT_RANGEE = 'max(var(--marge-page), calc((100% - 1150px) / 2))';
 
 const FLECHE = (cote) => ({
   position: 'absolute', top: '50%', [cote]: '18px',
@@ -315,7 +315,7 @@ function SectionDirect({ matchsLive, matchsAVenir, matchsTermines, isConnected, 
     }}>
 
       {/* En-tête aligné sur le contenu */}
-      <div style={{ position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '0 60px', boxSizing: 'content-box' }}>
+      <div style={{ position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '0 var(--marge-page)', boxSizing: 'content-box' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '22px' }}>
           <h2 style={{
             display: 'flex', alignItems: 'center', gap: '12px',
@@ -820,7 +820,7 @@ function SectionClassement({ signatureLive = '', live = false }) {
   return (
     <>
     <section style={{ backgroundColor: '#ffffff', padding: '56px 0 64px' }}>
-     <div style={{ maxWidth: '1150px', margin: '0 auto', padding: '0 60px', boxSizing: 'content-box' }}>
+     <div style={{ maxWidth: '1150px', margin: '0 auto', padding: '0 var(--marge-page)', boxSizing: 'content-box' }}>
       {/* En-tête */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
         <h2 style={{ color: CLAIRE.text, fontSize: '28px', fontWeight: 400, fontFamily: 'var(--font-titres)' }}>
@@ -954,7 +954,7 @@ function SectionClassement({ signatureLive = '', live = false }) {
     {!chargement && (
       <div style={{ position: 'relative', overflow: 'hidden', background: FOND_BANDE }}>
         <EclatsBande />
-        <div style={{ position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '56px 60px 64px', boxSizing: 'content-box' }}>
+        <div style={{ position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '56px var(--marge-page) 64px', boxSizing: 'content-box' }}>
           <BlocButeurs
             matchs={matchsParLigue[ligue] ?? []}
             live={live}
@@ -1001,7 +1001,7 @@ function SectionNouvelles({ articles }) {
       backgroundColor: '#ffffff',
     }}>
       {/* En-tête */}
-      <div style={{ position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '0 60px', boxSizing: 'content-box' }}>
+      <div style={{ position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '0 var(--marge-page)', boxSizing: 'content-box' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '22px' }}>
           <h2 style={{ color: '#141414', fontSize: '28px', fontWeight: 400, fontFamily: 'var(--font-titres)' }}>
             {t('accueil.nouvelles.titre')}
@@ -1245,7 +1245,7 @@ const AccueilPage = () => {
           position: 'absolute',
           top: 0, left: 0, right: 0, bottom: '450px',
           display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
-          padding: '0 60px',
+          padding: '0 var(--marge-page)',
         }}>
           <div style={{ width: '100%', maxWidth: '1150px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
             <span style={{
@@ -1328,7 +1328,7 @@ const AccueilPage = () => {
               sur le contenu
             - Grosses cartes blanches + flèches rondes posées sur les bords */}
         <div style={{ position: 'absolute', bottom: '36px', left: 0, right: 0 }}>
-          <div style={{ maxWidth: '1150px', margin: '0 auto', padding: '0 60px', boxSizing: 'content-box' }}>
+          <div style={{ maxWidth: '1150px', margin: '0 auto', padding: '0 var(--marge-page)', boxSizing: 'content-box' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <span style={{ fontSize: '19px', fontWeight: 800, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 {t('accueil.matchs')}
