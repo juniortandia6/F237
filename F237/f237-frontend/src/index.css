@@ -64,3 +64,9 @@ body {
 
 /* Sélection de texte aux couleurs F237 */
 ::selection { background: #1f9d55; color: #fff; }
+
+/* Carrousels : sur écran tactile ou téléphone, on fait défiler au doigt,
+   les flèches rondes ne servent plus (et cachent le bord des cartes). */
+@media (max-width: 767px), (hover: none) {
+  .fleche-carrousel { display: none !important; }
+}

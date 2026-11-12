@@ -1,7 +1,9 @@
 // f237-frontend/src/components/layout/Navbar.jsx
 // Grand écran (≥ 1280px) : logo | 6 onglets centrés | admin, points, profil, langue.
-// Téléphone et tablette : logo | langue + bouton menu ; le menu s'ouvre en panneau
-// plein écran sous la barre (onglets en grandes lignes faciles à toucher + compte).
+// Téléphone et tablette (inspiré de l'appli FIBA) :
+// - barre du haut minimaliste : logo | langue + compte ;
+// - barre d'onglets fixée en bas : Accueil, Matchs, Classements, Équipes, Plus ;
+// - "Plus" ouvre un panneau : Fantasy, Actualités, et le compte (profil, admin, déconnexion).
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -9,14 +11,15 @@ import { useAuth } from '../../contexts/AuthContext';
 import {
     Home, LayoutList, Trophy, Dices, Newspaper,
     UserCircle, Globe, ChevronDown, Shield, Check, LayoutDashboard,
-    Menu, X, LogOut, ChevronRight
+    MoreHorizontal, LogOut, ChevronRight
 } from 'lucide-react';
 import LogoF237 from './LogoF237';
 import { LANGUES, locale } from '../../i18n';
 import theme from '../../theme';
 
 const HAUTEUR = 68;          // barre sur grand écran
-const HAUTEUR_MOBILE = 60;   // barre sur téléphone / tablette
+const HAUTEUR_MOBILE = 60;   // barre du haut sur téléphone / tablette
+export const HAUTEUR_ONGLETS = 64; // barre d'onglets du bas (Layout réserve cette place sous le pied de page)
 
 // ── Menu de choix de la langue (FR / EN) ────────────────────────────────
 const SelecteurLangue = () => {
@@ -110,6 +113,7 @@ const PastillePoints = ({ points }) => {
 
 // ── Panneau du menu mobile ──────────────────────────────────────────────
 const MenuMobile = ({ navItems, isActive, user, estAdmin, onLogout }) => {
+    // Les onglets déjà présents dans la barre du bas ne sont pas répétés ici
     const { t } = useTranslation();
     const ligne = (actif) => ({
         display: 'flex', alignItems: 'center', gap: '14px', minHeight: '52px', padding: '0 14px',
@@ -122,7 +126,8 @@ const MenuMobile = ({ navItems, isActive, user, estAdmin, onLogout }) => {
         <div
             className="xl:hidden"
             style={{
-                position: 'fixed', top: HAUTEUR_MOBILE, left: 0, right: 0, bottom: 0, zIndex: 49,
+                position: 'fixed', top: HAUTEUR_MOBILE, left: 0, right: 0, zIndex: 49,
+                bottom: `calc(${HAUTEUR_ONGLETS}px + env(safe-area-inset-bottom))`,
                 backgroundColor: theme.bgDeep, overflowY: 'auto', overscrollBehavior: 'contain',
                 padding: '14px 16px 32px',
             }}
@@ -176,6 +181,26 @@ const MenuMobile = ({ navItems, isActive, user, estAdmin, onLogout }) => {
             )}
         </div>
     );
+};
+
+// Un onglet de la barre du bas : icône + libellé, couleur verte quand actif
+const Onglet = ({ to, label, Icon, actif, onClick, ariaExpanded }) => {
+    const style = {
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '3px',
+        height: HAUTEUR_ONGLETS, textDecoration: 'none', border: 'none', background: 'none', cursor: 'pointer',
+        color: actif ? theme.greenBright : theme.textMuted, minWidth: 0,
+    };
+    const contenu = (
+        <>
+            <Icon size={22} strokeWidth={actif ? 2.4 : 2} />
+            <span style={{ fontSize: '11px', fontWeight: actif ? 800 : 600, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 2px' }}>
+                {label}
+            </span>
+        </>
+    );
+    return to
+        ? <Link to={to} style={style} aria-current={actif ? 'page' : undefined}>{contenu}</Link>
+        : <button type="button" onClick={onClick} style={style} aria-expanded={ariaExpanded}>{contenu}</button>;
 };
 
 const Navbar = () => {
@@ -241,18 +266,18 @@ const Navbar = () => {
                     <div className="flex items-center gap-3">
                         {user && <span className="hidden sm:block"><PastillePoints points={user.soldePoints} /></span>}
                         <SelecteurLangue />
-                        <button
-                            onClick={basculerMenu}
-                            aria-expanded={menuOuvert}
-                            aria-label={menuOuvert ? t('nav.fermerMenu') : t('nav.ouvrirMenu')}
+                        {/* Compte : profil si connecté, sinon connexion */}
+                        <Link
+                            to={user ? '/profil' : '/login'}
+                            aria-label={user ? t('nav.monProfil') : t('nav.connexion')}
                             style={{
-                                width: '42px', height: '42px', borderRadius: '12px', border: `1px solid ${theme.border}`,
-                                backgroundColor: menuOuvert ? theme.green : theme.surface, color: '#fff',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+                                width: '40px', height: '40px', borderRadius: '50%',
+                                backgroundColor: user ? theme.green : theme.surfaceHover, color: '#fff',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
                             }}
                         >
-                            {menuOuvert ? <X size={22} /> : <Menu size={22} />}
-                        </button>
+                            <UserCircle size={22} />
+                        </Link>
                     </div>
                 </div>
 
@@ -359,8 +384,30 @@ const Navbar = () => {
             </nav>
 
             {menuOuvert && (
-                <MenuMobile navItems={navItems} isActive={isActive} user={user} estAdmin={estAdmin} onLogout={handleLogout} />
+                <MenuMobile navItems={navItems.slice(4)} isActive={isActive} user={user} estAdmin={estAdmin} onLogout={handleLogout} />
             )}
+
+            {/* ── Barre d'onglets du bas (téléphone / tablette) ───────── */}
+            <nav
+                className="xl:hidden"
+                aria-label={t('nav.navigation')}
+                style={{
+                    position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 50,
+                    display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)',
+                    height: `calc(${HAUTEUR_ONGLETS}px + env(safe-area-inset-bottom))`,
+                    paddingBottom: 'env(safe-area-inset-bottom)',
+                    backgroundColor: theme.bgDeep, borderTop: `1px solid ${theme.border}`,
+                }}
+            >
+                {navItems.slice(0, 4).map(({ to, label, Icon }) => (
+                    <Onglet key={to} to={to} label={label} Icon={Icon} actif={!menuOuvert && isActive(to)} />
+                ))}
+                <Onglet
+                    label={t('nav.plus')} Icon={MoreHorizontal} onClick={basculerMenu}
+                    actif={menuOuvert || ['/jouer', '/actualites', '/profil', '/admin'].some(isActive)}
+                    ariaExpanded={menuOuvert}
+                />
+            </nav>
         </>
     );
 };

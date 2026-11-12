@@ -11,8 +11,8 @@
     "pts": "{{n}} pts",
     "langue": "Langue",
     "monProfil": "Mon profil",
-    "ouvrirMenu": "Ouvrir le menu",
-    "fermerMenu": "Fermer le menu"
+    "plus": "Plus",
+    "navigation": "Navigation principale"
   },
   "commun": {
     "precedent": "Précédent",
@@ -84,7 +84,8 @@
       "tag": "F237",
       "titre": "Toute la MTN Elite One et l'Elite Two, en direct",
       "bouton": "Voir les matchs"
-    }
+    },
+    "voirPlusMatchs": "Voir plus de matchs"
   },
   "footer": {
     "accroche": "Le pouls du football camerounais : scores en direct, classements et actualités de la MTN Elite One et Elite Two.",

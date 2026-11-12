@@ -11,8 +11,8 @@
     "pts": "{{n}} pts",
     "langue": "Language",
     "monProfil": "My profile",
-    "ouvrirMenu": "Open menu",
-    "fermerMenu": "Close menu"
+    "plus": "More",
+    "navigation": "Main navigation"
   },
   "commun": {
     "precedent": "Previous",
@@ -84,7 +84,8 @@
       "tag": "F237",
       "titre": "All of MTN Elite One and Elite Two, live",
       "bouton": "See the matches"
-    }
+    },
+    "voirPlusMatchs": "See more matches"
   },
   "footer": {
     "accroche": "The heartbeat of Cameroonian football: live scores, standings and news from the MTN Elite One and Elite Two.",
