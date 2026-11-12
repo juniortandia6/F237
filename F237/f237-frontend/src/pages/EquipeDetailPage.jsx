@@ -21,6 +21,7 @@ import { getInfosClub } from '../data/clubsInfos';
 import theme from '../theme';
 import { estAVenir } from '../data/statutMatch';
 import AvatarJoueur from '../components/AvatarJoueur';
+import { regrouperButeurs, classerButeurs } from '../data/buteurs';
 
 // ── Couleurs de la zone claire (mêmes que les autres pages) ─────────────
 const CLAIR = {
@@ -67,7 +68,8 @@ const versJoueurSite = (j) => ({
   poste: POSTE_ADMIN[j.poste] ?? null,
   numero: j.numero ?? null,
   nationalite: j.nationalite ?? null,
-  age: ageDepuis(j.dateNaissance),
+  age: j.age ?? ageDepuis(j.dateNaissance),
+  f237: true, // joueur de notre base : il a une fiche (/joueurs/:id)
 });
 // Libellés des postes : equipe.postes.<poste> et equipe.postesCourts.<poste>
 const COULEUR_RESULTAT = { V: theme.green, N: '#a3aaa6', D: theme.red, '?': '#c9cfcc' };
@@ -180,9 +182,12 @@ function LigneAVenir({ m, premier }) {
 // Avatar « maillot » aux couleurs du club (pas de photo de joueur sans accord des clubs)
 function CarteJoueur({ j, club }) {
   const { t } = useTranslation();
+  // Joueur de notre base : la carte mène à sa fiche ; joueur de l'API : carte simple
+  const Conteneur = j.f237 && j.id ? Link : 'div';
+  const lien = j.f237 && j.id ? { to: `/joueurs/${j.id}`, className: 'transition-shadow hover:shadow-md' } : {};
   return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: '12px', padding: '12px',
+    <Conteneur {...lien} style={{
+      display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', textDecoration: 'none',
       backgroundColor: CLAIR.carte, border: `1px solid ${CLAIR.bord}`, borderRadius: '12px',
     }}>
       <AvatarJoueur club={club} nom={j.nom} numero={j.numero ?? undefined} taille={48} gardien={j.poste === 'Goalkeeper'} />
@@ -195,7 +200,7 @@ function CarteJoueur({ j, club }) {
       {j.numero != null && (
         <span style={{ fontFamily: CHIFFRES, fontSize: '24px', fontWeight: 800, color: '#cfd5d2' }}>{j.numero}</span>
       )}
-    </div>
+    </Conteneur>
   );
 }
 
@@ -505,9 +510,16 @@ function ColonneDroite({ data, club, derniersMatchs, prochain, buteurs }) {
       {/* Meilleurs buteurs du club cette saison */}
       <Carte titre={t('equipe.buteursClub')} icone={Goal}>
         {buteurs.length === 0 ? <Vide>{t('equipe.aucunBut')}</Vide> : buteurs.map((j, i) => (
-          <div key={j.nom} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 20px', borderTop: i ? `1px solid ${CLAIR.bord}` : 'none' }}>
+          <div key={j.cle} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 20px', borderTop: i ? `1px solid ${CLAIR.bord}` : 'none' }}>
             <span style={{ width: '18px', fontSize: '13px', fontWeight: 800, color: CLAIR.doux }}>{i + 1}</span>
-            <span style={{ flex: 1, minWidth: 0, fontSize: '14px', fontWeight: 700, color: CLAIR.texte, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{j.nom}</span>
+            {j.joueurId ? (
+              <Link to={`/joueurs/${j.joueurId}`} title={t('joueur.voirFiche')} className="hover:underline"
+                style={{ flex: 1, minWidth: 0, fontSize: '14px', fontWeight: 700, color: CLAIR.texte, textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {j.nom}
+              </Link>
+            ) : (
+              <span style={{ flex: 1, minWidth: 0, fontSize: '14px', fontWeight: 700, color: CLAIR.texte, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{j.nom}</span>
+            )}
             <span style={{ fontFamily: CHIFFRES, fontSize: '20px', fontWeight: 800, color: CLAIR.vert }}>{j.buts}</span>
           </div>
         ))}
@@ -632,15 +644,12 @@ function EquipeDetailPage() {
     .filter(estAVenir)
     .sort((a, b) => new Date(a.dateMatch) - new Date(b.dateMatch)), [matchsSaison]);
 
-  // Buteurs du club (sans CSC ni inconnus), top 5
+  // Buteurs du club (sans CSC ni inconnus), top 5 : regroupés par joueur quand le but est relié
+  // à l'effectif (même règle que l'accueil et le classement, voir data/buteurs.js)
   const buteurs = useMemo(() => {
     if (!data) return [];
-    const compte = new Map();
-    for (const m of matchsSaison) for (const b of m.buts ?? []) {
-      if (b.nomEquipe !== data.nom || b.estButCSC || !b.nomJoueur || b.nomJoueur === 'Inconnu') continue;
-      compte.set(b.nomJoueur, (compte.get(b.nomJoueur) ?? 0) + 1);
-    }
-    return [...compte].map(([nom, buts]) => ({ nom, buts })).sort((a, b) => b.buts - a.buts).slice(0, 5);
+    const butsDuClub = matchsSaison.map(m => ({ ...m, buts: (m.buts ?? []).filter(b => b.nomEquipe === data.nom) }));
+    return classerButeurs(regrouperButeurs(butsDuClub)).slice(0, 5);
   }, [matchsSaison, data]);
 
   if (chargement) {

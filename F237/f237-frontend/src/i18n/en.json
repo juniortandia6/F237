@@ -508,5 +508,39 @@
     "historiqueBientot_one": "{{count}} bet placed · details coming soon.",
     "historiqueBientot_other": "{{count}} bets placed · details coming soon.",
     "accesRapides": "Quick links"
+  },
+  "joueur": {
+    "chargement": "Loading player…",
+    "introuvable": "Player not found.",
+    "parSaison": "Goals by season",
+    "sesButs": "Goals",
+    "aucunBut": "No goals recorded for this player.",
+    "competition": "Competition",
+    "matchs": "Club matches",
+    "pen": "Pen.",
+    "buts": "Goals",
+    "saisonInconnue": "Season {{id}}",
+    "minuteInconnue": "min. ?",
+    "butsSaison": "Goals {{saison}}",
+    "butsSaisonCourt": "Season goals",
+    "butsTotal": "Total goals",
+    "penaltys": "Penalties",
+    "aQuitte": "This player is no longer in the club's current squad.",
+    "noteSources": "Only goals linked to this player are counted. \"Club matches\" = matches played by his club that season (player appearances are not tracked yet).",
+    "voirFiche": "View player profile",
+    "postes": {
+      "gardien": "Goalkeeper",
+      "defenseur": "Defender",
+      "milieu": "Midfielder",
+      "attaquant": "Forward"
+    },
+    "fiche": {
+      "titre": "Player profile",
+      "club": "Club",
+      "poste": "Position",
+      "numero": "Number",
+      "nationalite": "Nationality",
+      "age": "Age"
+    }
   }
 }

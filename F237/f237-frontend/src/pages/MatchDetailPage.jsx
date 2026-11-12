@@ -50,6 +50,16 @@ const abrev = (nom) => (nom ?? '???').replace(/[^A-Za-zÀ-ÿ]/g, '').substring(0
 const dateLongue = (d) => new Date(d).toLocaleDateString(locale(), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 const heure = (d) => new Date(d).toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
 const nomButeur = (b) => (b.nomJoueur && b.nomJoueur !== 'Inconnu' ? b.nomJoueur : i18n.t('matchDetail.buteurInconnu'));
+
+// Nom du buteur : lien vers sa fiche quand le but est relié à l'effectif (pas en direct ni pour un CSC)
+function LienButeur({ b }) {
+  if (!b.joueurId || b.estButCSC) return nomButeur(b);
+  return (
+    <Link to={`/joueurs/${b.joueurId}`} title={i18n.t('joueur.voirFiche')} className="hover:underline" style={{ color: 'inherit', textDecoration: 'none' }}>
+      {nomButeur(b)}
+    </Link>
+  );
+}
 // Minute d'un but : 23' ou 45+2'. Minute 0 = minute inconnue (saisie admin sans source) -> ''
 const minuteConnue = (b) => (b.minute ?? 0) > 0;
 const minuteBut = (b) => (minuteConnue(b) ? `${b.minute}${b.minuteAdditionnelle ? `+${b.minuteAdditionnelle}` : ''}'` : '');
@@ -97,7 +107,7 @@ function EquipeHero({ equipe, buts, alignement }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: alignement }}>
           {buts.map((b, i) => (
             <span key={i} style={{ color: 'rgba(255,255,255,0.75)', fontSize: '13px' }}>
-              ⚽ {nomButeur(b)} {minuteBut(b)}
+              ⚽ <LienButeur b={b} /> {minuteBut(b)}
               {b.estPenalty && <span style={{ color: theme.greenBright, fontWeight: 700 }}> ({t('matchDetail.pen')})</span>}
               {b.estButCSC && <span style={{ color: '#ff8a8d', fontWeight: 700 }}> ({t('matchDetail.csc')})</span>}
             </span>
@@ -303,7 +313,7 @@ function Evenement({ ev }) {
   const bloc = (
     <div style={{ textAlign: gauche ? 'right' : 'left' }}>
       <div style={{ fontWeight: 700, color: CLAIR.texte, fontSize: '15px' }}>
-        ⚽ {nomButeur(ev)}
+        ⚽ <LienButeur b={ev} />
         {ev.estPenalty && <span style={{ color: theme.green, fontSize: '12px', fontWeight: 700 }}> ({t('matchDetail.pen')})</span>}
         {ev.estButCSC && <span style={{ color: theme.red, fontSize: '12px', fontWeight: 700 }}> ({t('matchDetail.csc')})</span>}
       </div>

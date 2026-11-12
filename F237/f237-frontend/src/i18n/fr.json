@@ -508,5 +508,39 @@
     "historiqueBientot_one": "{{count}} pari placé · le détail arrive bientôt.",
     "historiqueBientot_other": "{{count}} paris placés · le détail arrive bientôt.",
     "accesRapides": "Accès rapides"
+  },
+  "joueur": {
+    "chargement": "Chargement du joueur…",
+    "introuvable": "Joueur introuvable.",
+    "parSaison": "Buts par saison",
+    "sesButs": "Ses buts",
+    "aucunBut": "Aucun but enregistré pour ce joueur.",
+    "competition": "Compétition",
+    "matchs": "Matchs du club",
+    "pen": "Pen.",
+    "buts": "Buts",
+    "saisonInconnue": "Saison {{id}}",
+    "minuteInconnue": "min. ?",
+    "butsSaison": "Buts {{saison}}",
+    "butsSaisonCourt": "Buts saison",
+    "butsTotal": "Buts au total",
+    "penaltys": "Penaltys",
+    "aQuitte": "Ce joueur ne fait plus partie de l'effectif actuel du club.",
+    "noteSources": "Seuls les buts reliés à ce joueur sont comptés. « Matchs du club » = matchs joués par son club cette saison-là (les présences du joueur ne sont pas encore suivies).",
+    "voirFiche": "Voir la fiche du joueur",
+    "postes": {
+      "gardien": "Gardien",
+      "defenseur": "Défenseur",
+      "milieu": "Milieu",
+      "attaquant": "Attaquant"
+    },
+    "fiche": {
+      "titre": "Fiche du joueur",
+      "club": "Club",
+      "poste": "Poste",
+      "numero": "Numéro",
+      "nationalite": "Nationalité",
+      "age": "Âge"
+    }
   }
 }

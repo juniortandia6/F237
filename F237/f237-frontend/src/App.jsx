@@ -7,6 +7,7 @@ import MatchsPage from './pages/MatchsPage';
 import MatchDetailPage from './pages/MatchDetailPage';
 import EquipesPage from './pages/EquipesPage';
 import EquipeDetailPage from './pages/EquipeDetailPage';
+import JoueurPage from './pages/JoueurPage';
 import JouerPage from './pages/JouerPage';
 import ActualitesPage from './pages/ActualitesPage';
 import ActualiteDetailPage from './pages/ActualiteDetailPage';
@@ -36,6 +37,7 @@ function App() {
             <Route path="/matchs/:id" element={<MatchDetailPage />} />
             <Route path="/equipes" element={<EquipesPage />} />
             <Route path="/equipes/:id" element={<EquipeDetailPage />} />
+            <Route path="/joueurs/:id" element={<JoueurPage />} />
             <Route path="/jouer" element={<JouerPage />} />
             <Route path="/actualites" element={<ActualitesPage />} />
             <Route path="/actualites/:slug" element={<ActualiteDetailPage />} />

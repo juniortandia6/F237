@@ -205,6 +205,17 @@ function SelecteurVue({ vue, onChange }) {
 // Meilleurs buteurs à partir des buts des matchs (sans CSC ni buteurs inconnus) : voir data/buteurs.js
 const calculerButeurs = (matchs) => classerButeurs(regrouperButeurs(matchs));
 
+// Nom d'un buteur : lien vers sa fiche s'il est relié à l'effectif
+function NomJoueur({ j }) {
+  const { t } = useTranslation();
+  if (!j.joueurId) return j.nom;
+  return (
+    <Link to={`/joueurs/${j.joueurId}`} title={t('joueur.voirFiche')} className="hover:underline" style={{ color: 'inherit', textDecoration: 'none' }}>
+      {j.nom}
+    </Link>
+  );
+}
+
 // ── Carte "Meilleurs buteurs" (dans la zone haute) ──────────────────────
 function CarteButeurs({ buteurs, logos, chargement, competition, surligne }) {
   const { t } = useTranslation();
@@ -241,7 +252,7 @@ function CarteButeurs({ buteurs, logos, chargement, competition, surligne }) {
             }}>1</span>
             <AvatarJoueur logo={logos.get(leader.equipe)} club={leader.equipe} nom={leader.nom} taille={52} />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: '18px', fontWeight: 800, color: CLAIR.texte, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{leader.nom}</div>
+              <div style={{ fontSize: '18px', fontWeight: 800, color: CLAIR.texte, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><NomJoueur j={leader} /></div>
               <div style={{ fontSize: '12px', color: CLAIR.doux }}>
                 {leader.equipe} · {t('matchs.nbMatchs', { count: leader.matchs })}{leader.penaltys ? ` · ${leader.penaltys} ${t('matchDetail.pen')}` : ''}
               </div>
@@ -261,7 +272,7 @@ function CarteButeurs({ buteurs, logos, chargement, competition, surligne }) {
               <span style={{ width: '30px', textAlign: 'center', fontWeight: 800, fontSize: '14px', color: CLAIR.doux, flexShrink: 0 }}>{i + 2}</span>
               <AvatarJoueur logo={logos.get(j.equipe)} club={j.equipe} nom={j.nom} taille={36} ombre={false} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: '14px', fontWeight: 700, color: CLAIR.texte, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{j.nom}</div>
+                <div style={{ fontSize: '14px', fontWeight: 700, color: CLAIR.texte, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><NomJoueur j={j} /></div>
                 <div style={{ fontSize: '11px', color: CLAIR.doux, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{j.equipe}</div>
               </div>
               <span style={{ fontFamily: CHIFFRES, fontSize: '22px', fontWeight: 800, color: CLAIR.texte }}>{j.buts}</span>
