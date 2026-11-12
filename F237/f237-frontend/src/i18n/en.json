@@ -265,7 +265,10 @@
     "vueNote": {
       "domicile": "Standings based on home matches only.",
       "exterieur": "Standings based on away matches only."
-    }
+    },
+    "abrV": "W",
+    "abrN": "D",
+    "abrD": "L"
   },
   "equipes": {
     "tri": {
@@ -546,6 +549,7 @@
       "numero": "Number",
       "nationalite": "Nationality",
       "age": "Age"
-    }
+    },
+    "matchsCourt": "Matches"
   }
 }

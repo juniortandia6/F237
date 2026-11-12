@@ -265,7 +265,10 @@
     "vueNote": {
       "domicile": "Classement des matchs joués à domicile uniquement.",
       "exterieur": "Classement des matchs joués à l'extérieur uniquement."
-    }
+    },
+    "abrV": "V",
+    "abrN": "N",
+    "abrD": "D"
   },
   "equipes": {
     "tri": {
@@ -546,6 +549,7 @@
       "numero": "Numéro",
       "nationalite": "Nationalité",
       "age": "Âge"
-    }
+    },
+    "matchsCourt": "Matchs"
   }
 }

@@ -13,6 +13,7 @@ import { equipeService } from '../services/equipeService';
 import { infosSaison, libelleSaison } from '../data/saisons';
 import AvatarJoueur from '../components/AvatarJoueur';
 import theme from '../theme';
+import { useEcranMobile } from '../hooks/useEcranMobile';
 
 // ── Mêmes couleurs et gabarits que la fiche club ────────────────────────
 const CLAIR = {
@@ -83,24 +84,26 @@ function PetitLogo({ equipe, taille = 26 }) {
 // ── Buts par saison ─────────────────────────────────────────────────────
 function ButsParSaison({ saisons }) {
   const { t } = useTranslation();
+  const mobile = useEcranMobile();
+  const colonnes = mobile ? 'minmax(0,1fr) 54px 36px 40px' : 'minmax(0,1fr) 110px 60px 60px';
   return (
     <Carte titre={t('joueur.parSaison')} icone={CalendarDays}>
       {saisons.length === 0 ? <Vide>{t('joueur.aucunBut')}</Vide> : (
         <div>
           <div style={{
-            display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 110px 60px 60px', gap: '8px', padding: '10px 20px',
+            display: 'grid', gridTemplateColumns: colonnes, gap: '8px', padding: mobile ? '10px 14px' : '10px 20px',
             fontSize: '11px', fontWeight: 800, color: CLAIR.doux, letterSpacing: '0.5px', textTransform: 'uppercase',
             borderBottom: `1px solid ${CLAIR.bord}`,
           }}>
             <span>{t('joueur.competition')}</span>
-            <span style={{ textAlign: 'center' }}>{t('joueur.matchs')}</span>
+            <span style={{ textAlign: 'center' }}>{mobile ? t('joueur.matchsCourt') : t('joueur.matchs')}</span>
             <span style={{ textAlign: 'center' }}>{t('joueur.pen')}</span>
             <span style={{ textAlign: 'center' }}>{t('joueur.buts')}</span>
           </div>
           {saisons.map((s, i) => (
             <div key={s.saisonId} style={{
-              display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 110px 60px 60px', gap: '8px', alignItems: 'center',
-              padding: '12px 20px', borderTop: i ? `1px solid ${CLAIR.bord}` : 'none',
+              display: 'grid', gridTemplateColumns: colonnes, gap: '8px', alignItems: 'center',
+              padding: mobile ? '12px 14px' : '12px 20px', borderTop: i ? `1px solid ${CLAIR.bord}` : 'none',
             }}>
               <span style={{ minWidth: 0 }}>
                 <span style={{ display: 'block', fontSize: '14px', fontWeight: 700, color: CLAIR.texte }}>
@@ -124,6 +127,42 @@ function ButsParSaison({ saisons }) {
 // ── Liste des buts (un match peut contenir plusieurs buts du joueur) ────
 function ListeButs({ matchs }) {
   const { t } = useTranslation();
+  const mobile = useEcranMobile();
+  if (mobile) {
+    // Téléphone : date + pastilles de buts sur une ligne, puis le match en dessous
+    return (
+      <Carte titre={t('joueur.sesButs')} icone={Goal}>
+        {matchs.length === 0 ? <Vide>{t('joueur.aucunBut')}</Vide> : matchs.map((m, i) => (
+          <Link key={m.matchId} to={`/matchs/${m.matchId}`}
+            style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px 14px', borderTop: i ? `1px solid ${CLAIR.bord}` : 'none', textDecoration: 'none' }}>
+            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: CLAIR.doux }}>{dateCourte(m.dateMatch)}</span>
+              <span style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                {m.buts.map(b => (
+                  <span key={b.id} style={{ fontSize: '12px', fontWeight: 800, padding: '2px 8px', borderRadius: '999px', backgroundColor: '#e8f3ec', color: CLAIR.vert, whiteSpace: 'nowrap' }}>
+                    ⚽ {b.minute > 0 ? `${b.minute}'` : t('joueur.minuteInconnue')}{b.estPenalty ? ` (${t('matchDetail.pen')})` : ''}
+                  </span>
+                ))}
+              </span>
+            </span>
+            <span style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto minmax(0,1fr)', alignItems: 'center', gap: '8px' }}>
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px', minWidth: 0 }}>
+                <span style={{ fontSize: '13px', fontWeight: m.pourDomicile ? 800 : 600, color: CLAIR.texte, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.equipeDomicile?.nom}</span>
+                <PetitLogo equipe={m.equipeDomicile} taille={20} />
+              </span>
+              <span style={{ fontFamily: CHIFFRES, fontSize: '17px', fontWeight: 800, color: CLAIR.texte, backgroundColor: CLAIR.tuile, borderRadius: '6px', padding: '1px 8px' }}>
+                {m.scoreDomicile ?? '–'}-{m.scoreExterieur ?? '–'}
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                <PetitLogo equipe={m.equipeExterieur} taille={20} />
+                <span style={{ fontSize: '13px', fontWeight: m.pourDomicile ? 600 : 800, color: CLAIR.texte, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.equipeExterieur?.nom}</span>
+              </span>
+            </span>
+          </Link>
+        ))}
+      </Carte>
+    );
+  }
   return (
     <Carte titre={t('joueur.sesButs')} icone={Goal}>
       {matchs.length === 0 ? <Vide>{t('joueur.aucunBut')}</Vide> : matchs.map((m, i) => (
@@ -208,6 +247,7 @@ function Fiche({ j }) {
 // ── Page ────────────────────────────────────────────────────────────────
 export default function JoueurPage() {
   const { t } = useTranslation();
+  const mobile = useEcranMobile();
   const { id } = useParams();
   const [etat, setEtat] = useState(null); // { id, data, erreur }
 
@@ -308,7 +348,7 @@ export default function JoueurPage() {
   return (
     <div>
       {/* ── ZONE HAUTE ─────────────────────────────────────────────────── */}
-      <section style={{ position: 'relative', overflow: 'hidden', background: FOND_BANDE, padding: '28px 0 48px' }}>
+      <section style={{ position: 'relative', overflow: 'hidden', background: FOND_BANDE, padding: mobile ? '20px 0 28px' : '28px 0 48px' }}>
         <EclatsBande />
         <div style={CONTENEUR}>
           {/* Fil d'Ariane */}
@@ -328,9 +368,9 @@ export default function JoueurPage() {
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '28px', flexWrap: 'wrap' }}>
             {/* Avatar + nom */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '26px', minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: mobile ? '16px' : '26px', minWidth: 0 }}>
               <AvatarJoueur club={data.equipe?.nom} nom={nomComplet} numero={data.numero ?? undefined}
-                taille={128} gardien={data.poste === 'Gardien'} />
+                taille={mobile ? 88 : 128} gardien={data.poste === 'Gardien'} />
               <div style={{ minWidth: 0 }}>
                 {data.equipe && (
                   <Link to={`/equipes/${data.equipe.id}`} style={{
@@ -342,12 +382,12 @@ export default function JoueurPage() {
                   </Link>
                 )}
                 {data.prenom && (
-                  <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: '20px', fontWeight: 600, lineHeight: 1.1 }}>{data.prenom}</div>
+                  <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: mobile ? '16px' : '20px', fontWeight: 600, lineHeight: 1.1 }}>{data.prenom}</div>
                 )}
-                <h1 style={{ color: '#fff', fontSize: '52px', fontWeight: 400, lineHeight: 1.05, fontFamily: MARQUEUR, margin: '2px 0 12px' }}>
+                <h1 style={{ color: '#fff', fontSize: mobile ? '34px' : '52px', fontWeight: 400, lineHeight: 1.05, fontFamily: MARQUEUR, margin: '2px 0 12px', overflowWrap: 'anywhere' }}>
                   {data.nom}
                 </h1>
-                <div style={{ display: 'flex', gap: '18px', flexWrap: 'wrap', color: 'rgba(255,255,255,0.8)', fontSize: '14px' }}>
+                <div style={{ display: 'flex', gap: mobile ? '4px 12px' : '18px', flexWrap: 'wrap', color: 'rgba(255,255,255,0.8)', fontSize: mobile ? '13px' : '14px' }}>
                   {POSTES[data.poste] && <span>{t(`joueur.postes.${POSTES[data.poste]}`)}</span>}
                   {data.numero != null && <span>#{data.numero}</span>}
                   {data.nationalite && <span>{data.nationalite}</span>}
@@ -358,7 +398,7 @@ export default function JoueurPage() {
 
             {/* Buts : saison la plus récente + total, en verre dépoli */}
             <div style={{
-              display: 'flex', borderRadius: '16px', overflow: 'hidden',
+              display: 'flex', borderRadius: '16px', overflow: 'hidden', width: mobile ? '100%' : 'auto',
               backgroundColor: 'rgba(0,0,0,0.28)', border: '1px solid rgba(255,255,255,0.14)', backdropFilter: 'blur(6px)',
             }}>
               {[
@@ -366,8 +406,8 @@ export default function JoueurPage() {
                 [t('joueur.butsTotal'), buts.length],
                 [t('joueur.penaltys'), totalPen],
               ].map(([label, val], i) => (
-                <div key={label} style={{ padding: '16px 24px', textAlign: 'center', borderLeft: i ? '1px solid rgba(255,255,255,0.14)' : 'none' }}>
-                  <div style={{ fontFamily: CHIFFRES, fontSize: '44px', fontWeight: 800, color: '#fff', lineHeight: 1 }}>{val}</div>
+                <div key={label} style={{ flex: mobile ? 1 : 'none', padding: mobile ? '12px 8px' : '16px 24px', textAlign: 'center', borderLeft: i ? '1px solid rgba(255,255,255,0.14)' : 'none' }}>
+                  <div style={{ fontFamily: CHIFFRES, fontSize: mobile ? '34px' : '44px', fontWeight: 800, color: '#fff', lineHeight: 1 }}>{val}</div>
                   <div style={{ marginTop: '4px', fontSize: '11px', fontWeight: 800, color: 'rgba(255,255,255,0.65)', letterSpacing: '1px', textTransform: 'uppercase' }}>{label}</div>
                 </div>
               ))}
@@ -377,10 +417,10 @@ export default function JoueurPage() {
       </section>
 
       {/* ── ZONE BASSE ─────────────────────────────────────────────────── */}
-      <section style={{ backgroundColor: CLAIR.fond, minHeight: '420px', padding: '32px 0 64px' }}>
+      <section style={{ backgroundColor: CLAIR.fond, minHeight: '420px', padding: mobile ? '20px 0 40px' : '32px 0 64px' }}>
         <div style={CONTENEUR}>
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]" style={{ alignItems: 'start' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]" style={{ alignItems: 'start' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: mobile ? '16px' : '20px', minWidth: 0 }}>
               <ButsParSaison saisons={saisons} />
               <ListeButs matchs={matchs} />
             </div>

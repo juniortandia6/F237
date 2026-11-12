@@ -13,6 +13,7 @@ import { useLiveScores } from '../hooks/useLiveScores';
 import { COMPETITIONS, ANNEE_ACTUELLE, SAISONS_DB, libelleSaison } from '../data/saisons';
 import SelecteurSaison from '../components/SelecteurSaison';
 import theme from '../theme';
+import { useEcranMobile } from '../hooks/useEcranMobile';
 import AvatarJoueur from '../components/AvatarJoueur';
 import { regrouperButeurs, classerButeurs } from '../data/buteurs';
 
@@ -364,14 +365,68 @@ function Evolution({ valeur }) {
 
 // ── Tableau du classement ───────────────────────────────────────────────
 const COLONNES = '76px minmax(200px, 1fr) repeat(4, 46px) repeat(3, 52px) 60px 140px';
+// Téléphone : # | équipe (+ bilan V·N·D dessous) | J | Diff | Pts ; la forme est masquée
+const COLONNES_MOBILE = '34px minmax(0,1fr) 26px 34px 36px';
 
 function TableauClassement({ lignes, zones, annee, avecZones = true }) {
   const { t } = useTranslation();
+  const mobile = useEcranMobile();
   const total = lignes.length;
   const parDescription = lignes.some(l => l.description);
   // Vues Domicile / Extérieur : les zones (titre, relégation) n'ont pas de sens
   const zonesLignes = lignes.map((l, i) => (avecZones ? zoneDe(l, l.position ?? i + 1, total, zones, parDescription) : null));
   const entete = { fontSize: '11px', fontWeight: 800, color: CLAIR.doux, letterSpacing: '0.5px', textAlign: 'center' };
+
+  if (mobile) {
+    return (
+      <div style={{ backgroundColor: CLAIR.carte, border: `1px solid ${CLAIR.bord}`, borderRadius: '14px', overflow: 'hidden' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: COLONNES_MOBILE, gap: '6px', alignItems: 'center', padding: '10px 12px', borderBottom: `1px solid ${CLAIR.bord}` }}>
+          <span style={entete}>#</span>
+          <span style={{ ...entete, textAlign: 'left' }}>{t('matchDetail.mt.equipe')}</span>
+          {['j', 'db', 'pts'].map(c => <span key={c} style={entete}>{t(`classement.col.${c}`)}</span>)}
+        </div>
+        {lignes.map((l, i) => {
+          const rang = l.position ?? i + 1;
+          const couleurZone = COULEUR_ZONE[zonesLignes[i]] ?? 'transparent';
+          const finDeZone = i < total - 1 && zonesLignes[i] !== zonesLignes[i + 1];
+          const id = idEquipe(l.brut);
+          return (
+            <Link key={`${l.nom}-${rang}`} to={id != null ? `/equipes/${id}?saison=${annee}` : '#'}
+              style={{
+                display: 'grid', gridTemplateColumns: COLONNES_MOBILE, gap: '6px', alignItems: 'center',
+                padding: '10px 12px', textDecoration: 'none', color: CLAIR.texte,
+                borderTop: i ? `1px solid ${CLAIR.bord}` : 'none',
+                boxShadow: `inset 4px 0 0 ${couleurZone}`,
+                borderBottom: finDeZone ? `2px dashed ${CLAIR.bord}` : undefined,
+              }}>
+              <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                <span style={{ fontWeight: 800, fontSize: '15px' }}>{rang}</span>
+                <Evolution valeur={l.evolution} />
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                {l.logo
+                  ? <img src={l.logo} alt="" style={{ width: '26px', height: '26px', objectFit: 'contain', flexShrink: 0 }} />
+                  : <span style={{ width: '26px', height: '26px', borderRadius: '50%', backgroundColor: CLAIR.tuile, flexShrink: 0 }} />}
+                <span style={{ minWidth: 0 }}>
+                  <span style={{ display: 'block', fontSize: '15px', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.nom}</span>
+                  <span style={{ display: 'block', fontSize: '11px', color: CLAIR.doux, fontWeight: 600 }}>
+                    <span style={{ color: theme.green }}>{l.v ?? 0}{t('classement.abrV')}</span>
+                    {' · '}{l.n ?? 0}{t('classement.abrN')}
+                    {' · '}<span style={{ color: theme.red }}>{l.d ?? 0}{t('classement.abrD')}</span>
+                  </span>
+                </span>
+              </span>
+              <span style={{ textAlign: 'center', fontSize: '14px', color: '#3d4441' }}>{l.j ?? '–'}</span>
+              <span style={{ textAlign: 'center', fontSize: '14px', color: l.db > 0 ? theme.green : l.db < 0 ? theme.red : '#3d4441' }}>
+                {l.db == null ? '–' : l.db > 0 ? `+${l.db}` : l.db}
+              </span>
+              <span style={{ textAlign: 'center', fontFamily: CHIFFRES, fontSize: '20px', fontWeight: 800 }}>{l.pts}</span>
+            </Link>
+          );
+        })}
+      </div>
+    );
+  }
 
   return (
     <div style={{ backgroundColor: CLAIR.carte, border: `1px solid ${CLAIR.bord}`, borderRadius: '14px', overflowX: 'auto' }}>
@@ -448,6 +503,7 @@ function Legende({ couleur, children }) {
 
 // ── Page ────────────────────────────────────────────────────────────────
 function ClassementPage() {
+  const mobile = useEcranMobile();
   const { t } = useTranslation();
   const [annee, setAnnee] = useState(ANNEE_ACTUELLE);
   // ?comp=two&joueur=Nom|Club#buteurs : arrivée depuis une carte buteur de l'accueil
@@ -579,28 +635,29 @@ function ClassementPage() {
   return (
     <div>
       {/* ── ZONE HAUTE ─────────────────────────────────────────────────── */}
-      <section style={{ position: 'relative', overflow: 'hidden', background: FOND_BANDE, padding: '48px 0 56px' }}>
+      <section style={{ position: 'relative', overflow: 'hidden', background: FOND_BANDE, padding: mobile ? '28px 0 32px' : '48px 0 56px' }}>
         <EclatsBande />
         <div style={CONTENEUR}>
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_400px]" style={{ alignItems: 'center' }}>
+          <div className="grid grid-cols-1 gap-8 lg:gap-10 lg:grid-cols-[minmax(0,1fr)_400px]" style={{ alignItems: 'center' }}>
             {/* Gauche : saison, titre, championnat, légende */}
             <div>
               <SelecteurSaison annee={annee} onChange={setAnnee} />
-              <h1 style={{ color: '#fff', fontSize: '56px', fontWeight: 400, lineHeight: 1.05, margin: '14px 0 10px', fontFamily: 'var(--font-titres)' }}>
+              <h1 style={{ color: '#fff', fontSize: mobile ? '34px' : '56px', fontWeight: 400, lineHeight: 1.05, margin: mobile ? '12px 0 8px' : '14px 0 10px', fontFamily: 'var(--font-titres)' }}>
                 {t('classement.titre')}
               </h1>
               <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '15px', marginBottom: '24px', maxWidth: '420px', lineHeight: 1.5 }}>
                 {t('classement.sousTitre', { c: `MTN ${competition}`, s: libelleSaison(annee) })}
               </p>
 
-              <div style={{ display: 'inline-flex', padding: '4px', borderRadius: '999px', backgroundColor: 'rgba(0,0,0,0.28)', border: '1px solid rgba(255,255,255,0.12)', marginBottom: '24px' }}>
+              <div style={{ display: mobile ? 'flex' : 'inline-flex', padding: '4px', borderRadius: '999px', backgroundColor: 'rgba(0,0,0,0.28)', border: '1px solid rgba(255,255,255,0.12)', marginBottom: mobile ? '18px' : '24px' }}>
                 {COMPETITIONS.map(c => {
                   const actif = c.cle === comp;
                   return (
                     <button key={c.cle} onClick={() => setComp(c.cle)}
                       style={{
-                        padding: '10px 22px', borderRadius: '999px', border: 'none', cursor: 'pointer',
-                        fontSize: '14px', fontWeight: 700, letterSpacing: '0.5px',
+                        flex: mobile ? 1 : 'none', whiteSpace: 'nowrap',
+                        padding: mobile ? '10px 8px' : '10px 22px', borderRadius: '999px', border: 'none', cursor: 'pointer',
+                        fontSize: mobile ? '13px' : '14px', fontWeight: 700, letterSpacing: '0.5px',
                         backgroundColor: actif ? '#fff' : 'transparent',
                         color: actif ? '#0f3d26' : 'rgba(255,255,255,0.8)',
                         transition: 'all 0.2s ease',
@@ -629,7 +686,7 @@ function ClassementPage() {
       </section>
 
       {/* ── ZONE BASSE ─────────────────────────────────────────────────── */}
-      <section style={{ backgroundColor: CLAIR.fond, minHeight: '420px', padding: '36px 0 64px' }}>
+      <section style={{ backgroundColor: CLAIR.fond, minHeight: '420px', padding: mobile ? '24px 0 40px' : '36px 0 64px' }}>
         <div style={CONTENEUR}>
           {saisonId == null ? (
             <div style={{

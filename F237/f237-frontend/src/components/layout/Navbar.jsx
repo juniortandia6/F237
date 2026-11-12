@@ -389,11 +389,12 @@ const Navbar = () => {
 
             {/* ── Barre d'onglets du bas (téléphone / tablette) ───────── */}
             <nav
-                className="xl:hidden"
+                // display vient de la classe (pas du style en ligne) : sinon xl:hidden ne masquerait pas la barre
+                className="grid xl:hidden"
                 aria-label={t('nav.navigation')}
                 style={{
                     position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 50,
-                    display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)',
+                    gridTemplateColumns: 'repeat(5, 1fr)',
                     height: `calc(${HAUTEUR_ONGLETS}px + env(safe-area-inset-bottom))`,
                     paddingBottom: 'env(safe-area-inset-bottom)',
                     backgroundColor: theme.bgDeep, borderTop: `1px solid ${theme.border}`,

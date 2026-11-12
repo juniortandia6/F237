@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../contexts/AuthContext";
 import { Loader2, AlertCircle, Eye, EyeOff, Mail, Lock, Trophy, Target, Coins, ArrowRight } from "lucide-react";
 import theme from "../theme";
+import { useEcranMobile } from '../hooks/useEcranMobile';
 
 const CLAIR = {
   texte: "#141414",
@@ -74,6 +75,7 @@ const AVANTAGES = [
 ];
 
 function LoginPage() {
+  const mobile = useEcranMobile();
   const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [motDePasse, setMotDePasse] = useState("");
@@ -102,7 +104,7 @@ function LoginPage() {
     <section style={{ position: "relative", overflow: "hidden", background: FOND_BANDE, minHeight: "calc(100vh - 100px)", display: "flex", alignItems: "center", padding: "56px 0" }}>
       <EclatsBande />
 
-      <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_440px]"
+      <div className="grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1fr)_440px]"
         style={{ position: "relative", width: "100%", maxWidth: "1150px", margin: "0 auto", padding: "0 var(--marge-page)", boxSizing: "content-box", alignItems: "center" }}>
 
         {/* ── Gauche : message + avantages ─────────────────────────────── */}
@@ -110,7 +112,7 @@ function LoginPage() {
           <p style={{ color: theme.yellow, fontSize: "13px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", marginBottom: "10px" }}>
             {t('auth.login.surtitre')}
           </p>
-          <h1 style={{ color: "#fff", fontSize: "60px", fontWeight: 400, lineHeight: 1.05, marginBottom: "14px", fontFamily: 'var(--font-titres)' }}>
+          <h1 style={{ color: "#fff", fontSize: mobile ? "36px" : "60px", fontWeight: 400, lineHeight: 1.05, marginBottom: "14px", fontFamily: 'var(--font-titres)' }}>
             {t('auth.login.titre')}
           </h1>
           <p style={{ color: "rgba(255,255,255,0.72)", fontSize: "17px", lineHeight: 1.55, maxWidth: "460px", marginBottom: "32px" }}>

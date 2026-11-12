@@ -212,7 +212,7 @@ function ProfilPage() {
       {/* ── ZONE BASSE ─────────────────────────────────────────────────── */}
       <section style={{ backgroundColor: CLAIR.fond, minHeight: '420px', padding: '36px 0 64px' }}>
         <div style={CONTENEUR}>
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]" style={{ alignItems: 'start' }}>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px]" style={{ alignItems: 'start' }}>
 
             {/* Historique des paris */}
             <Carte titre={t('profil.historique')} icone={Target}>

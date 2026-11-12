@@ -14,6 +14,7 @@ import { useLiveScores } from '../hooks/useLiveScores';
 import { TOUS_LES_SAISON_IDS, infosSaison, libelleSaison } from '../data/saisons';
 import theme from '../theme';
 import { etatMatch } from '../data/statutMatch';
+import { useEcranMobile } from '../hooks/useEcranMobile';
 
 // ── Couleurs de la zone claire (mêmes que MatchsPage) ───────────────────
 const CLAIR = {
@@ -99,14 +100,15 @@ function Logo({ equipe, taille }) {
 // ── Équipe dans la zone haute : logo, nom, buteurs ──────────────────────
 function EquipeHero({ equipe, buts, alignement }) {
   const { t } = useTranslation();
+  const mobile = useEcranMobile();
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '14px', minWidth: 0 }}>
-      <Logo equipe={equipe} taille={110} />
-      <div style={{ color: '#fff', fontSize: '24px', fontWeight: 800, lineHeight: 1.2 }}>{equipe?.nom ?? '—'}</div>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: mobile ? '8px' : '14px', minWidth: 0 }}>
+      <Logo equipe={equipe} taille={mobile ? 60 : 110} />
+      <div style={{ color: '#fff', fontSize: mobile ? '15px' : '24px', fontWeight: 800, lineHeight: 1.2, overflowWrap: 'anywhere' }}>{equipe?.nom ?? '—'}</div>
       {buts.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: alignement }}>
           {buts.map((b, i) => (
-            <span key={i} style={{ color: 'rgba(255,255,255,0.75)', fontSize: '13px' }}>
+            <span key={i} style={{ color: 'rgba(255,255,255,0.75)', fontSize: mobile ? '12px' : '13px', lineHeight: 1.35 }}>
               ⚽ <LienButeur b={b} /> {minuteBut(b)}
               {b.estPenalty && <span style={{ color: theme.greenBright, fontWeight: 700 }}> ({t('matchDetail.pen')})</span>}
               {b.estButCSC && <span style={{ color: '#ff8a8d', fontWeight: 700 }}> ({t('matchDetail.csc')})</span>}
@@ -121,6 +123,7 @@ function EquipeHero({ equipe, buts, alignement }) {
 // ── Boîte du score au centre ────────────────────────────────────────────
 function BoiteScore({ m }) {
   const { t } = useTranslation();
+  const mobile = useEcranMobile();
   const etat = etatMatch(m);
   const termine = etat === 'termine', live = etat === 'live';
   const joue = termine || live;
@@ -137,18 +140,18 @@ function BoiteScore({ m }) {
 
   // Petit triangle rouge sur le côté du gagnant (comme chez FIBA)
   const triangle = (cote) => ({
-    position: 'absolute', top: '38px', [cote]: '-9px', width: 0, height: 0,
+    position: 'absolute', top: mobile ? '22px' : '38px', [cote]: '-9px', width: 0, height: 0,
     borderTop: '9px solid transparent', borderBottom: '9px solid transparent',
     [cote === 'left' ? 'borderRight' : 'borderLeft']: `9px solid ${theme.red}`,
   });
 
   return (
-    <div style={{ position: 'relative', minWidth: '170px' }}>
+    <div style={{ position: 'relative', minWidth: mobile ? '104px' : '170px' }}>
       <div style={{ backgroundColor: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 12px 30px rgba(0,0,0,0.3)' }}>
-        <div style={{ padding: '14px 24px 10px', textAlign: 'center', fontFamily: CHIFFRES, fontWeight: 800, color: CLAIR.texte, fontSize: joue ? '56px' : '44px', lineHeight: 1 }}>
+        <div style={{ padding: mobile ? '10px 12px 8px' : '14px 24px 10px', textAlign: 'center', fontFamily: CHIFFRES, fontWeight: 800, color: CLAIR.texte, fontSize: mobile ? (joue ? '36px' : '30px') : (joue ? '56px' : '44px'), lineHeight: 1, whiteSpace: 'nowrap' }}>
           {joue ? `${m.scoreDomicile ?? 0} - ${m.scoreExterieur ?? 0}` : heure(m.dateMatch)}
         </div>
-        <div style={{ backgroundColor: bandeau.fond, color: bandeau.couleur, textAlign: 'center', padding: '6px 0', fontSize: '14px', fontWeight: 800, letterSpacing: '1px' }}>
+        <div style={{ backgroundColor: bandeau.fond, color: bandeau.couleur, textAlign: 'center', padding: mobile ? '5px 4px' : '6px 0', fontSize: mobile ? '11px' : '14px', fontWeight: 800, letterSpacing: mobile ? '0.5px' : '1px' }}>
           {live && <span className="animate-pulse" style={{ display: 'inline-block', width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#fff', marginRight: '7px', verticalAlign: 'middle' }} />}
           {bandeau.texte}
         </div>
@@ -405,6 +408,7 @@ function Chronologie({ m }) {
 
 // ── Onglet Face-à-face ──────────────────────────────────────────────────
 function FaceAFace({ m, tous }) {
+  const mobile = useEcranMobile();
   const { t } = useTranslation();
   const nomA = m.equipeDomicile?.nom, nomB = m.equipeExterieur?.nom;
   const confrontations = tous
@@ -445,15 +449,15 @@ function FaceAFace({ m, tous }) {
           return (
             <Link key={x.id} to={`/matchs/${x.id}`} state={{ match: x }}
               style={{
-                display: 'grid', gridTemplateColumns: '110px 1fr auto 1fr', alignItems: 'center', gap: '12px',
-                padding: '14px 20px', borderTop: i ? `1px solid ${CLAIR.bord}` : 'none', textDecoration: 'none',
+                display: 'grid', gridTemplateColumns: mobile ? '58px minmax(0,1fr) auto minmax(0,1fr)' : '110px 1fr auto 1fr', alignItems: 'center', gap: mobile ? '8px' : '12px',
+                padding: mobile ? '12px 14px' : '14px 20px', fontSize: mobile ? '13px' : undefined, borderTop: i ? `1px solid ${CLAIR.bord}` : 'none', textDecoration: 'none',
                 backgroundColor: actuel ? '#e8f3ec' : 'transparent', color: CLAIR.texte,
               }}>
               <span style={{ fontSize: '12px', color: CLAIR.doux, fontWeight: 600 }}>
-                {new Date(x.dateMatch).toLocaleDateString(locale(), { day: '2-digit', month: 'short', year: 'numeric' })}
+                {new Date(x.dateMatch).toLocaleDateString(locale(), mobile ? { day: '2-digit', month: '2-digit', year: '2-digit' } : { day: '2-digit', month: 'short', year: 'numeric' })}
               </span>
               <span style={{ textAlign: 'right', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{x.equipeDomicile?.nom}</span>
-              <span style={{ fontFamily: CHIFFRES, fontWeight: 800, fontSize: '18px', backgroundColor: CLAIR.tuile, borderRadius: '6px', padding: '3px 12px', minWidth: '62px', textAlign: 'center' }}>
+              <span style={{ fontFamily: CHIFFRES, fontWeight: 800, fontSize: mobile ? '16px' : '18px', backgroundColor: CLAIR.tuile, borderRadius: '6px', padding: mobile ? '3px 8px' : '3px 12px', minWidth: mobile ? '50px' : '62px', textAlign: 'center' }}>
                 {joue ? `${x.scoreDomicile} - ${x.scoreExterieur}` : heure(x.dateMatch)}
               </span>
               <span style={{ fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{x.equipeExterieur?.nom}</span>
@@ -525,6 +529,7 @@ function InfosMatch({ m, saison }) {
 const ONGLETS = ['apercu', 'chrono', 'h2h'];
 
 function MatchDetailPage() {
+  const mobile = useEcranMobile();
   const { t } = useTranslation();
   const { id } = useParams();
   const location = useLocation();
@@ -589,7 +594,7 @@ function MatchDetailPage() {
   return (
     <div>
       {/* ── ZONE HAUTE ─────────────────────────────────────────────────── */}
-      <section style={{ position: 'relative', overflow: 'hidden', background: FOND_BANDE, padding: '28px 0 56px' }}>
+      <section style={{ position: 'relative', overflow: 'hidden', background: FOND_BANDE, padding: mobile ? '20px 0 32px' : '28px 0 56px' }}>
         <EclatsBande />
         <div style={CONTENEUR}>
           {/* Fil d'Ariane */}
@@ -618,9 +623,9 @@ function MatchDetailPage() {
           </div>
 
           {/* Équipes + score */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'start', gap: '40px', maxWidth: '860px', margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto minmax(0,1fr)', alignItems: 'start', gap: mobile ? '10px' : '40px', maxWidth: '860px', margin: '0 auto' }}>
             <EquipeHero equipe={m.equipeDomicile} buts={butsDe(m, 'dom')} alignement="center" />
-            <div style={{ paddingTop: '14px' }}><BoiteScore m={m} /></div>
+            <div style={{ paddingTop: mobile ? '8px' : '14px' }}><BoiteScore m={m} /></div>
             <EquipeHero equipe={m.equipeExterieur} buts={butsDe(m, 'ext')} alignement="center" />
           </div>
         </div>
@@ -647,9 +652,9 @@ function MatchDetailPage() {
       </div>
 
       {/* ── ZONE BASSE ─────────────────────────────────────────────────── */}
-      <section style={{ backgroundColor: CLAIR.fond, minHeight: '420px', padding: '32px 0 64px' }}>
+      <section style={{ backgroundColor: CLAIR.fond, minHeight: '420px', padding: mobile ? '20px 0 40px' : '32px 0 64px' }}>
         <div style={CONTENEUR}>
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]" style={{ alignItems: 'start' }}>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]" style={{ alignItems: 'start' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {onglet === 'apercu' && (
                 <>

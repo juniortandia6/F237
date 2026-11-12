@@ -14,6 +14,7 @@ import SelecteurSaison from '../components/SelecteurSaison';
 import { useLiveScores } from '../hooks/useLiveScores';
 import theme from '../theme';
 import { etatMatch } from '../data/statutMatch';
+import { useEcranMobile } from '../hooks/useEcranMobile';
 
 // ── Couleurs de la zone claire ──────────────────────────────────────────
 const CLAIR = {
@@ -60,18 +61,19 @@ function EclatsBande() {
 
 // ── Petit interrupteur (comme "Masquer les scores" / "En direct" chez FIBA) ──
 function Interrupteur({ actif, onChange, icone: Icone, children }) {
+  const mobile = useEcranMobile();
   return (
     <button
       onClick={() => onChange(!actif)}
       aria-pressed={actif}
       style={{
-        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-        padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer',
-        color: CLAIR.doux, fontSize: '14px', fontWeight: 600,
+        flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: mobile ? '8px' : '10px',
+        padding: mobile ? '12px 10px' : '14px 16px', background: 'none', border: 'none', cursor: 'pointer',
+        color: CLAIR.doux, fontSize: mobile ? '13px' : '14px', fontWeight: 600, lineHeight: 1.2,
       }}
     >
-      <Icone size={16} />
-      {children}
+      {!mobile && <Icone size={16} />}
+      <span style={{ textAlign: 'left' }}>{children}</span>
       <span style={{
         position: 'relative', width: '44px', height: '24px', borderRadius: '999px', flexShrink: 0,
         backgroundColor: actif ? theme.green : '#d5dbd8', transition: 'background-color 0.2s ease',
@@ -137,23 +139,25 @@ function TuileDate({ cle, active, aujourdhui, nbMatchs, onClick }) {
 
 // ── Une ligne d'équipe dans une carte de match ──────────────────────────
 function LigneEquipe({ equipe, score, gagnant, perdant, masquer, aVenir }) {
+  const mobile = useEcranMobile();
   const couleur = perdant && !masquer ? CLAIR.perdant : CLAIR.texte;
+  const logo = mobile ? '24px' : '28px';
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: mobile ? '10px' : '12px', minWidth: 0 }}>
         {equipe?.logoUrl
-          ? <img src={equipe.logoUrl} alt="" style={{ width: '28px', height: '28px', objectFit: 'contain', flexShrink: 0 }} />
+          ? <img src={equipe.logoUrl} alt="" style={{ width: logo, height: logo, objectFit: 'contain', flexShrink: 0 }} />
           : <span style={{
-              width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#eceeed', flexShrink: 0,
+              width: logo, height: logo, borderRadius: '50%', backgroundColor: '#eceeed', flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800, color: CLAIR.doux,
             }}>{equipe?.nom?.substring(0, 2).toUpperCase()}</span>}
-        <span style={{ fontSize: '18px', fontWeight: 700, color: couleur, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <span style={{ fontSize: mobile ? '16px' : '18px', fontWeight: 700, color: couleur, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {equipe?.nom ?? '—'}
         </span>
       </div>
       {!aVenir && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-          <span style={{ fontSize: '20px', fontWeight: 800, color: couleur, minWidth: '26px', textAlign: 'right' }}>
+          <span style={{ fontSize: mobile ? '18px' : '20px', fontWeight: 800, color: couleur, minWidth: '22px', textAlign: 'right' }}>
             {masquer ? '–' : (score ?? '–')}
           </span>
           {/* Triangle rouge vers le score gagnant */}
@@ -172,6 +176,7 @@ function LigneEquipe({ equipe, score, gagnant, perdant, masquer, aVenir }) {
 function CarteMatch({ m, competition, masquer }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const mobile = useEcranMobile();
   // 'live' | 'termine' | 'aVenir' | 'reporte' | 'annule' | 'nonDispute'
   const etat = etatMatch(m);
   const termine = etat === 'termine';
@@ -198,12 +203,12 @@ function CarteMatch({ m, competition, masquer }) {
         overflow: 'hidden', cursor: 'pointer',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'stretch', padding: '16px 20px' }}>
+      <div style={{ display: 'flex', alignItems: 'stretch', padding: mobile ? '14px 14px 14px 16px' : '16px 20px' }}>
         {/* Gauche : en-tête + équipes */}
-        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '10px', paddingRight: '20px' }}>
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '10px', paddingRight: mobile ? '12px' : '20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '12px', fontWeight: 700, color: '#2c312e', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-              {journee ? `${t('matchs.journee', { n: journee })} · ` : ''}MTN {competition}
+            <span style={{ fontSize: mobile ? '11px' : '12px', fontWeight: 700, color: '#2c312e', textTransform: 'uppercase', letterSpacing: '0.4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {journee ? `${t('matchs.journee', { n: journee })} · ` : ''}{mobile ? '' : 'MTN '}{competition}
             </span>
             {live ? (
               <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 800, color: theme.red }}>
@@ -222,14 +227,14 @@ function CarteMatch({ m, competition, masquer }) {
 
         {/* Droite : séparateur + heure ou bouton détail */}
         <div style={{
-          borderLeft: `1px solid ${CLAIR.bord}`, paddingLeft: '20px', minWidth: '120px',
+          borderLeft: `1px solid ${CLAIR.bord}`, paddingLeft: mobile ? '12px' : '20px', minWidth: mobile ? '78px' : '120px',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px',
         }}>
           {sansScore ? (
             <>
               <span style={{
                 backgroundColor: aVenir || etat === 'reporte' ? CLAIR.texte : '#c9cfcc', color: '#fff',
-                textDecoration: etat === 'annule' ? 'line-through' : 'none', fontWeight: 800, fontSize: '16px', padding: '8px 14px', borderRadius: '8px' }}>
+                textDecoration: etat === 'annule' ? 'line-through' : 'none', fontWeight: 800, fontSize: mobile ? '15px' : '16px', padding: mobile ? '7px 10px' : '8px 14px', borderRadius: '8px' }}>
                 {heure(m.dateMatch)}
               </span>
               {aVenir && (
@@ -243,8 +248,8 @@ function CarteMatch({ m, competition, masquer }) {
             <span
               className="transition-colors"
               style={{
-                backgroundColor: '#eceeed', color: '#2c312e', borderRadius: '8px', padding: '9px 16px',
-                fontSize: '15px', fontWeight: 600,
+                backgroundColor: '#eceeed', color: '#2c312e', borderRadius: '8px', padding: mobile ? '8px 12px' : '9px 16px',
+                fontSize: mobile ? '14px' : '15px', fontWeight: 600,
               }}
               onMouseEnter={e => { e.currentTarget.style.backgroundColor = CLAIR.vert; e.currentTarget.style.color = '#fff'; }}
               onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#eceeed'; e.currentTarget.style.color = '#2c312e'; }}
@@ -334,6 +339,7 @@ function ResumeJournee({ matchs, masquer }) {
 // ── Page ────────────────────────────────────────────────────────────────
 const MatchsPage = () => {
   const { t } = useTranslation();
+  const mobile = useEcranMobile();
   const [matchs, setMatchs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [annee, setAnnee] = useState(ANNEE_ACTUELLE);
@@ -433,28 +439,30 @@ const MatchsPage = () => {
   return (
     <div>
       {/* ── ZONE HAUTE : fond sombre + calendrier ──────────────────────── */}
-      <section style={{ position: 'relative', overflow: 'hidden', background: FOND_BANDE, padding: '56px 0 64px' }}>
+      <section style={{ position: 'relative', overflow: 'hidden', background: FOND_BANDE, padding: mobile ? '28px 0 32px' : '56px 0 64px' }}>
         <EclatsBande />
 
         <div style={{ position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '0 var(--marge-page)', boxSizing: 'content-box' }}>
           {/* Titre + choix de la compétition */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '20px', flexWrap: 'wrap', marginBottom: '28px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: mobile ? '14px' : '20px', flexWrap: 'wrap', marginBottom: mobile ? '20px' : '28px' }}>
             <div>
               <SelecteurSaison annee={annee} onChange={a => changerSelection(a, comp)} />
-              <h1 style={{ color: '#fff', fontSize: '42px', fontWeight: 400, lineHeight: 1.1, fontFamily: 'var(--font-titres)' }}>
+              <h1 style={{ color: '#fff', fontSize: mobile ? '30px' : '42px', fontWeight: 400, lineHeight: 1.1, fontFamily: 'var(--font-titres)' }}>
                 {t('matchs.titre')}
               </h1>
             </div>
 
-            <div style={{ display: 'flex', padding: '4px', borderRadius: '999px', backgroundColor: 'rgba(0,0,0,0.28)', border: '1px solid rgba(255,255,255,0.12)' }}>
+            {/* Téléphone : le sélecteur prend toute la largeur, deux moitiés égales */}
+            <div style={{ display: 'flex', width: mobile ? '100%' : 'auto', padding: '4px', borderRadius: '999px', backgroundColor: 'rgba(0,0,0,0.28)', border: '1px solid rgba(255,255,255,0.12)' }}>
               {COMPETITIONS.map(c => {
                 const actif = c.cle === comp;
                 return (
                   <button key={c.cle}
                     onClick={() => changerSelection(annee, c.cle)}
                     style={{
-                      padding: '10px 22px', borderRadius: '999px', border: 'none', cursor: 'pointer',
-                      fontSize: '14px', fontWeight: 700, letterSpacing: '0.5px',
+                      flex: mobile ? 1 : 'none', whiteSpace: 'nowrap',
+                      padding: mobile ? '10px 8px' : '10px 22px', borderRadius: '999px', border: 'none', cursor: 'pointer',
+                      fontSize: mobile ? '13px' : '14px', fontWeight: 700, letterSpacing: '0.5px',
                       backgroundColor: actif ? '#fff' : 'transparent',
                       color: actif ? CLAIR.vertFonce : 'rgba(255,255,255,0.8)',
                       transition: 'all 0.2s ease',
@@ -468,8 +476,8 @@ const MatchsPage = () => {
 
           {/* Carte blanche du calendrier */}
           <div style={{ backgroundColor: '#fff', borderRadius: '16px', boxShadow: '0 16px 40px rgba(0,0,0,0.25)', overflow: 'hidden' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '20px 20px' }}>
-              <button onClick={() => scrollCal(-1)} aria-label={t('matchs.datesPrecedentes')} style={FLECHE}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: mobile ? '14px 12px' : '20px 20px' }}>
+              <button onClick={() => scrollCal(-1)} aria-label={t('matchs.datesPrecedentes')} className="fleche-carrousel" style={FLECHE}>
                 <ChevronLeft size={20} color="#222" />
               </button>
 
@@ -492,7 +500,7 @@ const MatchsPage = () => {
                 ))}
               </div>
 
-              <button onClick={() => scrollCal(1)} aria-label={t('matchs.datesSuivantes')} style={FLECHE}>
+              <button onClick={() => scrollCal(1)} aria-label={t('matchs.datesSuivantes')} className="fleche-carrousel" style={FLECHE}>
                 <ChevronRight size={20} color="#222" />
               </button>
             </div>
@@ -512,10 +520,10 @@ const MatchsPage = () => {
       </section>
 
       {/* ── ZONE BASSE : fond clair + matchs ───────────────────────────── */}
-      <section style={{ backgroundColor: CLAIR.fond, minHeight: '480px', padding: '36px 0 64px' }}>
+      <section style={{ backgroundColor: CLAIR.fond, minHeight: '480px', padding: mobile ? '24px 0 40px' : '36px 0 64px' }}>
         <div style={{ maxWidth: '1150px', margin: '0 auto', padding: '0 var(--marge-page)', boxSizing: 'content-box' }}>
           {/* Date affichée */}
-          <h2 style={{ fontSize: '22px', fontWeight: 800, color: CLAIR.texte, marginBottom: '18px', textTransform: 'capitalize' }}>
+          <h2 style={{ fontSize: mobile ? '18px' : '22px', fontWeight: 800, color: CLAIR.texte, marginBottom: mobile ? '14px' : '18px', textTransform: 'capitalize' }}>
             {directSeulement
               ? t('matchs.matchsEnDirect')
               : dateSelectionnee
@@ -548,8 +556,8 @@ const MatchsPage = () => {
               </button>
             </div>
           ) : (
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]" style={{ alignItems: 'start' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]" style={{ alignItems: 'start' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: mobile ? '12px' : '14px', minWidth: 0 }}>
               {loading ? (
                 <div style={{ textAlign: 'center', padding: '48px 0', color: CLAIR.doux }}>{t('commun.chargement')}</div>
               ) : matchsAffiches.length === 0 ? (

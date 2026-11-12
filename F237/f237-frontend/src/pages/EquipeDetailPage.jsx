@@ -19,6 +19,7 @@ import { COMPETITIONS, SAISONS_DB, ANNEE_ACTUELLE, libelleSaison } from '../data
 import SelecteurSaison from '../components/SelecteurSaison';
 import { getInfosClub } from '../data/clubsInfos';
 import theme from '../theme';
+import { useEcranMobile } from '../hooks/useEcranMobile';
 import { estAVenir } from '../data/statutMatch';
 import AvatarJoueur from '../components/AvatarJoueur';
 import { regrouperButeurs, classerButeurs } from '../data/buteurs';
@@ -125,8 +126,52 @@ function Tuile({ label, valeur, fort }) {
   );
 }
 
+// Téléphone : un match en 2 lignes (domicile au-dessus, extérieur dessous), score ou heure à droite
+function LigneMatchMobile({ to, state, pastille, date, dom, ext, droite, premier }) {
+  const equipe = (e) => (
+    <span style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+      {e.logo
+        ? <img src={e.logo} alt="" style={{ width: '20px', height: '20px', objectFit: 'contain', flexShrink: 0 }} />
+        : <span style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: CLAIR.tuile, flexShrink: 0 }} />}
+      <span style={{ fontSize: '14px', fontWeight: e.fort ? 800 : 600, color: e.fort ? CLAIR.texte : CLAIR.doux, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.nom}</span>
+    </span>
+  );
+  return (
+    <Link to={to} state={state}
+      style={{
+        display: 'grid', gridTemplateColumns: pastille ? '26px minmax(0,1fr) auto 14px' : 'minmax(0,1fr) auto 14px', alignItems: 'center', gap: '10px',
+        padding: '12px 14px', borderTop: premier ? 'none' : `1px solid ${CLAIR.bord}`, textDecoration: 'none', color: CLAIR.texte,
+      }}>
+      {pastille}
+      <span style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0 }}>
+        <span style={{ fontSize: '11px', fontWeight: 700, color: CLAIR.doux, textTransform: 'capitalize' }}>{date}</span>
+        {equipe(dom)}
+        {equipe(ext)}
+      </span>
+      {droite}
+      <ChevronRight size={14} color={CLAIR.doux} />
+    </Link>
+  );
+}
+
 // Ligne d'un match joué (format renvoyé par /equipes/:id -> derniersMatchs)
 function LigneMatch({ m, premier }) {
+  const mobile = useEcranMobile();
+  if (mobile) {
+    return (
+      <LigneMatchMobile to={`/matchs/${m.matchId}`} premier={premier}
+        pastille={<PastilleResultat r={m.resultat} />}
+        date={dateCourte(m.dateMatch)}
+        dom={{ nom: m.equipeDomicile, logo: m.logoDomicile, fort: m.estDomicile }}
+        ext={{ nom: m.equipeExterieur, logo: m.logoExterieur, fort: !m.estDomicile }}
+        droite={(
+          <span style={{ display: 'flex', flexDirection: 'column', gap: '5px', paddingTop: '16px', fontFamily: CHIFFRES, fontSize: '17px', fontWeight: 800, textAlign: 'right', lineHeight: '20px' }}>
+            <span>{m.scoreDomicile ?? '–'}</span>
+            <span>{m.scoreExterieur ?? '–'}</span>
+          </span>
+        )} />
+    );
+  }
   return (
     <Link to={`/matchs/${m.matchId}`}
       className="transition-colors hover:bg-[#f7f9f8]"
@@ -154,6 +199,20 @@ function LigneMatch({ m, premier }) {
 
 // Ligne d'un match à venir (format de matchService.getBySaison)
 function LigneAVenir({ m, premier }) {
+  const mobile = useEcranMobile();
+  if (mobile) {
+    return (
+      <LigneMatchMobile to={`/matchs/${m.id}`} state={{ match: m }} premier={premier}
+        date={dateCourte(m.dateMatch)}
+        dom={{ nom: m.equipeDomicile?.nom, logo: m.equipeDomicile?.logoUrl, fort: true }}
+        ext={{ nom: m.equipeExterieur?.nom, logo: m.equipeExterieur?.logoUrl, fort: true }}
+        droite={(
+          <span style={{ fontSize: '13px', fontWeight: 800, backgroundColor: CLAIR.texte, color: '#fff', borderRadius: '6px', padding: '5px 8px' }}>
+            {heure(m.dateMatch)}
+          </span>
+        )} />
+    );
+  }
   return (
     <Link to={`/matchs/${m.id}`} state={{ match: m }}
       className="transition-colors hover:bg-[#f7f9f8]"
@@ -562,6 +621,7 @@ function trouverSaisonClub(donnees, idClub) {
 
 // ── Page ────────────────────────────────────────────────────────────────
 function EquipeDetailPage() {
+  const mobile = useEcranMobile();
   const { t, i18n } = useTranslation();
   const { id } = useParams();
   const [parametres, setParametres] = useSearchParams();
@@ -710,7 +770,7 @@ function EquipeDetailPage() {
   return (
     <div>
       {/* ── ZONE HAUTE ─────────────────────────────────────────────────── */}
-      <section style={{ position: 'relative', overflow: 'hidden', background: FOND_BANDE, padding: '28px 0 48px' }}>
+      <section style={{ position: 'relative', overflow: 'hidden', background: FOND_BANDE, padding: mobile ? '20px 0 28px' : '28px 0 48px' }}>
         {/* Photo du stade, fondue dans le dégradé à droite */}
         {infos.stadeImage && (
           <img src={infos.stadeImage} alt="" aria-hidden="true"
@@ -742,12 +802,12 @@ function EquipeDetailPage() {
           <SelecteurSaison annee={annee} onChange={changerSaison} />
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '28px', flexWrap: 'wrap' }}>
-            {/* Logo + nom + infos */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '26px', minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: mobile ? '20px' : '28px', flexWrap: 'wrap' }}>
+            {/* Logo + nom + infos (téléphone : logo au-dessus du nom) */}
+            <div style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', alignItems: mobile ? 'flex-start' : 'center', gap: mobile ? '16px' : '26px', minWidth: 0, width: mobile ? '100%' : 'auto' }}>
               <span style={{
-                width: '128px', height: '128px', borderRadius: '24px', backgroundColor: '#fff', flexShrink: 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '14px', boxShadow: '0 14px 34px rgba(0,0,0,0.3)',
+                width: mobile ? '84px' : '128px', height: mobile ? '84px' : '128px', borderRadius: mobile ? '18px' : '24px', backgroundColor: '#fff', flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', padding: mobile ? '10px' : '14px', boxShadow: '0 14px 34px rgba(0,0,0,0.3)',
               }}>
                 {data.logoUrl && logoOk
                   ? <img src={data.logoUrl} alt={data.nom} onError={() => setLogoOk(false)} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
@@ -760,10 +820,10 @@ function EquipeDetailPage() {
                 }}>
                   MTN {eliteOne ? 'ELITE ONE' : 'ELITE TWO'}
                 </span>
-                <h1 style={{ color: '#fff', fontSize: '52px', fontWeight: 400, lineHeight: 1.05, fontFamily: MARQUEUR, marginBottom: '12px' }}>
+                <h1 style={{ color: '#fff', fontSize: mobile ? '34px' : '52px', fontWeight: 400, lineHeight: 1.05, fontFamily: MARQUEUR, marginBottom: '12px', overflowWrap: 'anywhere' }}>
                   {data.nom}
                 </h1>
-                <div style={{ display: 'flex', gap: '18px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: mobile ? '8px 16px' : '18px', flexWrap: 'wrap' }}>
                   {(infos.ville ?? club?.ville) && infoHero(MapPin, infos.ville ?? club.ville)}
                   {(infos.anneeCreation ?? club?.fondation) && infoHero(Calendar, t('equipe.fondeEnAnnee', { a: infos.anneeCreation ?? club.fondation }))}
                   {(infos.stadeNom ?? club?.stade) && infoHero(Building2, infos.stadeNom ?? club.stade)}
@@ -784,12 +844,12 @@ function EquipeDetailPage() {
             {/* Position + points, en verre dépoli */}
             {classement && (
               <div style={{
-                display: 'flex', borderRadius: '16px', overflow: 'hidden',
+                display: 'flex', borderRadius: '16px', overflow: 'hidden', width: mobile ? '100%' : 'auto',
                 backgroundColor: 'rgba(0,0,0,0.28)', border: '1px solid rgba(255,255,255,0.14)', backdropFilter: 'blur(6px)',
               }}>
                 {[[t('equipe.position'), `#${classement.position}`], [t('equipe.points'), classement.points]].map(([label, val], i) => (
-                  <div key={label} style={{ padding: '16px 26px', textAlign: 'center', borderLeft: i ? '1px solid rgba(255,255,255,0.14)' : 'none' }}>
-                    <div style={{ fontFamily: CHIFFRES, fontSize: '44px', fontWeight: 800, color: '#fff', lineHeight: 1 }}>{val}</div>
+                  <div key={label} style={{ flex: mobile ? 1 : 'none', padding: mobile ? '12px 16px' : '16px 26px', textAlign: 'center', borderLeft: i ? '1px solid rgba(255,255,255,0.14)' : 'none' }}>
+                    <div style={{ fontFamily: CHIFFRES, fontSize: mobile ? '36px' : '44px', fontWeight: 800, color: '#fff', lineHeight: 1 }}>{val}</div>
                     <div style={{ marginTop: '4px', fontSize: '11px', fontWeight: 800, color: 'rgba(255,255,255,0.65)', letterSpacing: '1px', textTransform: 'uppercase' }}>{label}</div>
                   </div>
                 ))}
@@ -801,15 +861,15 @@ function EquipeDetailPage() {
 
       {/* ── ONGLETS ────────────────────────────────────────────────────── */}
       <div style={{ backgroundColor: '#fff', borderBottom: `1px solid ${CLAIR.bord}` }}>
-        <div style={{ ...CONTENEUR, display: 'flex', gap: '8px', overflowX: 'auto' }}>
+        <div style={{ ...CONTENEUR, display: 'flex', gap: mobile ? '2px' : '8px', overflowX: 'auto', scrollbarWidth: 'none' }}>
           {ONGLETS.map(o => {
             const actif = o.cle === onglet;
             return (
               <button key={o.cle} onClick={() => setOngletChoisi({ id, cle: o.cle })}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '7px', whiteSpace: 'nowrap',
-                  padding: '16px 10px', margin: '0 6px', background: 'none', border: 'none', cursor: 'pointer',
-                  fontSize: '15px', fontWeight: actif ? 700 : 500, color: actif ? CLAIR.vert : '#4a514d',
+                  padding: mobile ? '14px 6px' : '16px 10px', margin: mobile ? '0 4px' : '0 6px', background: 'none', border: 'none', cursor: 'pointer',
+                  fontSize: mobile ? '14px' : '15px', fontWeight: actif ? 700 : 500, color: actif ? CLAIR.vert : '#4a514d',
                   borderBottom: `3px solid ${actif ? CLAIR.vert : 'transparent'}`,
                 }}>
                 {t(`equipe.onglets.${o.cle}`)}
@@ -823,10 +883,10 @@ function EquipeDetailPage() {
       </div>
 
       {/* ── ZONE BASSE ─────────────────────────────────────────────────── */}
-      <section style={{ backgroundColor: CLAIR.fond, minHeight: '420px', padding: '32px 0 64px' }}>
+      <section style={{ backgroundColor: CLAIR.fond, minHeight: '420px', padding: mobile ? '20px 0 40px' : '32px 0 64px' }}>
         <div style={CONTENEUR}>
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]" style={{ alignItems: 'start' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]" style={{ alignItems: 'start' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: mobile ? '16px' : '20px', minWidth: 0 }}>
               {onglet === 'apercu' && <OngletApercu classement={classement} derniersMatchs={derniersMatchs} annee={annee} chargement={chargementSaison} />}
               {onglet === 'matchs' && <OngletMatchs derniersMatchs={resultats} aVenir={aVenir} chargement={chargementSaison} />}
               {onglet === 'effectif' && <OngletEffectif effectif={effectif} club={data.nom} annee={annee} />}

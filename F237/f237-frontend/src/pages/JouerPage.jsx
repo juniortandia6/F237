@@ -12,6 +12,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { matchService } from '../services/matchService';
 import { COMPETITIONS, SAISONS_DB, ANNEE_ACTUELLE } from '../data/saisons';
 import theme from '../theme';
+import { useEcranMobile } from '../hooks/useEcranMobile';
 
 // ── Couleurs de la zone claire (mêmes que les autres pages) ─────────────
 const CLAIR = {
@@ -104,6 +105,8 @@ const COTES = [
 // ── Une ligne de pari (match + cotes, mise dépliée quand une cote est choisie) ──
 function LignePari({ p, selection, onSelection, mise, onMise, solde, premiere }) {
   const { t } = useTranslation();
+  // Téléphone : date + équipes sur une ligne, les 3 cotes en dessous sur toute la largeur
+  const mobile = useEcranMobile();
   const miseMax = Math.max(MISE_MIN, Math.min(solde, MISE_MAX));
   const miseActuelle = Math.min(mise ?? MISE_DEFAUT, miseMax);
   const coteChoisie = COTES.find(c => c.type === selection);
@@ -113,7 +116,7 @@ function LignePari({ p, selection, onSelection, mise, onMise, solde, premiere })
 
   return (
     <div style={{ borderTop: premiere ? 'none' : `1px solid ${CLAIR.bord}`, backgroundColor: selection ? '#f6faf7' : CLAIR.carte, transition: 'background-color 0.2s ease' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: GRILLE_PARI, alignItems: 'center', gap: '16px', padding: '14px 20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: mobile ? '52px minmax(0,1fr)' : GRILLE_PARI, alignItems: 'center', gap: mobile ? '10px 12px' : '16px', padding: mobile ? '12px 14px' : '14px 20px' }}>
         {/* Date / heure */}
         <Link to={`/matchs/${p.id}`} style={{ textDecoration: 'none', textAlign: 'center' }} title={t('jouer.voirMatch')}>
           <div style={{ fontSize: '11px', fontWeight: 700, color: CLAIR.doux, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
@@ -133,7 +136,7 @@ function LignePari({ p, selection, onSelection, mise, onMise, solde, premiere })
         </Link>
 
         {/* Cotes 1 / X / 2 */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', gridColumn: mobile ? '1 / -1' : 'auto' }}>
           {COTES.map(c => {
             const actif = selection === c.type;
             return (
@@ -157,11 +160,11 @@ function LignePari({ p, selection, onSelection, mise, onMise, solde, premiere })
 
       {/* Mise + validation (seulement quand une cote est choisie) */}
       {selection && (
-        <div style={{ padding: '0 20px 16px' }}>
+        <div style={{ padding: mobile ? '0 14px 14px' : '0 20px 16px' }}>
           {pasAssez ? (
             <p style={{ fontSize: '13px', color: theme.red, fontWeight: 600 }}>{t('jouer.soldeInsuffisant', { n: MISE_MIN })}</p>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', alignItems: 'center', gap: '16px', padding: '12px 14px', borderRadius: '12px', backgroundColor: '#fff', border: `1px solid ${CLAIR.bord}` }}>
+            <div style={{ display: 'grid', gridTemplateColumns: mobile ? 'minmax(0,1fr)' : 'minmax(0,1fr) auto', alignItems: 'center', gap: mobile ? '12px' : '16px', padding: '12px 14px', borderRadius: '12px', backgroundColor: '#fff', border: `1px solid ${CLAIR.bord}` }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <span style={{ fontSize: '11px', fontWeight: 800, color: CLAIR.doux, letterSpacing: '0.6px' }}>{t('jouer.miseMaj')}</span>
                 <input type="range" min={MISE_MIN} max={miseMax} step={10} value={miseActuelle}
@@ -175,7 +178,7 @@ function LignePari({ p, selection, onSelection, mise, onMise, solde, premiere })
                 style={{
                   padding: '11px 18px', borderRadius: '999px', border: 'none', cursor: 'pointer',
                   backgroundColor: theme.green, color: '#fff', fontSize: '14px', fontWeight: 800,
-                  display: 'flex', alignItems: 'center', gap: '10px', whiteSpace: 'nowrap',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', whiteSpace: mobile ? 'normal' : 'nowrap', flexWrap: 'wrap',
                   boxShadow: '0 8px 18px rgba(31,157,85,0.3)',
                 }}>
                 {t('jouer.parier', { n: miseActuelle, choix: nomChoix })}
@@ -195,6 +198,7 @@ function LignePari({ p, selection, onSelection, mise, onMise, solde, premiere })
 // ── Une journée d'une compétition ───────────────────────────────────────
 function BlocJournee({ competition, journee, rang, enfants }) {
   const { t } = useTranslation();
+  const mobile = useEcranMobile();
   const titre = journee.numero != null
     ? t('matchs.journee', { n: journee.numero })
     : rang === 0 ? t('jouer.prochaineJournee') : t('jouer.journeeSuivante');
@@ -202,7 +206,7 @@ function BlocJournee({ competition, journee, rang, enfants }) {
     <div style={{ backgroundColor: CLAIR.carte, border: `1px solid ${CLAIR.bord}`, borderRadius: '16px', overflow: 'hidden', boxShadow: '0 1px 2px rgba(20,40,30,0.04)' }}>
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap',
-        padding: '12px 20px', background: `linear-gradient(90deg, ${CLAIR.vert}, #1c6b3e)`, color: '#fff',
+        padding: mobile ? '12px 14px' : '12px 20px', background: `linear-gradient(90deg, ${CLAIR.vert}, #1c6b3e)`, color: '#fff',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span style={{ padding: '3px 9px', borderRadius: '6px', backgroundColor: 'rgba(255,255,255,0.16)', fontSize: '11px', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase' }}>
@@ -217,14 +221,14 @@ function BlocJournee({ competition, journee, rang, enfants }) {
           </span>
         </span>
       </div>
-      {/* En-tête des colonnes */}
-      <div style={{ display: 'grid', gridTemplateColumns: GRILLE_PARI, gap: '16px', padding: '8px 20px', borderBottom: `1px solid ${CLAIR.bord}`, backgroundColor: '#fafbfa', fontSize: '11px', fontWeight: 800, color: CLAIR.doux, letterSpacing: '0.6px', textTransform: 'uppercase' }}>
+      {/* En-tête des colonnes (inutile sur téléphone : chaque cote porte son libellé 1 / X / 2) */}
+      {!mobile && <div style={{ display: 'grid', gridTemplateColumns: GRILLE_PARI, gap: '16px', padding: '8px 20px', borderBottom: `1px solid ${CLAIR.bord}`, backgroundColor: '#fafbfa', fontSize: '11px', fontWeight: 800, color: CLAIR.doux, letterSpacing: '0.6px', textTransform: 'uppercase' }}>
         <span style={{ textAlign: 'center' }}><Clock size={12} style={{ display: 'inline', verticalAlign: '-2px' }} /></span>
         <span>{t('jouer.match')}</span>
         <span style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', textAlign: 'center' }}>
           {COTES.map(c => <span key={c.type}>{t(`jouer.cotes.${c.type}`)}</span>)}
         </span>
-      </div>
+      </div>}
       {enfants}
     </div>
   );
@@ -240,16 +244,17 @@ const AVANTAGES = [
 ];
 
 function Presentation() {
+  const mobile = useEcranMobile();
   const { t } = useTranslation();
   return (
     <section style={{ position: 'relative', overflow: 'hidden', background: FOND_BANDE, minHeight: 'calc(100vh - 100px)', display: 'flex', alignItems: 'center', padding: '56px 0' }}>
       <EclatsBande />
-      <div className="grid gap-12 lg:grid-cols-2" style={{ ...CONTENEUR, width: '100%', alignItems: 'center' }}>
+      <div className="grid grid-cols-1 gap-12 lg:grid-cols-2" style={{ ...CONTENEUR, width: '100%', alignItems: 'center' }}>
         <div>
           <p style={{ color: theme.yellow, fontSize: '13px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '10px' }}>
             Fantasy F237
           </p>
-          <h1 style={{ color: '#fff', fontSize: '60px', fontWeight: 400, lineHeight: 1.05, marginBottom: '16px', fontFamily: MARQUEUR }}>
+          <h1 style={{ color: '#fff', fontSize: mobile ? '36px' : '60px', fontWeight: 400, lineHeight: 1.05, marginBottom: '16px', fontFamily: MARQUEUR }}>
             {t('jouer.slogan')}
           </h1>
           <p style={{ color: 'rgba(255,255,255,0.72)', fontSize: '17px', lineHeight: 1.55, maxWidth: '480px', marginBottom: '30px' }}>
@@ -297,6 +302,7 @@ function Presentation() {
 
 // ── Page ────────────────────────────────────────────────────────────────
 const JouerPage = () => {
+  const mobile = useEcranMobile();
   const { t } = useTranslation();
   const [mises, setMises] = useState({});
   const [selectionnes, setSelectionnes] = useState({});
@@ -365,13 +371,13 @@ const JouerPage = () => {
   return (
     <div>
       {/* ── ZONE HAUTE ─────────────────────────────────────────────────── */}
-      <section style={{ position: 'relative', overflow: 'hidden', background: FOND_BANDE, padding: '48px 0 52px' }}>
+      <section style={{ position: 'relative', overflow: 'hidden', background: FOND_BANDE, padding: mobile ? '28px 0 32px' : '48px 0 52px' }}>
         <EclatsBande />
         <div style={CONTENEUR}>
           <p style={{ color: theme.yellow, fontSize: '13px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '8px' }}>
             Fantasy F237
           </p>
-          <h1 style={{ color: '#fff', fontSize: '56px', fontWeight: 400, lineHeight: 1.05, marginBottom: '8px', fontFamily: MARQUEUR }}>
+          <h1 style={{ color: '#fff', fontSize: mobile ? '34px' : '56px', fontWeight: 400, lineHeight: 1.05, marginBottom: '8px', fontFamily: MARQUEUR }}>
             {t('jouer.salut', { prenom: user.prenom })}
           </h1>
           <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '16px', marginBottom: '30px' }}>
@@ -400,7 +406,7 @@ const JouerPage = () => {
       {/* ── ZONE BASSE ─────────────────────────────────────────────────── */}
       <section style={{ backgroundColor: CLAIR.fond, minHeight: '480px', padding: '36px 0 64px' }}>
         <div style={CONTENEUR}>
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]" style={{ alignItems: 'start' }}>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px]" style={{ alignItems: 'start' }}>
 
             {/* Paris disponibles : les 2 prochaines journées de chaque compétition */}
             <div>
