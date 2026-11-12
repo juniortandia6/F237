@@ -253,10 +253,14 @@ function OngletMatchs({ derniersMatchs, aVenir, chargement }) {
   );
 }
 
-function OngletEffectif({ effectif, club }) {
+function OngletEffectif({ effectif, club, annee }) {
   const { t } = useTranslation();
   if (effectif.length === 0) {
-    return <Carte><Vide>{t('equipe.effectifIndispo')}</Vide></Carte>;
+    // Saison passée : on ne garde pas l'historique des effectifs
+    const message = annee !== ANNEE_ACTUELLE
+      ? t('equipe.effectifSaisonPassee', { s: libelleSaison(annee) })
+      : t('equipe.effectifIndispo');
+    return <Carte><Vide>{message}</Vide></Carte>;
   }
   const groupes = [
     ...POSTES_ORDRE.map(p => ({ titre: t(`equipe.postes.${p}`), joueurs: effectif.filter(j => j.poste === p) })),
@@ -676,9 +680,11 @@ function EquipeDetailPage() {
   const classement = saisonClub?.classement ?? null;
   const derniersMatchs = resultats.slice(0, 5); // Aperçu + forme récente
   const palmares = data.palmares ?? [];
-  // Effectif : celui de l'admin s'il a été saisi, sinon celui de l'API-Football
+  // Effectif : celui de l'admin s'il a été saisi, sinon celui de l'API-Football.
+  // Ce sont les effectifs ACTUELS : pour une saison passée, on n'en a pas -> "non disponible".
+  const saisonActuelle = annee === ANNEE_ACTUELLE;
   const saisi = effectifF237.id === id ? effectifF237.joueurs : [];
-  const effectif = saisi.length ? saisi.map(versJoueurSite) : (data.effectif ?? []);
+  const effectif = !saisonActuelle ? [] : saisi.length ? saisi.map(versJoueurSite) : (data.effectif ?? []);
   // Championnat de la saison choisie (à défaut, la division actuelle du club)
   const eliteOne = saisonClub?.comp ? saisonClub.comp === 'one' : data.division === 0;
   // Histoire + palmarès (Wikipédia), dans la langue du site ; null si pas encore rédigé
@@ -823,7 +829,7 @@ function EquipeDetailPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {onglet === 'apercu' && <OngletApercu classement={classement} derniersMatchs={derniersMatchs} annee={annee} chargement={chargementSaison} />}
               {onglet === 'matchs' && <OngletMatchs derniersMatchs={resultats} aVenir={aVenir} chargement={chargementSaison} />}
-              {onglet === 'effectif' && <OngletEffectif effectif={effectif} club={data.nom} />}
+              {onglet === 'effectif' && <OngletEffectif effectif={effectif} club={data.nom} annee={annee} />}
               {onglet === 'histoire' && <OngletHistoire club={club} />}
               {onglet === 'palmares' && <OngletPalmares palmares={palmares} club={club} />}
             </div>

@@ -305,7 +305,7 @@
     "aucunJoue": "No matches played yet.",
     "aucunProgramme": "No matches scheduled right now.",
     "resultatsRecents": "Recent results",
-    "effectifIndispo": "Squad not available in the API for this season.",
+    "effectifIndispo": "Squad not available for this season.",
     "sources": "Sources:",
     "licenceWiki": "texts from Wikipedia under the CC BY-SA 4.0 licence, summarised and translated for F237.",
     "histoireBientot": "This club's history is coming soon to F237.",
@@ -350,7 +350,8 @@
       "effectif": "Squad",
       "palmares": "Honours"
     },
-    "siteOfficiel": "Official website"
+    "siteOfficiel": "Official website",
+    "effectifSaisonPassee": "Squad not available for the {{s}} season."
   },
   "jouer": {
     "cotes": {

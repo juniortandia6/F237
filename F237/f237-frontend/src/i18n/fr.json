@@ -305,7 +305,7 @@
     "aucunJoue": "Aucun match joué pour l'instant.",
     "aucunProgramme": "Aucun match programmé pour le moment.",
     "resultatsRecents": "Résultats récents",
-    "effectifIndispo": "Effectif non disponible dans l'API pour cette saison.",
+    "effectifIndispo": "Effectif non disponible pour cette saison.",
     "sources": "Sources :",
     "licenceWiki": "textes de Wikipédia sous licence CC BY-SA 4.0, résumés pour F237.",
     "histoireBientot": "L'histoire de ce club arrive bientôt sur F237.",
@@ -350,7 +350,8 @@
       "effectif": "Effectif",
       "palmares": "Palmarès"
     },
-    "siteOfficiel": "Site officiel"
+    "siteOfficiel": "Site officiel",
+    "effectifSaisonPassee": "Effectif non disponible pour la saison {{s}}."
   },
   "jouer": {
     "cotes": {
