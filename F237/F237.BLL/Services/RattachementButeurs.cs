@@ -3,8 +3,9 @@
 // Utilisé partout où des buts sont créés : import API, scores en direct, saisie admin.
 //
 // Règles (les mêmes que le script SQL de rattachement) :
-//   1. Nom : un SEUL joueur de l'effectif de l'équipe créditée porte ce nom
-//      ("Samuel Tagbor", "S. Tagbor" ou "Tagbor", sans tenir compte des accents ni de la casse).
+//   1. Nom : un SEUL joueur de l'effectif de l'équipe créditée porte ce nom, sous l'une de ses
+//      écritures possibles ("Samuel Tagbor", "S. Tagbor", "Tagbor", et pour un nom officiel à plusieurs
+//      prénoms "S. Belemb" ou "J. P. Belemb" ; voir FormesDuNom), accents et casse ignorés.
 //   2. Sinon, identifiant API : ce même ApiJoueurId a déjà été relié à UN SEUL joueur
 //      dans un autre but (utile quand l'API écrit le nom autrement d'un match à l'autre).
 //   CSC, buteur inconnu, aucun ou plusieurs joueurs possibles : JoueurId reste null,
@@ -115,14 +116,48 @@ namespace F237.BLL.Services
             return relies;
         }
 
-        /// <summary>Les écritures possibles d'un joueur dans un but : nom complet, "P. Nom", nom seul.</summary>
+        /// <summary>
+        /// Les écritures possibles d'un joueur dans un but. Les noms officiels ont souvent plusieurs prénoms
+        /// et plusieurs noms ("Julien Patrice Samuel Belemb"), alors que l'API écrit "S. Belemb" ou "J. Belemb".
+        /// On produit donc : le nom complet, chaque mot seul, et "X. suite de mots" / "X. Y. suite de mots"
+        /// pour toute initiale X (et Y) prise parmi les mots. Le rattachement exige ensuite qu'UN SEUL joueur
+        /// de l'équipe corresponde : une écriture trop vague ("Manga") ne relie donc personne.
+        /// </summary>
         public static IEnumerable<string> FormesDuNom(string? prenom, string? nom)
         {
             prenom = (prenom ?? string.Empty).Trim();
             nom = (nom ?? string.Empty).Trim();
-            yield return NormaliserNom($"{prenom} {nom}");
-            if (prenom.Length > 0) yield return NormaliserNom($"{prenom[0]}. {nom}");
-            yield return NormaliserNom(nom);
+            var formes = new HashSet<string>
+            {
+                NormaliserNom($"{prenom} {nom}"),
+                NormaliserNom(nom),
+            };
+            if (prenom.Length > 0) formes.Add(NormaliserNom($"{prenom[0]}. {nom}"));
+
+            var mots = NormaliserNom($"{prenom} {nom}").Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Where(m => !m.EndsWith('.')).ToList();
+            foreach (var m in mots.Where(m => m.Length >= 3)) formes.Add(m);
+
+            // Suites de 1 à 3 mots consécutifs, prises dans les mots restants (dans l'ordre)
+            static IEnumerable<string> Suites(List<string> restants)
+            {
+                for (var debut = 0; debut < restants.Count; debut++)
+                    for (var n = 1; n <= 3 && debut + n <= restants.Count; n++)
+                        yield return string.Join(' ', restants.Skip(debut).Take(n));
+            }
+
+            for (var a = 0; a < mots.Count; a++)
+            {
+                var sansA = mots.Where((_, i) => i != a).ToList();
+                foreach (var suite in Suites(sansA)) formes.Add($"{mots[a][0]}. {suite}");
+                for (var b = 0; b < mots.Count; b++)
+                {
+                    if (b == a) continue;
+                    var sansAB = mots.Where((_, i) => i != a && i != b).ToList();
+                    foreach (var suite in Suites(sansAB)) formes.Add($"{mots[a][0]}. {mots[b][0]}. {suite}");
+                }
+            }
+            return formes;
         }
 
         /// <summary>"  Ndamé  NDAME " -> "ndame ndame"</summary>
