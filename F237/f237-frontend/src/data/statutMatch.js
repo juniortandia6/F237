@@ -22,7 +22,11 @@ function saisonTerminee(m) {
   return annee != null && annee < SAISON_EN_COURS;
 }
 
-/** 'live' | 'termine' | 'aVenir' | 'reporte' | 'annule' | 'nonDispute' */
+/**
+ * 'live' | 'termine' | 'aVenir' | 'enAttente' | 'reporte' | 'annule' | 'nonDispute'
+ * enAttente : match "planifié" dont l'heure est passée depuis moins de 24 h, sans score
+ * (ex. Elite Two : l'API ne donne que le résultat final, pas de direct).
+ */
 export function etatMatch(m) {
   switch (m?.statut) {
     case STATUT.EN_COURS: return 'live';
@@ -31,10 +35,12 @@ export function etatMatch(m) {
     case STATUT.ANNULE: return 'annule';
     default: {
       const debut = new Date(m?.dateMatch).getTime();
-      return Number.isFinite(debut) && debut < CHARGE_LE - DELAI_NON_DISPUTE ? 'nonDispute' : 'aVenir';
+      if (!Number.isFinite(debut) || debut >= CHARGE_LE) return 'aVenir';
+      return debut < CHARGE_LE - DELAI_NON_DISPUTE ? 'nonDispute' : 'enAttente';
     }
   }
 }
 
 /** Vrai pour un match qu'on peut encore pronostiquer / afficher dans "prochains matchs" */
 export const estAVenir = (m) => etatMatch(m) === 'aVenir';
+export const estEnAttente = (m) => etatMatch(m) === 'enAttente';  

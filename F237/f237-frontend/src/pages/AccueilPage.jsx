@@ -14,6 +14,7 @@ import { texteActu, articlesHero, IMAGES_DEFAUT } from '../data/actualites';
 import { useActualites } from '../hooks/useActualites';
 import { UTILISER_DEMO, construireMatchsDemo } from '../data/matchsDemo';
 import { COMPETITIONS, SAISONS_DB, ANNEE_ACTUELLE } from '../data/saisons';
+import { estEnAttente } from '../data/statutMatch';
 
 // Hero : les actus de l'API (à la une d'abord, 5 max). Sans article publié,
 // une seule diapo d'accueil (pas de fausse actu).
@@ -77,6 +78,7 @@ function CarteMatch({ m, pleineLargeur = false }) {
   const termine = m.statut === 2;
   const live = m.statut === 1;
   const aVenir = m.statut === 0;
+  const enAttente = estEnAttente(m); // heure passée, score pas encore connu
   const dom = m.scoreDomicile, ext = m.scoreExterieur;
   const domGagne = (termine || live) && dom > ext;
   const extGagne = (termine || live) && ext > dom;
@@ -110,6 +112,8 @@ function CarteMatch({ m, pleineLargeur = false }) {
             </span>
           ) : termine ? (
             <span style={{ fontSize: '11px', fontWeight: 700, color: '#8e8e8e', textTransform: 'uppercase' }}>{t('commun.termine')}</span>
+          ) : enAttente ? (
+            <span style={{ fontSize: '11px', fontWeight: 800, color: '#b06f00', textTransform: 'uppercase' }}>{t('commun.enAttente')}</span>
           ) : (
             <span style={{ fontSize: '11px', fontWeight: 700, color: '#8e8e8e', textTransform: 'uppercase' }}>
               {formatDateCourte(m.dateMatch)}
@@ -126,8 +130,8 @@ function CarteMatch({ m, pleineLargeur = false }) {
         display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '86px',
       }}>
         {aVenir ? (
-          <span style={{
-            backgroundColor: '#141414', color: '#fff', fontWeight: 700, fontSize: '15px',
+          <span title={enAttente ? t('matchDetail.scoreFinMatch') : undefined} style={{
+            backgroundColor: enAttente ? '#9a9a9a' : '#141414', color: '#fff', fontWeight: 700, fontSize: '15px',
             padding: '8px 12px', borderRadius: '8px',
           }}>
             {formatHeure(m.dateMatch)}
@@ -192,6 +196,7 @@ function CarteDirect({ m, mode }) {
   const { t } = useTranslation();
   const live = mode === 'live';
   const avenir = mode === 'avenir';
+  const enAttente = avenir && estEnAttente(m);
   const dom = m.scoreDomicile, ext = m.scoreExterieur;
   const aScore = dom != null && ext != null;
   const minute = m.minute ?? m.minuteLive ?? m.tempsEcoule ?? null;
@@ -228,12 +233,12 @@ function CarteDirect({ m, mode }) {
         <span style={{
           position: 'absolute', top: '10px', left: '10px',
           display: 'flex', alignItems: 'center', gap: '6px',
-          backgroundColor: live ? theme.red : avenir ? theme.green : 'rgba(0,0,0,0.45)', color: '#fff',
+          backgroundColor: live ? theme.red : enAttente ? theme.yellow : avenir ? theme.green : 'rgba(0,0,0,0.45)', color: enAttente ? '#1a1a1a' : '#fff',
           fontSize: '10px', fontWeight: 800, letterSpacing: '0.8px', textTransform: 'uppercase',
           padding: '4px 10px', borderRadius: '20px',
         }}>
           {live && <span className="animate-pulse" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#fff' }} />}
-          {live ? (m.statutCourt === 'HT' ? t('commun.miTemps') : minute ? `${t('commun.enDirect')} · ${minute}${m.minuteExtra ? `+${m.minuteExtra}` : ''}'` : t('commun.enDirect')) : avenir ? t('commun.aVenir') : t('commun.termine')}
+          {live ? (m.statutCourt === 'HT' ? t('commun.miTemps') : minute ? `${t('commun.enDirect')} · ${minute}${m.minuteExtra ? `+${m.minuteExtra}` : ''}'` : t('commun.enDirect')) : enAttente ? t('commun.enAttente') : avenir ? t('commun.aVenir') : t('commun.termine')}
         </span>
 
         <LogoCarte src={m.equipeDomicile?.logoUrl} />

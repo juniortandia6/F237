@@ -33,7 +33,8 @@
     "miTempsMaj": "MI-TEMPS",
     "annule": "Annulé",
     "nonDispute": "Non disputé",
-    "live": "En direct"
+    "live": "En direct",
+    "enAttente": "Résultat en attente"
   },
   "accueil": {
     "enSavoirPlus": "En savoir plus",
@@ -211,7 +212,9 @@
     "nonDisputeMaj": "NON DISPUTÉ",
     "minuteInconnueMaj": "MINUTE INCONNUE",
     "saisonPrecedente": "Saison précédente",
-    "formePrecedente": "Les pastilles pâles viennent de la saison précédente."
+    "formePrecedente": "Les pastilles pâles viennent de la saison précédente.",
+    "enAttenteMaj": "RÉSULTAT EN ATTENTE",
+    "scoreFinMatch": "Le score sera affiché à la fin du match."
   },
   "classement": {
     "aucunBut": "Aucun but enregistré pour l'instant.",
@@ -490,7 +493,9 @@
       "Compétition": "Compétition"
     },
     "erreur": "Impossible de charger les actualités pour le moment.",
-    "bientot": "Les premières actualités arrivent bientôt."
+    "bientot": "Les premières actualités arrivent bientôt.",
+    "publication": "Publication {{reseau}}",
+    "voirSur": "Voir la publication sur {{reseau}}"
   },
   "profil": {
     "chargement": "Chargement du profil...",

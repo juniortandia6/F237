@@ -20,7 +20,7 @@ import SelecteurSaison from '../components/SelecteurSaison';
 import { getInfosClub } from '../data/clubsInfos';
 import theme from '../theme';
 import { useEcranMobile } from '../hooks/useEcranMobile';
-import { estAVenir } from '../data/statutMatch';
+import { estAVenir, estEnAttente } from '../data/statutMatch';
 import AvatarJoueur from '../components/AvatarJoueur';
 import { regrouperButeurs, classerButeurs } from '../data/buteurs';
 
@@ -199,15 +199,22 @@ function LigneMatch({ m, premier }) {
 
 // Ligne d'un match à venir (format de matchService.getBySaison)
 function LigneAVenir({ m, premier }) {
+  const { t } = useTranslation();
   const mobile = useEcranMobile();
+  // Heure passée sans score : « Résultat en attente » à la place de la date, heure grisée
+  const enAttente = estEnAttente(m);
+  const fondHeure = enAttente ? '#9aa19d' : CLAIR.texte;
+  const date = enAttente
+    ? <span style={{ color: '#b06f00', fontWeight: 800, textTransform: 'none' }}>{t('commun.enAttente')}</span>
+    : dateCourte(m.dateMatch);
   if (mobile) {
     return (
       <LigneMatchMobile to={`/matchs/${m.id}`} state={{ match: m }} premier={premier}
-        date={dateCourte(m.dateMatch)}
+        date={date}
         dom={{ nom: m.equipeDomicile?.nom, logo: m.equipeDomicile?.logoUrl, fort: true }}
         ext={{ nom: m.equipeExterieur?.nom, logo: m.equipeExterieur?.logoUrl, fort: true }}
         droite={(
-          <span style={{ fontSize: '13px', fontWeight: 800, backgroundColor: CLAIR.texte, color: '#fff', borderRadius: '6px', padding: '5px 8px' }}>
+          <span style={{ fontSize: '13px', fontWeight: 800, backgroundColor: fondHeure, color: '#fff', borderRadius: '6px', padding: '5px 8px' }}>
             {heure(m.dateMatch)}
           </span>
         )} />
@@ -220,12 +227,12 @@ function LigneAVenir({ m, premier }) {
         display: 'grid', gridTemplateColumns: '90px minmax(0,1fr) 70px minmax(0,1fr) 18px', alignItems: 'center', gap: '12px',
         padding: '13px 20px', borderTop: premier ? 'none' : `1px solid ${CLAIR.bord}`, textDecoration: 'none', color: CLAIR.texte,
       }}>
-      <span style={{ fontSize: '12px', fontWeight: 600, color: CLAIR.doux, textTransform: 'capitalize' }}>{dateCourte(m.dateMatch)}</span>
+      <span style={{ fontSize: '12px', fontWeight: 600, color: CLAIR.doux, textTransform: 'capitalize' }}>{date}</span>
       <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', minWidth: 0 }}>
         <span style={{ fontSize: '15px', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.equipeDomicile?.nom}</span>
         {m.equipeDomicile?.logoUrl && <img src={m.equipeDomicile.logoUrl} alt="" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />}
       </span>
-      <span style={{ fontSize: '14px', fontWeight: 800, textAlign: 'center', backgroundColor: CLAIR.texte, color: '#fff', borderRadius: '6px', padding: '4px 0' }}>
+      <span style={{ fontSize: '14px', fontWeight: 800, textAlign: 'center', backgroundColor: fondHeure, color: '#fff', borderRadius: '6px', padding: '4px 0' }}>
         {heure(m.dateMatch)}
       </span>
       <span style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
@@ -703,9 +710,9 @@ function EquipeDetailPage() {
       };
     }), [matchsSaison, idClub]);
 
-  // Prochains matchs du club (à venir, date pas encore dépassée)
+  // Prochains matchs du club (à venir, ou heure passée mais résultat encore en attente)
   const aVenir = useMemo(() => matchsSaison
-    .filter(estAVenir)
+    .filter(m => estAVenir(m) || estEnAttente(m))
     .sort((a, b) => new Date(a.dateMatch) - new Date(b.dateMatch)), [matchsSaison]);
 
   // Buteurs du club (sans CSC ni inconnus), top 5 : regroupés par joueur quand le but est relié
@@ -893,7 +900,7 @@ function EquipeDetailPage() {
               {onglet === 'histoire' && <OngletHistoire club={club} />}
               {onglet === 'palmares' && <OngletPalmares palmares={palmares} club={club} />}
             </div>
-            <ColonneDroite data={data} club={club} derniersMatchs={derniersMatchs} prochain={aVenir[0]} buteurs={buteurs} />
+            <ColonneDroite data={data} club={club} derniersMatchs={derniersMatchs} prochain={aVenir.find(estAVenir)} buteurs={buteurs} />
           </div>
         </div>
       </section>

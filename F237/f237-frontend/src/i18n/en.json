@@ -33,7 +33,8 @@
     "miTempsMaj": "HALF-TIME",
     "annule": "Cancelled",
     "nonDispute": "Not played",
-    "live": "Live"
+    "live": "Live",
+    "enAttente": "Result pending"
   },
   "accueil": {
     "enSavoirPlus": "Read more",
@@ -211,7 +212,9 @@
     "nonDisputeMaj": "NOT PLAYED",
     "minuteInconnueMaj": "MINUTE UNKNOWN",
     "saisonPrecedente": "Previous season",
-    "formePrecedente": "Faded badges are from the previous season."
+    "formePrecedente": "Faded badges are from the previous season.",
+    "enAttenteMaj": "RESULT PENDING",
+    "scoreFinMatch": "The score will be shown at the end of the match."
   },
   "classement": {
     "aucunBut": "No goals recorded yet.",
@@ -490,7 +493,9 @@
       "Compétition": "Competition"
     },
     "erreur": "News can't be loaded right now.",
-    "bientot": "The first news stories are coming soon."
+    "bientot": "The first news stories are coming soon.",
+    "publication": "{{reseau}} post",
+    "voirSur": "View the post on {{reseau}}"
   },
   "profil": {
     "chargement": "Loading profile...",

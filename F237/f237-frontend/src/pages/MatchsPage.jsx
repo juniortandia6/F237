@@ -177,12 +177,13 @@ function CarteMatch({ m, competition, masquer }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const mobile = useEcranMobile();
-  // 'live' | 'termine' | 'aVenir' | 'reporte' | 'annule' | 'nonDispute'
+  // 'live' | 'termine' | 'aVenir' | 'enAttente' | 'reporte' | 'annule' | 'nonDispute'
   const etat = etatMatch(m);
   const termine = etat === 'termine';
   const live = etat === 'live';
   const aVenir = etat === 'aVenir';
-  const sansScore = !termine && !live; // à venir, reporté, annulé ou non disputé
+  const enAttente = etat === 'enAttente'; // heure passée, score pas encore connu
+  const sansScore = !termine && !live; // à venir, en attente, reporté, annulé ou non disputé
   const dom = m.scoreDomicile, ext = m.scoreExterieur;
   const domGagne = (termine || live) && dom > ext;
   const extGagne = (termine || live) && ext > dom;
@@ -216,7 +217,7 @@ function CarteMatch({ m, competition, masquer }) {
                 {m.statutCourt === 'HT' ? t('commun.miTempsMaj') : `${t('commun.enDirectMaj')}${m.minute ? ` · ${m.minute}${m.minuteExtra ? `+${m.minuteExtra}` : ''}'` : ''}`}
               </span>
             ) : (
-              <span style={{ fontSize: '12px', fontWeight: 700, color: CLAIR.doux, textTransform: 'uppercase' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: enAttente ? '#b06f00' : CLAIR.doux, textTransform: 'uppercase' }}>
                 {t(`commun.${etat}`)}
               </span>
             )}
@@ -237,6 +238,11 @@ function CarteMatch({ m, competition, masquer }) {
                 textDecoration: etat === 'annule' ? 'line-through' : 'none', fontWeight: 800, fontSize: mobile ? '15px' : '16px', padding: mobile ? '7px 10px' : '8px 14px', borderRadius: '8px' }}>
                 {heure(m.dateMatch)}
               </span>
+              {enAttente && (
+                <span style={{ fontSize: '11px', fontWeight: 600, color: CLAIR.doux, textAlign: 'center', lineHeight: 1.3, maxWidth: mobile ? '78px' : '120px' }}>
+                  {t('matchDetail.scoreFinMatch')}
+                </span>
+              )}
               {aVenir && (
                 <Link to="/jouer" onClick={e => e.stopPropagation()}
                   style={{ fontSize: '12px', fontWeight: 700, color: theme.green, textDecoration: 'none' }}>

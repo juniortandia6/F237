@@ -19,7 +19,7 @@ const FILTRES = [
   { cle: 'tous', label: 'Tous' },
 ];
 const ANNEES = Object.keys(SAISONS_DB).map(Number).sort((a, b) => b - a);
-const LIBELLE_ETAT = { aVenir: 'À venir', live: 'En direct', reporte: 'Reporté', annule: 'Annulé', nonDispute: 'Non disputé' };
+const LIBELLE_ETAT = { aVenir: 'À venir', enAttente: 'Résultat en attente', live: 'En direct', reporte: 'Reporté', annule: 'Annulé', nonDispute: 'Non disputé' };
 
 const formatDate = (s) => dateApi(s)?.toLocaleDateString(locale(), { weekday: 'short', day: 'numeric', month: 'short' }) ?? '';
 

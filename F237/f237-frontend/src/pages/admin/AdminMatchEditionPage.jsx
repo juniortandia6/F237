@@ -16,7 +16,7 @@ import { estInconnu, butsDe, problemesMatch } from './analyseMatch';
 import { CLAIR, CARTE, TITRE_CARTE, CHIFFRES } from './styleAdmin';
 
 const FUSEAU_CAMEROUN = 'Africa/Douala'; // UTC+1, sans heure d'été
-const LIBELLE_ETAT = { aVenir: 'À venir', live: 'En direct', termine: 'Terminé', reporte: 'Reporté', annule: 'Annulé', nonDispute: 'Non disputé' };
+const LIBELLE_ETAT = { aVenir: 'À venir', enAttente: 'Résultat en attente', live: 'En direct', termine: 'Terminé', reporte: 'Reporté', annule: 'Annulé', nonDispute: 'Non disputé' };
 
 const CHAMP = {
   boxSizing: 'border-box', padding: '9px 11px', borderRadius: '9px', border: `1px solid ${CLAIR.bord}`,

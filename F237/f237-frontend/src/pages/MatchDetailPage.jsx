@@ -136,6 +136,7 @@ function BoiteScore({ m }) {
     : etat === 'reporte' ? { texte: t('matchDetail.reporteMaj'), fond: theme.yellow, couleur: '#1a1a1a' }
     : etat === 'annule' ? { texte: t('matchDetail.annuleMaj'), fond: theme.red, couleur: '#fff' }
     : etat === 'nonDispute' ? { texte: t('matchDetail.nonDisputeMaj'), fond: '#5b625e', couleur: '#fff' }
+    : etat === 'enAttente' ? { texte: t('matchDetail.enAttenteMaj'), fond: theme.yellow, couleur: '#1a1a1a' }
     : { texte: t('matchDetail.aVenirMaj'), fond: '#d9dedb', couleur: '#5b625e' };
 
   // Petit triangle rouge sur le côté du gagnant (comme chez FIBA)
@@ -158,6 +159,11 @@ function BoiteScore({ m }) {
       </div>
       {domGagne && <span style={triangle('left')} />}
       {extGagne && <span style={triangle('right')} />}
+      {etat === 'enAttente' && (
+        <div style={{ marginTop: '10px', color: 'rgba(255,255,255,0.85)', fontSize: mobile ? '11px' : '13px', fontWeight: 600, textAlign: 'center', lineHeight: 1.35, maxWidth: mobile ? '110px' : '190px', marginLeft: 'auto', marginRight: 'auto' }}>
+          {t('matchDetail.scoreFinMatch')}
+        </div>
+      )}
     </div>
   );
 }
