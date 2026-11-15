@@ -7,9 +7,10 @@
 //   season 2026 = janv. → juil. 2026      -> "2026"
 //   season 2027 = oct. 2026 → mai 2027    -> "2026-27"
 
+// logo : copie locale dans public/competitions/ (source : API-Football, leagues/411.png et 813.png)
 export const COMPETITIONS = [
-  { cle: 'one', label: 'Elite One' },
-  { cle: 'two', label: 'Elite Two' },
+  { cle: 'one', label: 'Elite One', logo: '/competitions/elite-one.png' },
+  { cle: 'two', label: 'Elite Two', logo: '/competitions/elite-two.png' },
 ];
 
 // season API -> [année de début, année de fin] (source : /leagues?id=411, Elite One)

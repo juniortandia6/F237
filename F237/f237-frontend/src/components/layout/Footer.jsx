@@ -2,6 +2,7 @@
 // Footer inspiré de FIBA : marque + newsletter + réseaux | liens | compétitions,
 // puis barre légale. Icônes réseaux : react-icons (npm install react-icons).
 
+import LogoCompetition from '../LogoCompetition';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -32,8 +33,8 @@ const LIENS = [
 ];
 
 const COMPETITIONS = [
-  { label: 'MTN Elite One', to: '/classement' },
-  { label: 'MTN Elite Two', to: '/classement' },
+  { label: 'MTN Elite One', to: '/classement', cle: 'one' },
+  { label: 'MTN Elite Two', to: '/classement', cle: 'two' },
 ];
 
 const TITRE_COLONNE = {
@@ -184,7 +185,7 @@ function Footer() {
                   onMouseEnter={e => { e.currentTarget.style.backgroundColor = theme.surfaceHover; }}
                   onMouseLeave={e => { e.currentTarget.style.backgroundColor = theme.surface; }}
                 >
-                  <span style={{ width: '6px', height: '22px', borderRadius: '3px', background: `linear-gradient(${theme.green}, ${theme.red}, ${theme.yellow})` }} />
+                  <LogoCompetition cle={c.cle} size={30} />
                   {c.label}
                   <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" style={{ marginLeft: 'auto', color: theme.textMuted }} />
                 </Link>
@@ -210,7 +211,10 @@ function Footer() {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <LogoF237 size={26} />
-            <span style={{ fontSize: '13px', color: theme.textFaint }}>© {new Date().getFullYear()} F237 · {t('footer.droits')}</span>
+            <span style={{ fontSize: '13px', color: theme.textFaint }}>
+              © {new Date().getFullYear()} F237 · {t('footer.droits')}
+              <span style={{ display: 'block', fontSize: '12px', marginTop: '4px' }}>{t('footer.marques')}</span>
+            </span>
           </div>
           <nav style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
             {['cgu', 'confidentialite', 'cookies', 'contact'].map(c => t(`footer.${c}`)).map((l, i) => (

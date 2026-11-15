@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { locale } from '../i18n';
 import { ChevronLeft, ChevronRight, EyeOff, Radio, CalendarClock } from 'lucide-react';
 import { matchService } from '../services/matchService';
+import LogoCompetition from '../components/LogoCompetition';
 import { COMPETITIONS, ANNEE_ACTUELLE, SAISONS_DB, libelleSaison } from '../data/saisons';
 import SelecteurSaison from '../components/SelecteurSaison';
 import { useLiveScores } from '../hooks/useLiveScores';
@@ -467,12 +468,14 @@ const MatchsPage = () => {
                     onClick={() => changerSelection(annee, c.cle)}
                     style={{
                       flex: mobile ? 1 : 'none', whiteSpace: 'nowrap',
-                      padding: mobile ? '10px 8px' : '10px 22px', borderRadius: '999px', border: 'none', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                      padding: mobile ? '8px 8px' : '8px 20px 8px 10px', borderRadius: '999px', border: 'none', cursor: 'pointer',
                       fontSize: mobile ? '13px' : '14px', fontWeight: 700, letterSpacing: '0.5px',
                       backgroundColor: actif ? '#fff' : 'transparent',
                       color: actif ? CLAIR.vertFonce : 'rgba(255,255,255,0.8)',
                       transition: 'all 0.2s ease',
                     }}>
+                    <LogoCompetition cle={c.cle} size={mobile ? 22 : 26} />
                     MTN {c.label}
                   </button>
                 );

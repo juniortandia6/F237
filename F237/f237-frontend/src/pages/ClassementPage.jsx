@@ -10,6 +10,7 @@ import { Goal, CalendarClock, ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { classementService } from '../services/classementService';
 import { matchService } from '../services/matchService';
 import { useLiveScores } from '../hooks/useLiveScores';
+import LogoCompetition from '../components/LogoCompetition';
 import { COMPETITIONS, ANNEE_ACTUELLE, SAISONS_DB, libelleSaison } from '../data/saisons';
 import SelecteurSaison from '../components/SelecteurSaison';
 import theme from '../theme';
@@ -656,12 +657,14 @@ function ClassementPage() {
                     <button key={c.cle} onClick={() => setComp(c.cle)}
                       style={{
                         flex: mobile ? 1 : 'none', whiteSpace: 'nowrap',
-                        padding: mobile ? '10px 8px' : '10px 22px', borderRadius: '999px', border: 'none', cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                        padding: mobile ? '8px 8px' : '8px 20px 8px 10px', borderRadius: '999px', border: 'none', cursor: 'pointer',
                         fontSize: mobile ? '13px' : '14px', fontWeight: 700, letterSpacing: '0.5px',
                         backgroundColor: actif ? '#fff' : 'transparent',
                         color: actif ? '#0f3d26' : 'rgba(255,255,255,0.8)',
                         transition: 'all 0.2s ease',
                       }}>
+                      <LogoCompetition cle={c.cle} size={mobile ? 22 : 26} />
                       MTN {c.label}
                     </button>
                   );

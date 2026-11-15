@@ -10,6 +10,7 @@ import { Search, MapPin, ArrowRight, X, CalendarClock } from 'lucide-react';
 import { equipeService } from '../services/equipeService';
 import { classementService } from '../services/classementService';
 import { matchService } from '../services/matchService';
+import LogoCompetition from '../components/LogoCompetition';
 import { COMPETITIONS, SAISONS_DB, ANNEE_ACTUELLE, libelleSaison } from '../data/saisons';
 import SelecteurSaison from '../components/SelecteurSaison';
 import theme from '../theme';
@@ -237,12 +238,13 @@ function EquipesPage() {
                   <button key={c.cle} onClick={() => setComp(c.cle)}
                     style={{
                       display: 'flex', alignItems: 'center', gap: '8px',
-                      padding: '10px 20px', borderRadius: '999px', border: 'none', cursor: 'pointer',
+                      padding: '8px 20px 8px 10px', borderRadius: '999px', border: 'none', cursor: 'pointer',
                       fontSize: '14px', fontWeight: 700, letterSpacing: '0.5px',
                       backgroundColor: actif ? '#fff' : 'transparent',
                       color: actif ? '#0f3d26' : 'rgba(255,255,255,0.8)',
                       transition: 'all 0.2s ease',
                     }}>
+                    <LogoCompetition cle={c.cle} size={26} />
                     MTN {c.label}
                     {!loading && saisonDispo && (
                       <span style={{
