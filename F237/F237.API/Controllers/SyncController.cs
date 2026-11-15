@@ -10,15 +10,17 @@ namespace F237.API.Controllers
     public class SyncController : ControllerBase
     {
         private readonly IApiFootballService _apiFootballService;
+        private readonly IClassementService _classementService;
         private const int ELITE_ONE_ID = 411;
         private const int ELITE_TWO_ID = 813;
         private const int SAISON = 2026;
         private const int ELITE_ONE_SAISONID = 3;
         private const int ELITE_TWO_SAISONID = 4;
 
-        public SyncController(IApiFootballService apiFootballService)
+        public SyncController(IApiFootballService apiFootballService, IClassementService classementService)
         {
             _apiFootballService = apiFootballService;
+            _classementService = classementService;
         }
 
         [HttpGet("test")]
@@ -46,6 +48,9 @@ namespace F237.API.Controllers
                 return BadRequest($"Ligue inconnue : utilise {ELITE_ONE_ID} (Elite One) ou {ELITE_TWO_ID} (Elite Two).");
 
             var resultat = await _apiFootballService.ImporterSaisonAsync(league, season);
+            // Scores saisis à la main que l'API n'a pas encore : le classement de l'API ne les compte pas
+            if (resultat.ScoresManuelsGardes > 0 && resultat.SaisonId != 0)
+                await _classementService.RecalculerClassementAsync(resultat.SaisonId);
             return resultat.Erreur == null ? Ok(resultat) : StatusCode(207, resultat);
         }
 

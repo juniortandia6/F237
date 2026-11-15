@@ -21,6 +21,10 @@ namespace F237.API.Services
     ///   3. Pour les matchs qui ne sont plus "live" depuis le tour précédent (match terminé,
     ///      interrompu...), va chercher leur état final : sinon ils resteraient "en cours"
     ///   4. Envoie les scores à tous les navigateurs connectés (SignalR)
+    ///   5. Rattrapage (toutes les 10 min) : matchs encore "planifiés" en base alors que le
+    ///      coup d'envoi date de plus de 2 h. Cas typiques : l'API F237 était arrêtée pendant
+    ///      le match (PC éteint, redémarrage), ou match Elite Two "résultat final seulement"
+    ///      qui ne passe jamais par le direct. On va chercher leur état chez API-Football.
     /// </summary>
     public class LiveScoreService : BackgroundService
     {
@@ -37,6 +41,10 @@ namespace F237.API.Services
 
         // Matchs (id API) en cours au tour précédent
         private HashSet<int> _enCoursPrecedent = new();
+
+        // Rattrapage des matchs restés "planifiés" après leur heure (voir étape 5)
+        private readonly TimeSpan _intervalRattrapage = TimeSpan.FromMinutes(10);
+        private DateTime _dernierRattrapage = DateTime.MinValue;
 
         /// <summary>
         /// Dernier état du direct envoyé aux navigateurs. Le hub le renvoie à chaque
@@ -118,6 +126,33 @@ namespace F237.API.Services
                 finis.AddRange(await GetFixturesAsync(client, $"fixtures?ids={string.Join('-', lot)}", ct) ?? new List<MatchDto>());
             _enCoursPrecedent = idsEnCours;
 
+            // 5. Rattrapage : coup d'envoi passé depuis plus de 2 h (et moins de 3 jours),
+            //    toujours "planifié" en base. Au plus 1 appel par lot de 20 toutes les 10 min.
+            var maintenant = DateTime.UtcNow;
+            if (maintenant - _dernierRattrapage >= _intervalRattrapage)
+            {
+                _dernierRattrapage = maintenant;
+                var limiteHaute = maintenant.AddHours(-2);
+                var limiteBasse = maintenant.AddDays(-3);
+                var enRetard = (await context.Matchs
+                        .Where(m => m.Statut == StatutMatchEnum.Planifié && m.ApiFootballId != null
+                                 && m.DateMatch < limiteHaute && m.DateMatch > limiteBasse)
+                        .Select(m => m.ApiFootballId)
+                        .ToListAsync(ct))
+                    .Select(id => (int)id!)
+                    .Where(id => !idsEnCours.Contains(id) && !disparus.Contains(id))
+                    .Distinct().ToList();
+                foreach (var lot in enRetard.Chunk(20))
+                {
+                    var recus = await GetFixturesAsync(client, $"fixtures?ids={string.Join('-', lot)}", ct) ?? new List<MatchDto>();
+                    // Toujours "NS" chez l'API (résultat pas encore saisi) : rien à changer
+                    var changes = recus.Where(f => f.Statut != 0).ToList();
+                    finis.AddRange(changes);
+                    if (changes.Count > 0)
+                        _logger.LogInformation("🔁 Rattrapage : {N} match(s) mis à jour hors direct", changes.Count);
+                }
+            }
+
             // 2. Mise à jour en base
 
             var aDiffuser = new List<(int Id, object Donnees)>();
@@ -146,22 +181,28 @@ namespace F237.API.Services
                 match.ScoreExterieur = fixture.ScoreExterieur;
                 match.Statut = (StatutMatchEnum)fixture.Statut;
 
-                // Buts du match (comme Flashscore : minute + buteur) : on remplace ceux de la base
+                // Buts du match (comme Flashscore : minute + buteur) : on remplace ceux de la base.
+                // Sauf si l'API n'en donne aucun alors que le score n'est pas 0-0 (Elite Two :
+                // résultat final seulement) : on garde alors les buts saisis à la main dans l'admin.
                 var buts = _butsParMatch.GetValueOrDefault(fixture.ApiFootballId) ?? new List<ButLive>();
-                var anciensButs = await context.ButsMatch.Where(b => b.MatchId == match.Id).ToListAsync(ct);
-                context.ButsMatch.RemoveRange(anciensButs);
-                foreach (var b in buts)
+                var sansDetail = buts.Count == 0 && (fixture.ScoreDomicile ?? 0) + (fixture.ScoreExterieur ?? 0) > 0;
+                if (!sansDetail)
                 {
-                    await context.ButsMatch.AddAsync(new ButMatch
+                    var anciensButs = await context.ButsMatch.Where(b => b.MatchId == match.Id).ToListAsync(ct);
+                    context.ButsMatch.RemoveRange(anciensButs);
+                    foreach (var b in buts)
                     {
-                        MatchId = match.Id,
-                        NomJoueur = b.NomJoueur,
-                        NomEquipe = RattachementButeurs.NomEquipeCreditee(match, b.ApiEquipeId, b.NomEquipe),
-                        ApiJoueurId = b.ApiJoueurId,
-                        Minute = b.Minute,
-                        EstButCSC = b.EstButCSC,
-                        EstPenalty = b.EstPenalty,
-                    }, ct);
+                        await context.ButsMatch.AddAsync(new ButMatch
+                        {
+                            MatchId = match.Id,
+                            NomJoueur = b.NomJoueur,
+                            NomEquipe = RattachementButeurs.NomEquipeCreditee(match, b.ApiEquipeId, b.NomEquipe),
+                            ApiJoueurId = b.ApiJoueurId,
+                            Minute = b.Minute,
+                            EstButCSC = b.EstButCSC,
+                            EstPenalty = b.EstPenalty,
+                        }, ct);
+                    }
                 }
 
                 // Infos de notre base pour les navigateurs

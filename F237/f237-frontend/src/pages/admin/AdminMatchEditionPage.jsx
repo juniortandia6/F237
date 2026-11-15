@@ -59,8 +59,8 @@ function FormulaireBut({ initial, nomEquipe, suggestions, suggestionsCsc, onVali
       <div style={{ display: 'grid', gridTemplateColumns: '70px minmax(0, 1fr)', gap: '8px' }}>
         <input type="number" min={1} max={130} required={!inconnue} disabled={inconnue} value={inconnue ? '' : minute} onChange={e => setMinute(e.target.value)}
           placeholder={inconnue ? '–' : 'Min.'} aria-label="Minute" style={{ ...CHAMP, backgroundColor: inconnue ? CLAIR.tuile : '#fff' }} />
-        <input required value={nom} onChange={e => setNom(e.target.value)} list={idListe} aria-label="Buteur"
-          placeholder={csc ? 'Joueur adverse (contre son camp)' : 'Ex. M. Williams'} style={CHAMP} autoFocus />
+        <input value={nom} onChange={e => setNom(e.target.value)} list={idListe} aria-label="Buteur"
+          placeholder={csc ? 'Joueur adverse (vide = inconnu)' : 'Buteur (vide = inconnu)'} style={CHAMP} autoFocus />
         <datalist id={idListe}>
           {(csc ? suggestionsCsc : suggestions).map(n => <option key={n} value={n} />)}
         </datalist>
@@ -81,6 +81,7 @@ function FormulaireBut({ initial, nomEquipe, suggestions, suggestionsCsc, onVali
       </div>
       {csc && <span style={{ fontSize: '12px', color: CLAIR.doux }}>Le but est compté pour {nomEquipe}. Il n'apparaît pas au classement des buteurs.</span>}
       {inconnue && <span style={{ fontSize: '12px', color: CLAIR.doux }}>Le but compte au classement des buteurs ; sur le site, il s'affiche sans minute.</span>}
+      {nom.trim() === '' && <span style={{ fontSize: '12px', color: CLAIR.doux }}>Sans nom, le but est enregistré « buteur inconnu » : il compte dans le score mais pas au classement des buteurs. Tu pourras le compléter plus tard.</span>}
     </form>
   );
 }
@@ -147,6 +148,49 @@ function ColonneButs({ m, equipe, suggestions, suggestionsCsc, action }) {
           <Plus size={14} /> But pour {equipe.nom}
         </button>
       )}
+    </div>
+  );
+}
+
+// ── Score final (saisie à la main) ──────────────────────────────────────
+// Pour un match joué dont l'API n'a pas le résultat (Elite Two : « résultat final seulement »,
+// parfois publié avec des jours de retard, parfois jamais). Le match passe « Terminé » et le
+// classement est recalculé. Un import ne l'écrase que quand l'API a enfin un vrai résultat.
+const OUVERTURE_PAGE = Date.now();
+function CarteScore({ m, action }) {
+  const termine = etatMatch(m) === 'termine';
+  const [dom, setDom] = useState(termine ? (m.scoreDomicile ?? '') : '');
+  const [ext, setExt] = useState(termine ? (m.scoreExterieur ?? '') : '');
+  const vide = dom === '' || ext === '';
+  const champ = { ...CHAMP, width: '64px', textAlign: 'center', fontFamily: CHIFFRES, fontSize: '20px', fontWeight: 800 };
+
+  return (
+    <div style={CARTE}>
+      <div style={TITRE_CARTE}>Score final</div>
+      <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <input type="number" min={0} max={30} value={dom} onChange={e => setDom(e.target.value)} aria-label={`Score ${m.equipeDomicile?.nom}`} style={champ} />
+          <span style={{ fontWeight: 800, color: CLAIR.doux }}>-</span>
+          <input type="number" min={0} max={30} value={ext} onChange={e => setExt(e.target.value)} aria-label={`Score ${m.equipeExterieur?.nom}`} style={champ} />
+        </div>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button disabled={action.envoi || vide}
+            onClick={() => action.executer(() => adminService.matchs.score(m.id, Number(dom), Number(ext)), 'Score final enregistré : match terminé, classement recalculé.')}
+            style={{ ...BOUTON(CLAIR.vert, '#fff'), opacity: vide ? 0.5 : 1 }}>
+            <Check size={14} /> {termine ? 'Corriger' : 'Terminer le match'}
+          </button>
+          {termine && (
+            <button disabled={action.envoi}
+              onClick={() => action.executer(() => adminService.matchs.score(m.id, null, null), 'Saisie annulée : le match est de nouveau « à jouer ».').then(ok => { if (ok) { setDom(''); setExt(''); } })}
+              style={BOUTON('transparent', CLAIR.doux)}>
+              Annuler la saisie
+            </button>
+          )}
+        </div>
+        <span style={{ fontSize: '12px', color: CLAIR.doux }}>
+          Gardé lors des imports tant que l'API n'a pas le résultat. Dès qu'elle l'a, c'est son score qui compte.
+        </span>
+      </div>
     </div>
   );
 }
@@ -401,6 +445,9 @@ export default function AdminMatchEditionPage() {
 
         {/* Colonne droite */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {etat !== 'live' && etat !== 'annule' && new Date(match.dateMatch).getTime() < OUVERTURE_PAGE && (
+            <CarteScore key={`sc-${match.statut}-${match.scoreDomicile}-${match.scoreExterieur}`} m={match} action={action} />
+          )}
           {joue && <CarteMiTemps key={`mt-${match.scoreMiTempsDomicile}-${match.scoreMiTempsExterieur}`} m={match} action={action} />}
           <CarteHeure key={`h-${match.dateMatch}`} m={match} action={action} />
         </div>

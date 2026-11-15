@@ -107,6 +107,14 @@ namespace F237.API.Services
             var leagueId = (int)saison.Division == 0 ? 411 : 813;
             var resultat = await api.ImporterSaisonAsync(leagueId, saison.Annee);
 
+            // Scores saisis à la main que l'API n'a pas encore : le classement de l'API ne les compte pas
+            if (resultat.ScoresManuelsGardes > 0 && resultat.SaisonId != 0)
+            {
+                var classements = scope.ServiceProvider.GetRequiredService<IClassementService>();
+                await classements.RecalculerClassementAsync(resultat.SaisonId);
+                _logger.LogInformation("🧮 Classement recalculé ({N} score(s) saisi(s) à la main gardé(s))", resultat.ScoresManuelsGardes);
+            }
+
             _logger.LogInformation("🔄 Import auto ({Raison}) : {Nom} — {Matchs} matchs, {Classement} lignes de classement, {Buts} buts, erreur : {Erreur}",
                 raison, saison.Nom, resultat.Matchs, resultat.EquipesClassement, resultat.ButsImportes, resultat.Erreur ?? "aucune");
         }

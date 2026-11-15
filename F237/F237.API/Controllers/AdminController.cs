@@ -140,6 +140,59 @@ namespace F237.API.Controllers
             return NoContent();
         }
 
+        // PUT /api/admin/matchs/1444/score   { "domicile": 2, "exterieur": 1 }
+        // Score final saisi à la main (ex. Elite Two quand l'API n'a pas le résultat) : le match passe
+        // "Terminé" et le classement de la saison est recalculé. { null, null } = annuler la saisie
+        // (le match redevient "Planifié"). Un import ne l'écrase que si l'API a enfin un vrai résultat.
+        [HttpPut("matchs/{matchId:int}/score")]
+        public async Task<IActionResult> DefinirScore(int matchId, [FromBody] SaisieScoreDto saisie,
+            [FromServices] F237.BLL.Services.Interfaces.IClassementService classementService)
+        {
+            var match = await _context.Matchs.FirstOrDefaultAsync(m => m.Id == matchId);
+            if (match == null) return NotFound(new { message = "Match introuvable." });
+
+            if (match.Statut == StatutMatchEnum.EnCours)
+                return BadRequest(new { message = "Match en direct : le score est mis à jour automatiquement." });
+            if ((saisie.Domicile == null) != (saisie.Exterieur == null))
+                return BadRequest(new { message = "Donne les deux scores, ou aucun pour annuler la saisie." });
+            if (saisie.Domicile is < 0 or > 30 || saisie.Exterieur is < 0 or > 30)
+                return BadRequest(new { message = "Score invalide." });
+
+            if (saisie.Domicile == null)
+            {
+                // Annulation : le match redevient "à jouer"
+                match.ScoreDomicile = null;
+                match.ScoreExterieur = null;
+                match.Statut = StatutMatchEnum.Planifié;
+            }
+            else
+            {
+                if (match.DateMatch > DateTime.UtcNow)
+                    return BadRequest(new { message = "Ce match n'a pas encore commencé." });
+                match.ScoreDomicile = saisie.Domicile;
+                match.ScoreExterieur = saisie.Exterieur;
+                match.Statut = StatutMatchEnum.Terminé;
+                // Mi-temps devenue impossible avec le nouveau score : on l'efface
+                if (match.ScoreMiTempsDomicile > saisie.Domicile || match.ScoreMiTempsExterieur > saisie.Exterieur)
+                {
+                    match.ScoreMiTempsDomicile = null;
+                    match.ScoreMiTempsExterieur = null;
+                }
+            }
+            await _context.SaveChangesAsync();
+            await classementService.RecalculerClassementAsync(match.SaisonId);
+
+            return Ok(new
+            {
+                match.Id,
+                match.ScoreDomicile,
+                match.ScoreExterieur,
+                Statut = (int)match.Statut,
+                match.ScoreMiTempsDomicile,
+                match.ScoreMiTempsExterieur
+            });
+        }
+
         // PUT /api/admin/matchs/1444/mi-temps   { "domicile": 1, "exterieur": 0 }   (null + null = effacer)
         // Gardé lors des imports tant que l'API ne fournit pas elle-même ce score.
         [HttpPut("matchs/{matchId:int}/mi-temps")]
@@ -663,8 +716,8 @@ namespace F237.API.Controllers
         // comme les buts venant de l'API.
         private static string? ValiderBut(SaisieButDto s, Match match)
         {
+            // Nom vide = buteur inconnu (enregistré "Inconnu", à compléter plus tard)
             var nom = s.NomJoueur?.Trim() ?? string.Empty;
-            if (nom.Length == 0) return "Le nom du buteur est obligatoire.";
             if (nom.Length > 200) return "Le nom du buteur dépasse 200 caractères.";
             // 0 = minute inconnue (le but compte, sans minute affichée sur le site)
             if (s.Minute is < 0 or > 130) return "La minute doit être entre 1 et 130 (ou 0 si elle est inconnue).";
@@ -676,7 +729,8 @@ namespace F237.API.Controllers
 
         private static void Appliquer(ButMatch but, SaisieButDto s)
         {
-            but.NomJoueur = s.NomJoueur!.Trim();
+            var nom = s.NomJoueur?.Trim();
+            but.NomJoueur = string.IsNullOrEmpty(nom) ? BUTEUR_INCONNU : nom;
             but.NomEquipe = s.NomEquipe!;
             but.Minute = s.Minute;
             but.EstPenalty = s.EstPenalty && !s.EstButCSC; // un CSC n'est jamais un penalty
@@ -767,6 +821,12 @@ namespace F237.API.Controllers
     {
         public string? Principale { get; set; }
         public string? Secondaire { get; set; }
+    }
+
+    public class SaisieScoreDto
+    {
+        public int? Domicile { get; set; }
+        public int? Exterieur { get; set; }
     }
 
     public class SaisieMiTempsDto

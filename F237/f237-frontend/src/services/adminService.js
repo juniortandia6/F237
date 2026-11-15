@@ -59,6 +59,8 @@ export const adminService = {
     ajouterBut: (matchId, but) => appel(`/api/admin/matchs/${matchId}/buts`, { method: 'POST', body: JSON.stringify(but) }),
     modifierBut: (butId, but) => appel(`/api/admin/buts/${butId}`, { method: 'PUT', body: JSON.stringify(but) }),
     supprimerBut: (butId) => appel(`/api/admin/buts/${butId}`, { method: 'DELETE' }),
+    /** Score final saisi à la main (match -> Terminé, classement recalculé). null + null = annuler la saisie */
+    score: (matchId, domicile, exterieur) => appel(`/api/admin/matchs/${matchId}/score`, { method: 'PUT', body: JSON.stringify({ domicile, exterieur }) }),
     /** null + null = effacer le score à la mi-temps */
     miTemps: (matchId, domicile, exterieur) => appel(`/api/admin/matchs/${matchId}/mi-temps`, { method: 'PUT', body: JSON.stringify({ domicile, exterieur }) }),
     /** heure = chaîne ISO avec fuseau, ex. "2026-11-14T15:30:00+01:00" (heure du Cameroun) */
@@ -101,7 +103,7 @@ export const adminService = {
     /** Saisie rapide : un joueur par ligne ("9 Mathew Williams"). Renvoie { ajoutes, ignores }. */
     /** Copie l'effectif de l'API-Football dans F237 (1 requête). Renvoie { ajoutes, ignores, message? }. */
     importerApi: (equipeId) => appel(`/api/admin/equipes/${equipeId}/joueurs/importer-api`, { method: 'POST' }),
-    ajouterLot: (equipeId, lignes, poste) => appel(`/api/admin/equipes/${equipeId}/joueurs/lot`, { method: 'POST', body: JSON.stringify({ lignes, poste }) }),
+    ajouterLot: (equipeId, lignes, poste, nationalite) => appel(`/api/admin/equipes/${equipeId}/joueurs/lot`, { method: 'POST', body: JSON.stringify({ lignes, poste, nationalite }) }),
     /** Même corps que ajouter, + estActif (false = a quitté le club) */
     modifier: (id, joueur) => appel(`/api/admin/joueurs/${id}`, { method: 'PUT', body: JSON.stringify(joueur) }),
     supprimer: (id) => appel(`/api/admin/joueurs/${id}`, { method: 'DELETE' }),

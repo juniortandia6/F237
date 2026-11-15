@@ -21,6 +21,7 @@ namespace F237.BLL.Services.Implementations
 
         // Suivi du quota pendant un import
         private int _requetesUtilisees;
+        private int _scoresManuelsGardes; // voir ResultatImportSaison.ScoresManuelsGardes
         private int? _requetesRestantes;
 
         // Nombre max de matchs par appel /fixtures?ids=... (limite API-Football)
@@ -303,9 +304,20 @@ namespace F237.BLL.Services.Implementations
 
                 if (matchsExistants.TryGetValue(apiFixtureId, out var matchExistant))
                 {
-                    matchExistant.Statut = statut;
-                    matchExistant.ScoreDomicile = scoreDomicile;
-                    matchExistant.ScoreExterieur = scoreExterieur;
+                    // Score saisi à la main (match terminé chez nous) alors que l'API n'a encore rien
+                    // ("NS", sans score) : on le garde. Dès que l'API a le résultat, c'est elle qui gagne.
+                    var resultatManuel = matchExistant.Statut == StatutMatchEnum.Terminé
+                        && statut == StatutMatchEnum.Planifié && scoreDomicile == null && scoreExterieur == null;
+                    if (resultatManuel)
+                    {
+                        _scoresManuelsGardes++;
+                    }
+                    else
+                    {
+                        matchExistant.Statut = statut;
+                        matchExistant.ScoreDomicile = scoreDomicile;
+                        matchExistant.ScoreExterieur = scoreExterieur;
+                    }
                     // Score à la mi-temps : l'API n'en a pas toujours (ex. Elite Two). Si elle n'en
                     // donne pas, on garde celui de la base (éventuellement saisi à la main dans l'admin).
                     if (miTempsDomicile != null && miTempsExterieur != null)
@@ -564,6 +576,7 @@ namespace F237.BLL.Services.Implementations
         {
             _requetesUtilisees = 0;
             _requetesRestantes = null;
+            _scoresManuelsGardes = 0;
             var resultat = new ResultatImportSaison { LeagueId = leagueId, Saison = saison };
 
             try
@@ -637,6 +650,7 @@ namespace F237.BLL.Services.Implementations
                 // 4. Matchs (1 requête)
                 var fixtures = await GetApiAsync($"/fixtures?league={leagueId}&season={saison}");
                 resultat.Matchs = await EnregistrerMatchsAsync(fixtures, entiteSaison.Id);
+                resultat.ScoresManuelsGardes = _scoresManuelsGardes;
 
                 // 4 bis. Saison la plus récente de cette ligue : ses clubs SONT les clubs actuels de la division.
                 //        On aligne leur division et on les réactive (promus, relégués, clubs créés inactifs).

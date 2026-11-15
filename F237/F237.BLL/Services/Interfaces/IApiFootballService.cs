@@ -45,6 +45,13 @@ namespace F237.BLL.Services.Interfaces
         public int EquipesClassement { get; set; }
         public int ButsImportes { get; set; }
 
+        /// <summary>
+        /// Matchs terminés en base (score saisi à la main dans l'admin) que l'API donne encore
+        /// "pas commencé" : on les a gardés tels quels. S'il y en a, l'appelant recalcule le classement
+        /// (celui de l'API ne les compte pas).
+        /// </summary>
+        public int ScoresManuelsGardes { get; set; }
+
         /// <summary>False si l'API ne fournit pas les buteurs de cette ligue (ex. Elite Two) : étape des buts sautée.</summary>
         public bool ButsFournis { get; set; } = true;
         public int MatchsSansButsRestants { get; set; }

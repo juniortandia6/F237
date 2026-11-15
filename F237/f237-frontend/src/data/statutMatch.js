@@ -16,6 +16,13 @@ export const STATUT = { PLANIFIE: 0, EN_COURS: 1, TERMINE: 2, REPORTE: 3, ANNULE
 const CHARGE_LE = Date.now();
 const DELAI_NON_DISPUTE = 24 * 3600 * 1000;
 
+// Match d'Elite Two ? (d'après sa saison, sinon le nom de la compétition)
+function estEliteTwo(m) {
+  const cle = infosSaison(m?.saisonId)?.cle;
+  if (cle) return cle === 'two';
+  return /elite\s*two|elite\s*2/i.test(m?.competition ?? '');
+}
+
 // Saison du match déjà terminée ? (inconnue -> on considère qu'elle est en cours)
 function saisonTerminee(m) {
   const annee = infosSaison(m?.saisonId)?.annee;
@@ -24,8 +31,8 @@ function saisonTerminee(m) {
 
 /**
  * 'live' | 'termine' | 'aVenir' | 'enAttente' | 'reporte' | 'annule' | 'nonDispute'
- * enAttente : match "planifié" dont l'heure est passée depuis moins de 24 h, sans score
- * (ex. Elite Two : l'API ne donne que le résultat final, pas de direct).
+ * enAttente : match d'Elite Two "planifié" dont l'heure est passée depuis moins de 24 h, sans score
+ * (l'API ne donne que le résultat final, pas de direct). Elite One : reste « à venir ».
  */
 export function etatMatch(m) {
   switch (m?.statut) {
@@ -35,12 +42,15 @@ export function etatMatch(m) {
     case STATUT.ANNULE: return 'annule';
     default: {
       const debut = new Date(m?.dateMatch).getTime();
-      if (!Number.isFinite(debut) || debut >= CHARGE_LE) return 'aVenir';
-      return debut < CHARGE_LE - DELAI_NON_DISPUTE ? 'nonDispute' : 'enAttente';
+      if (Number.isFinite(debut) && debut < CHARGE_LE - DELAI_NON_DISPUTE) return 'nonDispute';
+      // Heure passée : « résultat en attente » seulement en Elite Two (pas de direct chez l'API).
+      // En Elite One, le direct prend le relais : le match reste « à venir » jusqu'au coup d'envoi réel.
+      if (Number.isFinite(debut) && debut < CHARGE_LE && estEliteTwo(m)) return 'enAttente';
+      return 'aVenir';
     }
   }
 }
 
 /** Vrai pour un match qu'on peut encore pronostiquer / afficher dans "prochains matchs" */
 export const estAVenir = (m) => etatMatch(m) === 'aVenir';
-export const estEnAttente = (m) => etatMatch(m) === 'enAttente';  
+export const estEnAttente = (m) => etatMatch(m) === 'enAttente';

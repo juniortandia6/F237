@@ -13,8 +13,12 @@ import { regrouperButeurs, classerButeurs } from '../data/buteurs';
 import { texteActu, articlesHero, IMAGES_DEFAUT } from '../data/actualites';
 import { useActualites } from '../hooks/useActualites';
 import { UTILISER_DEMO, construireMatchsDemo } from '../data/matchsDemo';
-import { COMPETITIONS, SAISONS_DB, ANNEE_ACTUELLE } from '../data/saisons';
+import { COMPETITIONS, SAISONS_DB, ANNEE_ACTUELLE, infosSaison } from '../data/saisons';
 import { estEnAttente } from '../data/statutMatch';
+
+// Compétition d'un match : celle ajoutée au chargement, sinon déduite de sa saison
+// (les matchs du direct SignalR n'ont que le SaisonId)
+const nomCompetition = (m) => m?.competition ?? infosSaison(m?.saisonId)?.label ?? 'Elite One';
 
 // Hero : les actus de l'API (à la une d'abord, 5 max). Sans article publié,
 // une seule diapo d'accueil (pas de fausse actu).
@@ -103,7 +107,7 @@ function CarteMatch({ m, pleineLargeur = false }) {
       <div style={{ flex: 1, minWidth: 0, paddingRight: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: '11px', fontWeight: 700, color: '#333', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-            {m.competition ?? 'Elite One'}
+            {nomCompetition(m)}
           </span>
           {live ? (
             <span style={{ fontSize: '11px', fontWeight: 800, color: theme.red, display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -188,7 +192,7 @@ function LogoCarte({ src }) {
 const lienCalendrier = (m) => {
   const d = new Date(m.dateMatch);
   const jour = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  return `/matchs?date=${jour}&comp=${m.competition === 'Elite Two' ? 'two' : 'one'}`;
+  return `/matchs?date=${jour}&comp=${nomCompetition(m) === 'Elite Two' ? 'two' : 'one'}`;
 };
 
 // mode : 'live' | 'avenir' | 'termine'
@@ -268,7 +272,7 @@ function CarteDirect({ m, mode }) {
 
       {/* Infos */}
       <span style={{ marginTop: '14px', fontSize: '11px', fontWeight: 700, color: '#7a7a7a', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-        Elite One{m.dateMatch ? ` · ${new Date(m.dateMatch).toLocaleDateString(locale(), { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
+        {nomCompetition(m)}{m.dateMatch ? ` · ${new Date(m.dateMatch).toLocaleDateString(locale(), { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
       </span>
       <span style={{
         marginTop: '6px', fontSize: '18px', fontWeight: 700, color: '#141414', lineHeight: 1.3,
