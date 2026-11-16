@@ -8,6 +8,7 @@ import { ArrowRight } from 'lucide-react';
 import theme from '../theme';
 import { formatDateActu, texteActu } from '../data/actualites';
 import { useActualites } from '../hooks/useActualites';
+import { SqueletteCarteArticle, ZoneChargement } from '../components/Squelette';
 
 function Tag({ children }) {
   const { t } = useTranslation();
@@ -113,7 +114,9 @@ function ActualitesPage() {
       </div>
 
       {chargement && articles.length === 0 ? (
-        <p style={{ color: theme.textFaint, textAlign: 'center', padding: '40px 0' }}>{t('commun.chargement')}</p>
+        <ZoneChargement label={t('commun.chargement')} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '22px' }}>
+          {Array.from({ length: 6 }, (_, i) => <SqueletteCarteArticle key={i} index={i} />)}
+        </ZoneChargement>
       ) : erreur && articles.length === 0 ? (
         <p style={{ color: theme.textMuted, textAlign: 'center', padding: '40px 0' }}>{t('actualites.erreur')}</p>
       ) : articles.length === 0 ? (

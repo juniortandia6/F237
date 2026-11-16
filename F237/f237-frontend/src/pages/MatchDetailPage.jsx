@@ -16,6 +16,7 @@ import { TOUS_LES_SAISON_IDS, infosSaison, libelleSaison } from '../data/saisons
 import theme from '../theme';
 import { etatMatch } from '../data/statutMatch';
 import { useEcranMobile } from '../hooks/useEcranMobile';
+import { SqueletteFiche, ZoneChargement } from '../components/Squelette';
 
 // ── Couleurs de la zone claire (mêmes que MatchsPage) ───────────────────
 const CLAIR = {
@@ -597,6 +598,11 @@ function MatchDetailPage() {
     const l = brut.apiFootballId != null ? matchsLive?.find(x => x.apiFootballId === brut.apiFootballId) : null;
     return l ? { ...brut, statut: 1, scoreDomicile: l.scoreDomicile, scoreExterieur: l.scoreExterieur, minute: l.minuteLive ?? l.minute ?? brut.minuteLive ?? brut.minute, statutCourt: l.statutCourt, minuteExtra: l.minuteExtra, buts: l.buts ?? brut.buts } : brut;
   }, [brut, matchsLive]);
+
+  // Premier chargement : squelette de la fiche (bande sombre + cartes)
+  if (!m && !donnees) {
+    return <ZoneChargement label={t('matchDetail.chargement')}><SqueletteFiche /></ZoneChargement>;
+  }
 
   if (!m) {
     return (

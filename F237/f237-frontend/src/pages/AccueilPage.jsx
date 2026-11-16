@@ -15,6 +15,7 @@ import { useActualites } from '../hooks/useActualites';
 import { UTILISER_DEMO, construireMatchsDemo } from '../data/matchsDemo';
 import { COMPETITIONS, SAISONS_DB, ANNEE_ACTUELLE, infosSaison } from '../data/saisons';
 import { estEnAttente } from '../data/statutMatch';
+import { SqueletteCarteMatch, SqueletteLignesClassement, ZoneChargement } from '../components/Squelette';
 
 // Compétition d'un match : celle ajoutée au chargement, sinon déduite de sa saison
 // (les matchs du direct SignalR n'ont que le SaisonId)
@@ -879,7 +880,7 @@ function SectionClassement({ signatureLive = '', live = false }) {
       </div>
 
       {chargement ? (
-        <div className="text-center py-10" style={{ fontSize: '14px', color: CLAIRE.textFaint }}>{t('commun.chargement')}</div>
+        <ZoneChargement label={t('commun.chargement')}><SqueletteLignesClassement n={5} /></ZoneChargement>
       ) : top5.length === 0 ? (
         <div className="text-center py-10" style={{ fontSize: '14px', color: CLAIRE.textMuted }}>
           {t('accueil.classements.indisponible')}
@@ -1419,7 +1420,9 @@ const AccueilPage = () => {
               }}
             >
               {loadingMatchs ? (
-                <span style={{ fontSize: '14px', color: theme.textMuted }}>{t('commun.chargement')}</span>
+                <ZoneChargement label={t('commun.chargement')} style={{ display: 'flex', gap: '16px' }}>
+                  {Array.from({ length: 4 }, (_, i) => <SqueletteCarteMatch key={i} variante="carrousel" index={i} />)}
+                </ZoneChargement>
               ) : matchsCarrousel.length === 0 ? (
                 <span style={{ fontSize: '14px', color: theme.textMuted }}>{t('accueil.aucunMatch')}</span>
               ) : matchsCarrousel.map((m, i) => (
@@ -1454,7 +1457,9 @@ const AccueilPage = () => {
             </Link>
           </div>
           {loadingMatchs ? (
-            <span style={{ fontSize: '14px', color: theme.textMuted }}>{t('commun.chargement')}</span>
+            <ZoneChargement label={t('commun.chargement')} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {Array.from({ length: 3 }, (_, i) => <SqueletteCarteMatch key={i} variante="pleine" index={i} />)}
+            </ZoneChargement>
           ) : matchsCarrousel.length === 0 ? (
             <span style={{ fontSize: '14px', color: theme.textMuted }}>{t('accueil.aucunMatch')}</span>
           ) : (

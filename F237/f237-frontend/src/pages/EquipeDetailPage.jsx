@@ -23,6 +23,7 @@ import { useEcranMobile } from '../hooks/useEcranMobile';
 import { estAVenir, estEnAttente } from '../data/statutMatch';
 import AvatarJoueur from '../components/AvatarJoueur';
 import { regrouperButeurs, classerButeurs } from '../data/buteurs';
+import { SqueletteLignes, SqueletteFiche, ZoneChargement } from '../components/Squelette';
 
 // ── Couleurs de la zone claire (mêmes que les autres pages) ─────────────
 const CLAIR = {
@@ -273,7 +274,7 @@ function CarteJoueur({ j, club }) {
 // ── Contenu des onglets ─────────────────────────────────────────────────
 function OngletApercu({ classement, derniersMatchs, annee, chargement }) {
   const { t } = useTranslation();
-  if (chargement) return <Carte><Vide>{t('commun.chargement')}</Vide></Carte>;
+  if (chargement) return <Carte><ZoneChargement label={t('commun.chargement')}><SqueletteLignes n={5} /></ZoneChargement></Carte>;
   return (
     <>
       <Carte titre={t('saison.saison', { s: libelleSaison(annee) })}>
@@ -302,7 +303,7 @@ function OngletApercu({ classement, derniersMatchs, annee, chargement }) {
 
 function OngletMatchs({ derniersMatchs, aVenir, chargement }) {
   const { t } = useTranslation();
-  if (chargement) return <Carte><Vide>{t('commun.chargement')}</Vide></Carte>;
+  if (chargement) return <Carte><ZoneChargement label={t('commun.chargement')}><SqueletteLignes n={6} /></ZoneChargement></Carte>;
   return (
     <>
       <Carte titre={t('commun.aVenir')} droite={<span style={{ fontSize: '12px', fontWeight: 700, color: CLAIR.doux }}>{t('matchs.nbMatchs', { count: aVenir.length })}</span>}>
@@ -724,11 +725,7 @@ function EquipeDetailPage() {
   }, [matchsSaison, data]);
 
   if (chargement) {
-    return (
-      <div style={{ backgroundColor: CLAIR.fond, minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: CLAIR.doux }}>{t('equipe.chargement')}</p>
-      </div>
-    );
+    return <ZoneChargement label={t('equipe.chargement')}><SqueletteFiche /></ZoneChargement>;
   }
 
   if (etat.erreur || !data) {

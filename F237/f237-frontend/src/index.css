@@ -22,11 +22,17 @@
 :root {
   --marge-page: 16px;
 }
+
 @media (min-width: 768px) {
-  :root { --marge-page: 32px; }
+  :root {
+    --marge-page: 32px;
+  }
 }
+
 @media (min-width: 1280px) {
-  :root { --marge-page: 60px; }
+  :root {
+    --marge-page: 60px;
+  }
 }
 
 /* Police de tout le site (les chiffres et les titres la remplacent là où il faut).
@@ -57,16 +63,59 @@ body {
 }
 
 /* Scrollbar sombre (Chrome / Edge) */
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: #111e18; }
-::-webkit-scrollbar-thumb { background: #2b4639; border-radius: 6px; }
-::-webkit-scrollbar-thumb:hover { background: #365847; }
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111e18;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2b4639;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #365847;
+}
 
 /* Sélection de texte aux couleurs F237 */
-::selection { background: #1f9d55; color: #fff; }
+::selection {
+  background: #1f9d55;
+  color: #fff;
+}
 
 /* Carrousels : sur écran tactile ou téléphone, on fait défiler au doigt,
    les flèches rondes ne servent plus (et cachent le bord des cartes). */
-@media (max-width: 767px), (hover: none) {
-  .fleche-carrousel { display: none !important; }
+@media (max-width: 767px),
+(hover: none) {
+  .fleche-carrousel {
+    display: none !important;
+  }
+}
+
+/* Squelettes de chargement (components/Squelette.jsx) */
+@keyframes f237-squelette {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.squelette {
+  background-color: #e3e8e5;
+  animation: f237-squelette 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .squelette {
+    animation: none;
+  }
 }

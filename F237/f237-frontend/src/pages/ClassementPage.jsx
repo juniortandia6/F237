@@ -17,6 +17,7 @@ import theme from '../theme';
 import { useEcranMobile } from '../hooks/useEcranMobile';
 import AvatarJoueur from '../components/AvatarJoueur';
 import { regrouperButeurs, classerButeurs } from '../data/buteurs';
+import { SqueletteTableau, SqueletteLignes, ZoneChargement } from '../components/Squelette';
 
 // ── Couleurs de la zone claire (mêmes que MatchsPage) ───────────────────
 const CLAIR = {
@@ -238,7 +239,7 @@ function CarteButeurs({ buteurs, logos, chargement, competition, surligne }) {
       </div>
 
       {chargement ? (
-        <p style={{ padding: '36px 18px', textAlign: 'center', color: CLAIR.doux, fontSize: '14px' }}>{t('commun.chargement')}</p>
+        <ZoneChargement label={t('commun.chargement')}><SqueletteLignes n={5} /></ZoneChargement>
       ) : !leader ? (
         <p style={{ padding: '36px 18px', textAlign: 'center', color: CLAIR.doux, fontSize: '14px' }}>{t('classement.aucunBut')}</p>
       ) : (
@@ -709,7 +710,7 @@ function ClassementPage() {
               </button>
             </div>
           ) : chargement ? (
-            <div style={{ textAlign: 'center', padding: '60px 0', color: CLAIR.doux }}>{t('classement.chargement')}</div>
+            <ZoneChargement label={t('classement.chargement')}><SqueletteTableau n={12} mobile={mobile} /></ZoneChargement>
           ) : lignes.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px 20px', color: CLAIR.doux, backgroundColor: CLAIR.carte, border: `1px dashed ${CLAIR.bord}`, borderRadius: '14px' }}>
               {t('classement.aucun')}

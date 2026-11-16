@@ -14,6 +14,7 @@ import { infosSaison, libelleSaison } from '../data/saisons';
 import AvatarJoueur from '../components/AvatarJoueur';
 import theme from '../theme';
 import { useEcranMobile } from '../hooks/useEcranMobile';
+import { SqueletteFiche, ZoneChargement } from '../components/Squelette';
 
 // ── Mêmes couleurs et gabarits que la fiche club ────────────────────────
 const CLAIR = {
@@ -321,11 +322,7 @@ export default function JoueurPage() {
   }, [matchs, data]);
 
   if (!etat || etat.id !== id) {
-    return (
-      <div style={{ backgroundColor: CLAIR.fond, minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: CLAIR.doux }}>{t('joueur.chargement')}</p>
-      </div>
-    );
+    return <ZoneChargement label={t('joueur.chargement')}><SqueletteFiche /></ZoneChargement>;
   }
 
   if (etat.erreur || !data) {

@@ -14,6 +14,7 @@ import LogoCompetition from '../components/LogoCompetition';
 import { COMPETITIONS, SAISONS_DB, ANNEE_ACTUELLE, libelleSaison } from '../data/saisons';
 import SelecteurSaison from '../components/SelecteurSaison';
 import theme from '../theme';
+import { SqueletteCarteEquipe, ZoneChargement } from '../components/Squelette';
 
 // ── Couleurs de la zone claire (mêmes que les autres pages) ─────────────
 const CLAIR = {
@@ -329,7 +330,11 @@ function EquipesPage() {
               </button>
             </div>
           ) : loading ? (
-            <div style={{ textAlign: 'center', padding: '60px 0', color: CLAIR.doux }}>{t('equipes.chargement')}</div>
+            <ZoneChargement label={t('equipes.chargement')}>
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+                {Array.from({ length: 8 }, (_, i) => <SqueletteCarteEquipe key={i} index={i} />)}
+              </div>
+            </ZoneChargement>
           ) : affichees.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '56px 20px', color: CLAIR.doux, backgroundColor: CLAIR.carte, border: `1px dashed ${CLAIR.bord}`, borderRadius: '14px' }}>
               {recherche ? t('equipes.aucunResultat', { q: recherche }) : t('equipes.aucun')}

@@ -9,6 +9,7 @@ import theme from '../theme';
 import { formatDateActu, texteActu, normaliserArticle } from '../data/actualites';
 import { useActualites } from '../hooks/useActualites';
 import { articleService } from '../services/articleService';
+import { SqueletteArticle, ZoneChargement } from '../components/Squelette';
 
 function ActualiteDetailPage() {
   const { t } = useTranslation();
@@ -34,9 +35,9 @@ function ActualiteDetailPage() {
 
   if (!pret && !actu) {
     return (
-      <div style={{ maxWidth: '760px', margin: '0 auto', padding: '96px 24px', textAlign: 'center', color: theme.textFaint }}>
-        {t('commun.chargement')}
-      </div>
+      <ZoneChargement label={t('commun.chargement')} style={{ maxWidth: '760px', margin: '0 auto', padding: '56px 24px 96px' }}>
+        <SqueletteArticle />
+      </ZoneChargement>
     );
   }
 

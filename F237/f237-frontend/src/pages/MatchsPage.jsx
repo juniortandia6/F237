@@ -10,6 +10,7 @@ import { locale } from '../i18n';
 import { ChevronLeft, ChevronRight, EyeOff, Radio, CalendarClock } from 'lucide-react';
 import { matchService } from '../services/matchService';
 import LogoCompetition from '../components/LogoCompetition';
+import { SqueletteCarteMatch, SqueletteDate, ZoneChargement } from '../components/Squelette';
 import { COMPETITIONS, ANNEE_ACTUELLE, SAISONS_DB, libelleSaison } from '../data/saisons';
 import SelecteurSaison from '../components/SelecteurSaison';
 import { useLiveScores } from '../hooks/useLiveScores';
@@ -492,7 +493,9 @@ const MatchsPage = () => {
 
               <div ref={calRef} style={{ display: 'flex', gap: '10px', overflowX: 'auto', scrollbarWidth: 'none', flex: 1, padding: '2px' }}>
                 {loading ? (
-                  <span style={{ padding: '30px 10px', color: CLAIR.doux, fontSize: '14px' }}>{t('matchs.chargementCalendrier')}</span>
+                  <ZoneChargement label={t('matchs.chargementCalendrier')} style={{ display: 'flex', gap: '10px' }}>
+                    {Array.from({ length: 9 }, (_, i) => <SqueletteDate key={i} />)}
+                  </ZoneChargement>
                 ) : datesUniques.length === 0 ? (
                   <span style={{ padding: '30px 10px', color: CLAIR.doux, fontSize: '14px' }}>
                     {pasDeDonnees ? t('matchs.calendrierBientot', { s: libelleSaison(annee) }) : t('matchs.aucunProgramme')}
@@ -568,7 +571,9 @@ const MatchsPage = () => {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]" style={{ alignItems: 'start' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: mobile ? '12px' : '14px', minWidth: 0 }}>
               {loading ? (
-                <div style={{ textAlign: 'center', padding: '48px 0', color: CLAIR.doux }}>{t('commun.chargement')}</div>
+                <ZoneChargement label={t('commun.chargement')} style={{ display: 'flex', flexDirection: 'column', gap: mobile ? '12px' : '14px' }}>
+                  {Array.from({ length: 4 }, (_, i) => <SqueletteCarteMatch key={i} variante="liste" mobile={mobile} index={i} />)}
+                </ZoneChargement>
               ) : matchsAffiches.length === 0 ? (
                 <div style={{
                   textAlign: 'center', padding: '48px 20px', color: CLAIR.doux,
