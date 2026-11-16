@@ -1,9 +1,11 @@
 ﻿using F237.API.DTOs;
 using F237.BLL.Services.Interfaces;
+using F237.DAL.Data;
 using F237.Domain.Entities;
 using F237.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace F237.API.Controllers
 {
@@ -125,6 +127,19 @@ namespace F237.API.Controllers
             }).ToList();
 
             return Ok(forme);
+        }
+
+        // Événements d'un match autres que les buts (penalty manqué...), saisis dans l'admin.
+        // GET /api/matchs/1470/evenements -> [{ id, type (1 = penalty manqué), minute, joueurId, nomJoueur, nomEquipe }]
+        [HttpGet("{id:int}/evenements")]
+        public async Task<IActionResult> GetEvenements(int id, [FromServices] F237DbContext context)
+        {
+            var liste = await context.EvenementsMatch.AsNoTracking()
+                .Where(e => e.MatchId == id)
+                .OrderBy(e => e.Minute)
+                .Select(e => new { e.Id, Type = (int)e.Type, e.Minute, e.JoueurId, e.NomJoueur, e.NomEquipe })
+                .ToListAsync();
+            return Ok(liste);
         }
 
         [HttpGet("{id}/buts")]

@@ -215,7 +215,9 @@
     "saisonPrecedente": "Previous season",
     "formePrecedente": "Faded badges are from the previous season.",
     "enAttenteMaj": "RESULT PENDING",
-    "scoreFinMatch": "The score will be shown at the end of the match."
+    "scoreFinMatch": "The score will be shown at the end of the match.",
+    "penManque": "missed penalty",
+    "tireurInconnu": "Unknown taker"
   },
   "classement": {
     "aucunBut": "No goals recorded yet.",

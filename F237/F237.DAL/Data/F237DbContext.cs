@@ -16,6 +16,7 @@ namespace F237.DAL.Data
         public DbSet<Saison> Saisons { get; set; }
         public DbSet<Classement> Classements { get; set; }
         public DbSet<ButMatch> ButsMatch { get; set; }
+        public DbSet<EvenementMatch> EvenementsMatch { get; set; }
         public DbSet<Pari> Paris { get; set; }
         public DbSet<PariGroupe> PariGroupes { get; set; }
         public DbSet<Utilisateur> Utilisateurs { get; set; }
@@ -53,6 +54,19 @@ namespace F237.DAL.Data
                 .WithMany()
                 .HasForeignKey(t => t.EquipeArriveeId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Événements de match (penalty manqué...) : supprimés avec le match ;
+            // si le joueur est supprimé, l'événement reste (sans lien)
+            modelBuilder.Entity<EvenementMatch>(e =>
+            {
+                e.HasOne(ev => ev.Match).WithMany(m => m.Evenements)
+                    .HasForeignKey(ev => ev.MatchId).OnDelete(DeleteBehavior.Cascade);
+                e.HasOne(ev => ev.Joueur).WithMany()
+                    .HasForeignKey(ev => ev.JoueurId).OnDelete(DeleteBehavior.SetNull);
+                e.Property(ev => ev.NomJoueur).HasMaxLength(200);
+                e.Property(ev => ev.NomEquipe).HasMaxLength(200);
+                e.HasIndex(ev => ev.MatchId);
+            });
 
             // Articles : slug unique (adresse /actualites/{slug}) + index pour la liste publique
             modelBuilder.Entity<Article>(e =>

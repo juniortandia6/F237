@@ -31,5 +31,6 @@ namespace F237.Domain.Entities
         public Saison Saison { get; set; } = null!;
         public ICollection<Pari> Paris { get; set; } = new List<Pari>();
         public ICollection<ButMatch> Buts { get; set; } = new List<ButMatch>();
+        public ICollection<EvenementMatch> Evenements { get; set; } = new List<EvenementMatch>();
     }
 }

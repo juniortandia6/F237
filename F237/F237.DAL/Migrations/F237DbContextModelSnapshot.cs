@@ -289,6 +289,45 @@ namespace F237.DAL.Migrations
                     b.ToTable("Equipes");
                 });
 
+            modelBuilder.Entity("F237.Domain.Entities.EvenementMatch", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("JoueurId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MatchId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Minute")
+                        .HasColumnType("int");
+
+                    b.Property<string>("NomEquipe")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("NomJoueur")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JoueurId");
+
+                    b.HasIndex("MatchId");
+
+                    b.ToTable("EvenementsMatch");
+                });
+
             modelBuilder.Entity("F237.Domain.Entities.Joueur", b =>
                 {
                     b.Property<int>("Id")
@@ -667,6 +706,24 @@ namespace F237.DAL.Migrations
                     b.Navigation("Utilisateur");
                 });
 
+            modelBuilder.Entity("F237.Domain.Entities.EvenementMatch", b =>
+                {
+                    b.HasOne("F237.Domain.Entities.Joueur", "Joueur")
+                        .WithMany()
+                        .HasForeignKey("JoueurId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("F237.Domain.Entities.Match", "Match")
+                        .WithMany("Evenements")
+                        .HasForeignKey("MatchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Joueur");
+
+                    b.Navigation("Match");
+                });
+
             modelBuilder.Entity("F237.Domain.Entities.Joueur", b =>
                 {
                     b.HasOne("F237.Domain.Entities.Equipe", "Equipe")
@@ -796,6 +853,8 @@ namespace F237.DAL.Migrations
             modelBuilder.Entity("F237.Domain.Entities.Match", b =>
                 {
                     b.Navigation("Buts");
+
+                    b.Navigation("Evenements");
 
                     b.Navigation("Paris");
                 });

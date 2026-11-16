@@ -61,6 +61,10 @@ export const adminService = {
     supprimerBut: (butId) => appel(`/api/admin/buts/${butId}`, { method: 'DELETE' }),
     /** Score final saisi à la main (match -> Terminé, classement recalculé). null + null = annuler la saisie */
     score: (matchId, domicile, exterieur) => appel(`/api/admin/matchs/${matchId}/score`, { method: 'PUT', body: JSON.stringify({ domicile, exterieur }) }),
+    /** Événements (penalty manqué...) : ev = { type: 1, nomJoueur, nomEquipe (équipe du joueur), minute } */
+    evenements: (matchId) => appel(`/api/matchs/${matchId}/evenements`).then(l => l ?? []),
+    ajouterEvenement: (matchId, ev) => appel(`/api/admin/matchs/${matchId}/evenements`, { method: 'POST', body: JSON.stringify(ev) }),
+    supprimerEvenement: (id) => appel(`/api/admin/evenements/${id}`, { method: 'DELETE' }),
     /** null + null = effacer le score à la mi-temps */
     miTemps: (matchId, domicile, exterieur) => appel(`/api/admin/matchs/${matchId}/mi-temps`, { method: 'PUT', body: JSON.stringify({ domicile, exterieur }) }),
     /** heure = chaîne ISO avec fuseau, ex. "2026-11-14T15:30:00+01:00" (heure du Cameroun) */

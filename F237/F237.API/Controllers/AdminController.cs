@@ -129,6 +129,84 @@ namespace F237.API.Controllers
             return Ok(VersDto(but));
         }
 
+        // ── Événements de match (penalty manqué...) : saisie à la main ────────
+        // Lecture publique : GET /api/matchs/{id}/evenements
+        // POST /api/admin/matchs/1444/evenements   { "type": 1, "nomJoueur": "...", "nomEquipe": "...", "minute": 33 }
+        [HttpPost("matchs/{matchId:int}/evenements")]
+        public async Task<IActionResult> AjouterEvenement(int matchId, [FromBody] SaisieEvenementDto saisie)
+        {
+            var match = await MatchAvecEquipesAsync(matchId);
+            if (match == null) return NotFound(new { message = "Match introuvable." });
+            var erreur = ValiderEvenement(saisie, match);
+            if (erreur != null) return BadRequest(new { message = erreur });
+
+            var ev = new EvenementMatch { MatchId = matchId };
+            AppliquerEvenement(ev, saisie);
+            ev.JoueurId = await TrouverJoueurAsync(ev.NomJoueur, ev.NomEquipe, match);
+            await _context.EvenementsMatch.AddAsync(ev);
+            await _context.SaveChangesAsync();
+            return Ok(VersDtoEvenement(ev));
+        }
+
+        // PUT /api/admin/evenements/12   (même corps)
+        [HttpPut("evenements/{id:int}")]
+        public async Task<IActionResult> ModifierEvenement(int id, [FromBody] SaisieEvenementDto saisie)
+        {
+            var ev = await _context.EvenementsMatch.FirstOrDefaultAsync(e => e.Id == id);
+            if (ev == null) return NotFound(new { message = "Événement introuvable." });
+            var match = await MatchAvecEquipesAsync(ev.MatchId);
+            if (match == null) return NotFound(new { message = "Match introuvable." });
+            var erreur = ValiderEvenement(saisie, match);
+            if (erreur != null) return BadRequest(new { message = erreur });
+
+            AppliquerEvenement(ev, saisie);
+            ev.JoueurId = await TrouverJoueurAsync(ev.NomJoueur, ev.NomEquipe, match);
+            await _context.SaveChangesAsync();
+            return Ok(VersDtoEvenement(ev));
+        }
+
+        // DELETE /api/admin/evenements/12
+        [HttpDelete("evenements/{id:int}")]
+        public async Task<IActionResult> SupprimerEvenement(int id)
+        {
+            var ev = await _context.EvenementsMatch.FirstOrDefaultAsync(e => e.Id == id);
+            if (ev == null) return NotFound(new { message = "Événement introuvable." });
+            _context.EvenementsMatch.Remove(ev);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
+        private static string? ValiderEvenement(SaisieEvenementDto s, Match match)
+        {
+            if (!Enum.IsDefined(typeof(TypeEvenementEnum), s.Type)) return "Type d'événement inconnu.";
+            if ((s.NomJoueur?.Trim().Length ?? 0) > 200) return "Le nom du joueur dépasse 200 caractères.";
+            if (s.Minute is < 0 or > 130) return "La minute doit être entre 1 et 130 (ou 0 si elle est inconnue).";
+            var nomEquipe = s.NomEquipe ?? string.Empty;
+            if (nomEquipe != match.EquipeDomicile?.Nom && nomEquipe != match.EquipeExterieur?.Nom)
+                return "L'équipe doit être l'une des deux équipes du match.";
+            return null;
+        }
+
+        private static void AppliquerEvenement(EvenementMatch ev, SaisieEvenementDto s)
+        {
+            var nom = s.NomJoueur?.Trim();
+            ev.Type = (TypeEvenementEnum)s.Type;
+            ev.NomJoueur = string.IsNullOrEmpty(nom) ? BUTEUR_INCONNU : nom;
+            ev.NomEquipe = s.NomEquipe!;
+            ev.Minute = s.Minute;
+        }
+
+        private static object VersDtoEvenement(EvenementMatch e) => new
+        {
+            e.Id,
+            e.MatchId,
+            Type = (int)e.Type,
+            e.Minute,
+            e.JoueurId,
+            e.NomJoueur,
+            e.NomEquipe,
+        };
+
         // DELETE /api/admin/buts/512
         [HttpDelete("buts/{id:int}")]
         public async Task<IActionResult> SupprimerBut(int id)
@@ -757,10 +835,16 @@ namespace F237.API.Controllers
         {
             but.JoueurId = null;
             if (but.EstButCSC) return;                 // le buteur d'un CSC joue dans l'autre équipe
-            var cle = RattachementButeurs.NormaliserNom(but.NomJoueur);
-            if (cle.Length == 0 || cle == "inconnu") return;
+            but.JoueurId = await TrouverJoueurAsync(but.NomJoueur, but.NomEquipe, match);
+        }
 
-            var equipeId = match.EquipeDomicile?.Nom == but.NomEquipe ? match.EquipeDomicileId : match.EquipeExterieurId;
+        // Joueur de l'effectif de l'équipe nomEquipe dont un des noms correspond, s'il est UNIQUE
+        private async Task<int?> TrouverJoueurAsync(string nomJoueur, string nomEquipe, Match match)
+        {
+            var cle = RattachementButeurs.NormaliserNom(nomJoueur);
+            if (cle.Length == 0 || cle == "inconnu") return null;
+
+            var equipeId = match.EquipeDomicile?.Nom == nomEquipe ? match.EquipeDomicileId : match.EquipeExterieurId;
             var joueurs = await _context.Joueurs
                 .Where(j => j.EquipeId == equipeId)
                 .Select(j => new { j.Id, j.Prenom, j.Nom })
@@ -770,7 +854,7 @@ namespace F237.API.Controllers
                 .Where(j => RattachementButeurs.FormesDuNom(j.Prenom, j.Nom).Any(f => f == cle))
                 .Select(j => j.Id)
                 .ToList();
-            if (trouves.Count == 1) but.JoueurId = trouves[0];
+            return trouves.Count == 1 ? trouves[0] : null;
         }
     }
 
@@ -827,6 +911,14 @@ namespace F237.API.Controllers
     {
         public int? Domicile { get; set; }
         public int? Exterieur { get; set; }
+    }
+
+    public class SaisieEvenementDto
+    {
+        public int Type { get; set; }               // 1 = penalty manqué (2/3 : cartons, plus tard)
+        public string? NomJoueur { get; set; }      // vide = inconnu
+        public string? NomEquipe { get; set; }      // équipe du joueur
+        public int Minute { get; set; }             // 0 = minute inconnue
     }
 
     public class SaisieMiTempsDto

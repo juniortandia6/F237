@@ -152,6 +152,72 @@ function ColonneButs({ m, equipe, suggestions, suggestionsCsc, action }) {
   );
 }
 
+// ── Penaltys manqués (n'entrent ni dans le score ni au classement des buteurs) ──
+const PENALTY_MANQUE = 1;
+function CartePenaltysManques({ m, liste, noms, action }) {
+  const equipes = [m.equipeDomicile, m.equipeExterieur].filter(Boolean);
+  const [ouvert, setOuvert] = useState(false);
+  const [equipe, setEquipe] = useState(equipes[0]?.nom ?? '');
+  const [nom, setNom] = useState('');
+  const [minute, setMinute] = useState('');
+  const minuteNum = minute === '' ? 0 : Number(minute);
+  const minuteValide = Number.isInteger(minuteNum) && minuteNum >= 0 && minuteNum <= 130;
+  const idListe = 'tireurs-penalty';
+
+  const valider = () => action.executer(
+    () => adminService.matchs.ajouterEvenement(m.id, { type: PENALTY_MANQUE, nomJoueur: nom.trim(), nomEquipe: equipe, minute: minuteNum }),
+    'Penalty manqué ajouté.',
+  ).then(ok => { if (ok) { setNom(''); setMinute(''); setOuvert(false); } });
+
+  return (
+    <div style={CARTE}>
+      <div style={TITRE_CARTE}>
+        Penaltys manqués
+        <span style={{ fontSize: '12px', color: CLAIR.doux, fontWeight: 600 }}>affichés dans la chronologie, sans changer le score</span>
+      </div>
+      <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {liste.length === 0 && !ouvert && <span style={{ fontSize: '14px', color: CLAIR.doux }}>Aucun penalty manqué saisi.</span>}
+        {liste.map(ev => (
+          <div key={ev.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', borderRadius: '10px', backgroundColor: CLAIR.tuile }}>
+            <span style={{ fontFamily: CHIFFRES, fontWeight: 800, fontSize: '17px', minWidth: '38px', color: CLAIR.texte }}>{ev.minute > 0 ? `${ev.minute}'` : '–'}</span>
+            <span aria-hidden="true">❌</span>
+            <span style={{ flex: 1, fontSize: '14px', color: CLAIR.texte }}>
+              <strong>{ev.nomJoueur === 'Inconnu' ? 'Tireur inconnu' : ev.nomJoueur}</strong> <span style={{ color: CLAIR.doux }}>· {ev.nomEquipe}</span>
+            </span>
+            <button disabled={action.envoi} title="Supprimer"
+              onClick={() => action.executer(() => adminService.matchs.supprimerEvenement(ev.id), 'Penalty manqué supprimé.')}
+              style={BOUTON('transparent', CLAIR.rouge)}>
+              <Trash2 size={14} />
+            </button>
+          </div>
+        ))}
+
+        {ouvert ? (
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <select value={equipe} onChange={e => setEquipe(e.target.value)} aria-label="Équipe du tireur" style={{ ...CHAMP, minWidth: '160px' }}>
+              {equipes.map(e => <option key={e.id ?? e.nom} value={e.nom}>{e.nom}</option>)}
+            </select>
+            <input value={nom} onChange={e => setNom(e.target.value)} list={idListe} placeholder="Tireur (vide = inconnu)" aria-label="Tireur"
+              style={{ ...CHAMP, flex: 1, minWidth: '180px' }} autoFocus />
+            <datalist id={idListe}>{noms(equipes.find(e => e.nom === equipe)).map(n => <option key={n} value={n} />)}</datalist>
+            <input type="number" min={0} max={130} value={minute} onChange={e => setMinute(e.target.value)} placeholder="Min." aria-label="Minute"
+              style={{ ...CHAMP, width: '80px' }} />
+            <button disabled={action.envoi || !minuteValide} onClick={valider} style={{ ...BOUTON(CLAIR.vert, '#fff'), opacity: minuteValide ? 1 : 0.5 }}>
+              <Check size={14} /> Ajouter
+            </button>
+            <button onClick={() => setOuvert(false)} style={BOUTON('transparent', CLAIR.doux)}><X size={14} /></button>
+          </div>
+        ) : (
+          <button onClick={() => setOuvert(true)} style={{ ...BOUTON('transparent', CLAIR.vert), alignSelf: 'flex-start', border: `1px dashed ${CLAIR.bord}` }}>
+            <Plus size={14} /> Ajouter un penalty manqué
+          </button>
+        )}
+        <span style={{ fontSize: '12px', color: CLAIR.doux }}>Minute vide = inconnue. Le tireur est relié à sa fiche joueur s'il est dans l'effectif.</span>
+      </div>
+    </div>
+  );
+}
+
 // ── Score final (saisie à la main) ──────────────────────────────────────
 // Pour un match joué dont l'API n'a pas le résultat (Elite Two : « résultat final seulement »,
 // parfois publié avec des jours de retard, parfois jamais). Le match passe « Terminé » et le
@@ -287,6 +353,16 @@ export default function AdminMatchEditionPage() {
   const [erreur, setErreur] = useState(null);
   const [envoi, setEnvoi] = useState(false);
   const [message, setMessage] = useState(null);
+  // Penaltys manqués du match (rechargés après chaque modification)
+  const [evenements, setEvenements] = useState({ cle: null, liste: [] });
+  useEffect(() => {
+    let ignore = false;
+    const cle = `${id}-${version}`;
+    adminService.matchs.evenements(id)
+      .then(l => { if (!ignore) setEvenements({ cle, liste: l }); })
+      .catch(() => { if (!ignore) setEvenements({ cle, liste: [] }); });
+    return () => { ignore = true; };
+  }, [id, version]);
 
   // GET /api/matchs/{id} ne renvoie ni les équipes ni les buts : on s'en sert seulement
   // pour connaître la saison, puis on prend le match COMPLET dans la liste de la saison
@@ -420,6 +496,7 @@ export default function AdminMatchEditionPage() {
       )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 300px', gap: '20px', alignItems: 'start' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', minWidth: 0 }}>
         {/* Buteurs */}
         <div style={CARTE}>
           <div style={TITRE_CARTE}>
@@ -441,6 +518,10 @@ export default function AdminMatchEditionPage() {
           <p style={{ padding: '0 18px 14px', fontSize: '12px', color: CLAIR.doux, margin: 0 }}>
             Les noms déjà utilisés cette saison sont proposés pendant la saisie : garde la même orthographe pour que les buts s'additionnent au classement.
           </p>
+        </div>
+        {joue && match.equipeDomicile && match.equipeExterieur && (
+          <CartePenaltysManques m={match} liste={evenements.liste} noms={noms} action={action} />
+        )}
         </div>
 
         {/* Colonne droite */}

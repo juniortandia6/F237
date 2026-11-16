@@ -112,7 +112,7 @@
     "confidentialite": "Confidentialité",
     "cookies": "Cookies",
     "contact": "Contact",
-    "marques": "Logos et marques (MTN Elite One, Elite Two, clubs) sont des propriétés de leurs détenteurs respectifs. F237 est un site de fans indépendant"
+    "marques": "Logos et marques (MTN Elite One, Elite Two, clubs) : propriété de leurs détenteurs respectifs. F237 est un site de fans indépendant, sans lien officiel avec la FECAFOOT, la LFPC ou MTN."
   },
   "bandeau": {
     "aucunMatch": "Aucun match en cours · Scores mis à jour en temps réel",
@@ -215,7 +215,9 @@
     "saisonPrecedente": "Saison précédente",
     "formePrecedente": "Les pastilles pâles viennent de la saison précédente.",
     "enAttenteMaj": "RÉSULTAT EN ATTENTE",
-    "scoreFinMatch": "Le score sera affiché à la fin du match."
+    "scoreFinMatch": "Le score sera affiché à la fin du match.",
+    "penManque": "penalty manqué",
+    "tireurInconnu": "Tireur inconnu"
   },
   "classement": {
     "aucunBut": "Aucun but enregistré pour l'instant.",

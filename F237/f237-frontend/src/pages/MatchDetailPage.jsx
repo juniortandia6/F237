@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import i18n, { locale } from '../i18n';
 import { ChevronRight, ArrowLeft, CalendarDays, Clock, MapPin, Trophy, Hash } from 'lucide-react';
 import { matchService } from '../services/matchService';
+import { evenementService, TYPE_EVENEMENT } from '../services/evenementService';
 import { useLiveScores } from '../hooks/useLiveScores';
 import { TOUS_LES_SAISON_IDS, infosSaison, libelleSaison } from '../data/saisons';
 import theme from '../theme';
@@ -319,10 +320,13 @@ function Jalon({ texte }) {
 function Evenement({ ev }) {
   const { t } = useTranslation();
   const gauche = ev.cote === 'dom';
+  // ev.autre = événement qui n'est pas un but (penalty manqué) : ne compte pas dans le score
+  const penManque = ev.autre && ev.type === TYPE_EVENEMENT.PENALTY_MANQUE;
   const bloc = (
     <div style={{ textAlign: gauche ? 'right' : 'left' }}>
-      <div style={{ fontWeight: 700, color: CLAIR.texte, fontSize: '15px' }}>
-        ⚽ <LienButeur b={ev} />
+      <div style={{ fontWeight: 700, color: penManque ? CLAIR.doux : CLAIR.texte, fontSize: '15px' }}>
+        {penManque ? <span aria-hidden="true">❌</span> : '⚽'} {penManque && (!ev.nomJoueur || ev.nomJoueur === 'Inconnu') ? t('matchDetail.tireurInconnu') : <LienButeur b={ev} />}
+        {penManque && <span style={{ color: theme.red, fontSize: '12px', fontWeight: 700 }}> ({t('matchDetail.penManque')})</span>}
         {ev.estPenalty && <span style={{ color: theme.green, fontSize: '12px', fontWeight: 700 }}> ({t('matchDetail.pen')})</span>}
         {ev.estButCSC && <span style={{ color: theme.red, fontSize: '12px', fontWeight: 700 }}> ({t('matchDetail.csc')})</span>}
       </div>
@@ -334,7 +338,7 @@ function Evenement({ ev }) {
       <div>{gauche && bloc}</div>
       <span style={{
         justifySelf: 'center', width: '48px', height: '48px', borderRadius: '50%',
-        backgroundColor: '#fff', border: `2px solid ${gauche ? CLAIR.vert : theme.red}`,
+        backgroundColor: '#fff', border: `2px ${ev.autre ? 'dashed' : 'solid'} ${ev.autre ? CLAIR.perdant : gauche ? CLAIR.vert : theme.red}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontFamily: CHIFFRES, fontWeight: 800, fontSize: '18px', color: CLAIR.texte,
       }}>{minuteBut(ev) || '–'}</span>
@@ -343,16 +347,19 @@ function Evenement({ ev }) {
   );
 }
 
-// ── Onglet Chronologie : frise des buts ─────────────────────────────────
-function Chronologie({ m }) {
+// ── Onglet Chronologie : frise des buts (+ penaltys manqués saisis dans l'admin) ──
+function Chronologie({ m, autres = [] }) {
   const { t } = useTranslation();
   const joue = m.statut === 1 || m.statut === 2;
-  const evenements = [
+  const buts = [
     ...butsDe(m, 'dom').map(b => ({ ...b, cote: 'dom' })),
     ...butsDe(m, 'ext').map(b => ({ ...b, cote: 'ext' })),
   ].sort((a, b) => ordreMinute(a) - ordreMinute(b));
-  const sansMinute = evenements.filter(ev => !minuteConnue(ev));
-  const avecMinute = evenements.filter(minuteConnue);
+  // Autres événements : côté = équipe du joueur. Ils ne changent jamais le score.
+  const evAutres = autres.map(e => ({ ...e, autre: true, cote: e.nomEquipe === m.equipeDomicile?.nom ? 'dom' : 'ext' }));
+  const sansMinute = [...buts.filter(ev => !minuteConnue(ev)), ...evAutres.filter(ev => !minuteConnue(ev))];
+  const avecMinute = buts.filter(minuteConnue);
+  const butsSansMinute = buts.filter(ev => !minuteConnue(ev)).length;
 
   if (!joue) {
     return <Carte><p style={{ padding: '40px 20px', textAlign: 'center', color: CLAIR.doux }}>{t('matchDetail.chronoBientot')}</p></Carte>;
@@ -363,10 +370,13 @@ function Chronologie({ m }) {
   let d = 0, e = 0;
   const avecScore = avecMinute.map(ev => {
     if (ev.cote === 'dom') d++; else e++;
-    return { ...ev, score: sansMinute.length ? null : `${d}-${e}` };
+    return { ...ev, score: butsSansMinute ? null : `${d}-${e}` };
   });
-  const premiereMT = avecScore.filter(ev => ev.minute <= 45);
-  const deuxiemeMT = avecScore.filter(ev => ev.minute > 45);
+  // Frise : buts + autres événements à minute connue, dans l'ordre (à minute égale, le but d'abord)
+  const frise = [...avecScore, ...evAutres.filter(minuteConnue)]
+    .sort((a, b) => a.minute - b.minute || (a.autre ? 1 : 0) - (b.autre ? 1 : 0));
+  const premiereMT = frise.filter(ev => ev.minute <= 45);
+  const deuxiemeMT = frise.filter(ev => ev.minute > 45);
 
   return (
     <Carte>
@@ -401,7 +411,7 @@ function Chronologie({ m }) {
             {sansMinute.map((ev, i) => <Evenement key={`c${i}`} ev={ev} />)}
           </>
         )}
-        {evenements.length === 0 && (
+        {buts.length === 0 && (
           <p style={{ textAlign: 'center', color: CLAIR.doux, position: 'relative', zIndex: 1, backgroundColor: '#fff', padding: '8px' }}>
             {/* Des buts au score mais aucun détail : l'API ne fournit pas les buteurs pour ce match */}
             {(m.scoreDomicile ?? 0) + (m.scoreExterieur ?? 0) > 0 ? t('matchDetail.detailIndispo') : t('matchDetail.aucunBut')}
@@ -542,6 +552,16 @@ function MatchDetailPage() {
   const { matchsLive } = useLiveScores();
   const [donnees, setDonnees] = useState(null); // { tous: [...] } une fois chargé
   const [ongletChoisi, setOngletChoisi] = useState({ id: null, cle: 'apercu' });
+  // Penaltys manqués (saisis dans l'admin), pour la chronologie
+  const [evenements, setEvenements] = useState({ id: null, liste: [] });
+  useEffect(() => {
+    let ignore = false;
+    evenementService.getParMatch(id)
+      .then(l => { if (!ignore) setEvenements({ id, liste: Array.isArray(l) ? l : [] }); })
+      .catch(() => { if (!ignore) setEvenements({ id, liste: [] }); });
+    return () => { ignore = true; };
+  }, [id]);
+  const autres = evenements.id === id ? evenements.liste : [];
 
   // Revient sur "Aperçu" quand on change de match (sans setState dans un effet)
   const onglet = ongletChoisi.id === id ? ongletChoisi.cle : 'apercu';
@@ -668,7 +688,7 @@ function MatchDetailPage() {
                   <FormeRecente m={m} tous={donnees?.tous ?? []} />
                 </>
               )}
-              {onglet === 'chrono' && <Chronologie m={m} />}
+              {onglet === 'chrono' && <Chronologie m={m} autres={autres} />}
               {onglet === 'h2h' && <FaceAFace m={m} tous={donnees?.tous ?? [m]} />}
             </div>
             <InfosMatch m={m} saison={saison} />
