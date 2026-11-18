@@ -36,43 +36,60 @@ export const CLUBS_INFOS = {
   'aigle royal': {
     nomComplet: 'Aigle Royal de la Menoua',
     alias: ['aigle royal de la menoua', 'aigle royal menoua', 'aigle royal de dschang'],
-    surnom: 'El Pacha, le « Rapide de la Menoua »',
+    surnom: "El Pacha, l'« Oiseau de la Menoua »",
     ville: 'Dschang',
     fondation: 1932,
-    stade: 'Stade de Dschang',
+    couleurs: 'Jaune et noir',
+    stade: 'Stade municipal de Dschang (CENAJES)',
     histoire: [
-      "Né en juin 1932 à Dschang, dans la région de l'Ouest, l'Aigle Royal de la Menoua est l'un des plus anciens clubs du pays.",
-      "Vice-champion du Cameroun en 2005, il découvre la Ligue des champions de la CAF en 2006, puis atteint les huitièmes de finale de la Coupe de la Confédération en 2009. Il dispute deux finales de Coupe du Cameroun, en 2008 et en 2024.",
-      "Champion d'Elite Two en 2024-2025, le club retrouve l'élite pour la saison 2025-2026.",
+      "Fondé en 1932 à Dschang, dans la région de l'Ouest, sous le nom d'Aigle Royal de Dschang (à l'initiative, selon le club, de l'administrateur Félix Soulier), « El Pacha » est l'un des plus anciens clubs du Cameroun et la fierté de tout le département de la Menoua.",
+      "Il s'impose très tôt parmi les meilleures équipes du pays : finaliste de la coupe nationale en 1947 et en 1958, il termine aussi vice-champion du Cameroun en 1955-1956.",
+      "Après des décennies entre l'élite et les divisions inférieures, le club vit un renouveau au milieu des années 2000. Champion de deuxième division en 2004, il devient vice-champion du Cameroun dès son retour, en 2004-2005, et découvre la Ligue des champions de la CAF en 2006. Finaliste de la Coupe du Cameroun en 2008, il atteint ensuite les huitièmes de finale de la Coupe de la Confédération en 2009.",
+      "À partir de fin 2021, le club se restructure sous la présidence de Maître Gautier Zomissi. Relégué en Elite Two à l'issue de la saison 2023-2024, il réussit pourtant une belle épopée en Coupe du Cameroun 2024, jusqu'en finale contre la Colombe du Dja et Lobo (0-1). En 2025, il remporte l'Elite Two, retrouve l'Elite One et représente le Cameroun en Coupe de la Confédération.",
+      "Au stade municipal de Dschang, ses supporters entretiennent une ambiance bouillante, surtout lors des derbys de l'Ouest face au Racing de Bafoussam ou à Fovu de Baham.",
     ],
     palmares: [
-      { competition: 'Elite Two', type: 'titre', annees: ['2024-25'] },
-      { competition: 'Championnat du Cameroun', type: 'finale', annees: ['2004-05'], libelle: 'Vice-champion' },
-      { competition: 'Coupe du Cameroun', type: 'finale', annees: [2008, 2024] },
+      { competition: 'Elite Two', type: 'titre', annees: [2004, '2024-25'] },
+      { competition: 'Championnat du Cameroun', type: 'finale', annees: ['1955-56', '2004-05'], libelle: 'Vice-champion' },
+      { competition: 'Coupe du Cameroun', type: 'finale', annees: [1947, 1958, 2008, 2024] },
     ],
-    sources: ['https://en.wikipedia.org/wiki/Aigle_Royal_Menoua'],
+    sources: [
+      'https://fr.wikipedia.org/wiki/Aigle_royal_de_La_Menoua',
+      'https://en.wikipedia.org/wiki/Aigle_Royal_Menoua',
+      'https://rsssf.org/tablesk/kamcuphist.html',
+      'https://rsssf.org/tablesk/kamchamp.html',
+    ],
   },
 
   'canon': {
     nomComplet: 'Canon Sportif de Yaoundé',
-    alias: ['canon yaounde', 'canon sportif de yaounde', 'canon de yaounde'],
-    surnom: 'Kpa-Kum, Mekok Me Ngonda',
+    alias: ['canon yaounde', 'canon sportif de yaounde', 'canon de yaounde', 'canon kpakum'],
+    surnom: 'Kpa-Kum (le bruit du coup de canon), Mekok Me Ngonda, les « Brésiliens d\'Afrique »',
     ville: 'Yaoundé',
     fondation: 1930,
+    couleurs: 'Vert et rouge',
     stade: 'Stade Ahmadou-Ahidjo',
     histoire: [
-      "Fondé le 11 novembre 1930, le Canon Sportif de Yaoundé est l'un des clubs les plus titrés d'Afrique. Le Tonnerre Kalara Club est né d'une scission avec le Canon, et les deux se disputent le derby de Yaoundé.",
-      "Ses années 1970 et 1980 sont exceptionnelles : une dizaine de titres de champion, de nombreuses Coupes du Cameroun et trois Coupes d'Afrique des clubs champions, emmenés notamment par le capitaine Théophile Abega.",
-      "Après des années d'instabilité administrative, le club est revenu jouer les premiers rôles en Elite One au début des années 2020.",
+      "Fondé le 11 novembre 1930 à Yaoundé (dans le quartier de Mvog-Mbi, selon la tradition du club), le Canon Sportif devient très tôt un symbole de fierté populaire dans la capitale. Son grand rival, le Tonnerre Kalara Club, né d'une scission avec le Canon, lui dispute le derby de Yaoundé.",
+      "Ses années 1970 et 1980 sont un âge d'or : pratiquant un football spectaculaire qui lui vaut le surnom de « Brésiliens d'Afrique », le Kpa-Kum remporte trois Coupes d'Afrique des clubs champions (1971, 1978, 1980) et la Coupe d'Afrique des vainqueurs de coupe (1979), tout en dominant le championnat et la Coupe du Cameroun.",
+      "À son apogée, le club fournit l'ossature des Lions Indomptables de la Coupe du monde 1982 et du premier titre à la CAN en 1984, avec des légendes comme Thomas N'Kono (Ballon d'Or africain 1979 et 1982), Jean Manga Onguéné (1980), Théophile Abega (1984), Emmanuel Kundé ou Grégoire M'Bida.",
+      "Après un dixième titre de champion en 2002 et une finale de Coupe des vainqueurs de coupe en 2000, le club traverse une longue période de crises internes et de difficultés financières. Il retrouve de la stabilité au début des années 2020 et joue de nouveau le haut du classement de l'Elite One.",
     ],
     palmares: [
       { competition: 'Championnat du Cameroun', type: 'titre', annees: [1970, 1974, 1977, 1979, 1980, 1982, 1985, 1986, 1991, 2002] },
       { competition: 'Coupe du Cameroun', type: 'titre', annees: [1957, 1967, 1973, 1975, 1976, 1977, 1978, 1983, 1986, 1993, 1995, 1999] },
       { competition: "Coupe d'Afrique des clubs champions", type: 'titre', annees: [1971, 1978, 1980], continental: true },
       { competition: "Coupe d'Afrique des vainqueurs de coupe", type: 'titre', annees: [1979], continental: true },
+      { competition: "Coupe d'Afrique des vainqueurs de coupe", type: 'finale', annees: [1977, 1984, 2000], continental: true },
+      { competition: 'Coupe du Cameroun', type: 'finale', annees: [1960, 1974, 1980, 1985, 1998] },
+      { competition: 'Super Coupe Roger Milla', type: 'finale', annees: [2000] },
     ],
-    grandsJoueurs: ['Théophile Abega', 'Jean-Paul Akono'],
-    sources: ['https://fr.wikipedia.org/wiki/Canon_Yaoundé', 'https://en.wikipedia.org/wiki/Cameroonian_Cup'],
+    grandsJoueurs: ['Thomas N\'Kono', 'Théophile Abega', 'Jean Manga Onguéné', 'Emmanuel Kundé', 'Grégoire M\'Bida', 'Jean-Paul Akono'],
+    sources: [
+      'https://fr.wikipedia.org/wiki/Canon_Yaoundé',
+      'https://en.wikipedia.org/wiki/Canon_Yaound%C3%A9',
+      'https://rsssf.org/tablesk/kamcuphist.html',
+    ],
   },
 
   'colombe': {
@@ -101,11 +118,14 @@ export const CLUBS_INFOS = {
     surnom: 'Les Cotonniers',
     ville: 'Garoua',
     fondation: 1986,
-    stade: 'Stade Roumdé-Adjia',
+    couleurs: 'Vert et blanc',
+    stade: 'Stade omnisports Roumdé-Adjia',
     histoire: [
-      "Fondé en 1986 à Garoua, dans le Nord, Coton Sport accède à la première division en 1992 et devient à partir de la fin des années 1990 le club dominant du football camerounais.",
-      "Le club s'impose aussi sur la scène africaine : finaliste de la Coupe de la CAF en 2003, puis de la Ligue des champions de la CAF en 2008 face à Al Ahly, il atteint encore les demi-finales de la Ligue des champions en 2013.",
-      "Avec 18 titres de champion, dont sept d'affilée de 2003 à 2008, Coton Sport est de loin le club le plus titré du championnat camerounais.",
+      "Créé en 1986 à Garoua, dans la région du Nord, avec le soutien de la société cotonnière Sodecoton, Coton Sport gravit rapidement les échelons : il accède à l'élite en 1993 et termine vice-champion du Cameroun dès la saison suivante, en 1994, avant de remporter son premier titre en 1997.",
+      "Le club met alors fin à la domination historique des clubs de Douala et de Yaoundé. Avec 18 titres de champion, dont six d'affilée de 2003 à 2007-2008 et un dernier triplé de 2021 à 2023, il détient le record du championnat camerounais. Il compte aussi sept Coupes du Cameroun.",
+      "Coton Sport porte régulièrement le drapeau camerounais sur la scène africaine : finaliste de la Coupe de la CAF en 2003, puis de la Ligue des champions de la CAF en 2008 face à Al Ahly, il atteint encore les demi-finales de la Ligue des champions en 2013.",
+      "Appuyé sur une organisation professionnelle et un centre de formation performant, le club a servi de tremplin à plusieurs générations de Lions Indomptables.",
+      "Après son triplé, il traverse une phase de renouvellement face à l'émergence de nouveaux rivaux (4e de l'Elite One en 2025-2026) et aborde la saison 2026-2027 avec l'ambition de reconquérir le titre.",
     ],
     palmares: [
       { competition: 'Championnat du Cameroun', type: 'titre', annees: [1997, 1998, 2001, 2003, 2004, 2005, 2006, 2007, '2007-08', '2009-10', '2010-11', 2013, 2014, 2015, 2018, '2020-21', 2022, '2022-23'] },
@@ -113,9 +133,16 @@ export const CLUBS_INFOS = {
       { competition: 'Super Coupe Roger Milla', type: 'titre', annees: [2023] },
       { competition: 'Ligue des champions de la CAF', type: 'finale', annees: [2008], continental: true },
       { competition: 'Coupe de la CAF', type: 'finale', annees: [2003], continental: true },
+      { competition: 'Championnat du Cameroun', type: 'finale', annees: [1994, 1996, 1999, 2000, 2002], libelle: 'Vice-champion' },
       { competition: 'Coupe du Cameroun', type: 'finale', annees: [1999] },
     ],
-    sources: ['https://en.wikipedia.org/wiki/Coton_Sport_FC_de_Garoua', 'https://en.wikipedia.org/wiki/Cameroonian_Cup', 'https://rsssf.org/tablesk/kamchamp.html'],
+    grandsJoueurs: ['Vincent Aboubakar', 'Jean II Makoun', 'Alioum Boukar', 'André-Frank Zambo Anguissa', 'Marius Mouandilmadji'],
+    sources: [
+      'https://fr.wikipedia.org/wiki/Coton_Sport_Football_Club_de_Garoua',
+      'https://en.wikipedia.org/wiki/Coton_Sport_FC_de_Garoua',
+      'https://rsssf.org/tablesk/kamchamp.html',
+      'https://rsssf.org/tablesk/kam93.html',
+    ],
   },
 
   'dynamo de douala': {
@@ -172,21 +199,30 @@ export const CLUBS_INFOS = {
   'panthère': {
     nomComplet: 'Panthère Sportive du Ndé',
     alias: ['panthere', 'panthere du nde', 'panthere sportive du nde', 'panthere sportive du nde fc'],
-    surnom: 'Nzuimanto',
+    surnom: 'Nzuimanto (« la panthère » en langue locale), le Fauve du Ndé',
     ville: 'Bangangté',
+    fondation: 1952,
+    couleurs: 'Vert et jaune',
     stade: 'Stade municipal de Bangangté',
     histoire: [
-      "Club de Bangangté, dans le département du Ndé, la Panthère Sportive est surnommée « Nzuimanto ».",
-      "Elle s'est fait une spécialité de la Coupe du Cameroun : victorieuse en 1988, en 2009 et en 2025, et finaliste deux années de suite, en 2014 et en 2015.",
-      "Vice-championne d'Elite One en 2024-2025, elle remporte la même année la Coupe du Cameroun et la Super Coupe Roger Milla.",
+      "Fondée en 1952 à Bangangté, dans le département du Ndé, la Panthère Sportive s'impose vite dans la région et devient, après l'indépendance, l'un des porte-étendards du football de l'Ouest.",
+      "En 1988, Nzuimanto entre dans l'histoire en remportant la Coupe du Cameroun face au grand rival régional, le Racing de Bafoussam (1-0) : c'est le premier club de l'Ouest à soulever ce trophée.",
+      "Après un passage en deuxième division, le club revient au premier plan en 2009 avec une deuxième Coupe du Cameroun, gagnée 3-2 face aux Astres de Douala. Il confirme sa régularité en disputant deux finales consécutives, en 2014 et en 2015.",
+      "Revenue d'Elite Two, la Panthère vit une saison 2024-2025 exceptionnelle sous l'impulsion de sa présidente d'honneur Célestine Ketcha Courtès : vice-championne d'Elite One derrière la Colombe, elle remporte le 14 décembre 2025 sa troisième Coupe du Cameroun face à cette même Colombe (1-1, 3-1 aux tirs au but). En février 2026, le Trophée des champions qui les oppose de nouveau est interrompu ; la FECAFOOT donne la victoire à la Panthère sur tapis vert (3-0).",
+      "Le club a formé ou révélé de nombreux internationaux camerounais et a représenté le Cameroun en Coupe d'Afrique des vainqueurs de coupe et en Coupe de la Confédération de la CAF.",
     ],
     palmares: [
       { competition: 'Coupe du Cameroun', type: 'titre', annees: [1988, 2009, 2025] },
-      { competition: 'Super Coupe Roger Milla', type: 'titre', annees: [2025] },
+      { competition: 'Super Coupe Roger Milla', type: 'titre', annees: [2026] },
       { competition: 'Coupe du Cameroun', type: 'finale', annees: [2014, 2015] },
       { competition: 'Championnat du Cameroun', type: 'finale', annees: ['2024-25'], libelle: 'Vice-champion' },
     ],
-    sources: ['https://en.wikipedia.org/wiki/Panth%C3%A8re_Sportive_du_Nd%C3%A9_FC', 'https://en.wikipedia.org/wiki/Cameroonian_Cup'],
+    grandsJoueurs: ['Augustin Simo', 'Guy-Noël Tapoko', 'Charley Fomen', 'Franck Kom', 'Richard Towa'],
+    sources: [
+      'https://en.wikipedia.org/wiki/Panth%C3%A8re_Sportive_du_Nd%C3%A9_FC',
+      'https://rsssf.org/tablesk/kamcuphist.html',
+      'https://www.cameroon-tribune.cm/article.html/75476/fr.html/details_2',
+    ],
   },
 
   'pwd bamenda': {
@@ -207,17 +243,29 @@ export const CLUBS_INFOS = {
   },
 
   'stade renard': {
-    nomComplet: 'Stade Renard de Melong',
-    alias: ['stade renard de melong'],
+    nomComplet: 'Stade Renard FC de Melong',
+    alias: ['stade renard de melong', 'stade renard fc de melong', 'stade renard melong'],
+    surnom: 'Les Renards',
     ville: 'Melong',
+    couleurs: 'Vert et blanc',
+    stade: 'Stade municipal de Melong',
     histoire: [
-      "Club de Melong, dans le Moungo, le Stade Renard est monté de Ligue 2 vers l'élite après sa promotion en première division.",
-      "Son plus grand succès reste la Coupe du Cameroun 2019, remportée 3-2 en finale face à l'AS FAP de Yaoundé.",
+      "Club de Melong, dans le Moungo (région du Littoral), le Stade Renard existe déjà à la fin des années 1960 : en 1969, il évolue en deuxième division, et c'est chez lui qu'un jeune Michel Kaham signe sa première licence avant de briller avec l'Aigle Royal de Nkongsamba.",
+      "Après une longue période discrète, le club est relancé au début des années 2010 sous l'impulsion de dirigeants locaux, dont le maire de Melong, Jean Kuete. Parti de la ligue régionale du Littoral, il grimpe les échelons en trois saisons et remporte le championnat de Ligue 2 en 2016, synonyme d'accession à l'élite. Le stade municipal de Melong est rénové pour accompagner ce retour au premier plan.",
+      "2019 reste l'année la plus faste de son histoire : le Stade Renard remporte la Coupe du Cameroun (3-2 en finale face à l'AS FAP de Yaoundé, au stade Ahmadou-Ahidjo), puis la Super Coupe Roger Milla en octobre (3-1 contre l'UMS de Loum).",
+      "Installé durablement en Elite One, le club termine notamment 3e en 2021, son meilleur classement en première division.",
     ],
     palmares: [
       { competition: 'Coupe du Cameroun', type: 'titre', annees: [2019] },
+      { competition: 'Super Coupe Roger Milla', type: 'titre', annees: [2019] },
+      { competition: 'Elite Two', type: 'titre', annees: [2016] },
     ],
-    sources: ['https://en.wikipedia.org/wiki/Cameroonian_Cup'],
+    grandsJoueurs: ['Michel Kaham'],
+    sources: [
+      'https://fr.wikipedia.org/wiki/Stade_Renard_de_Melong',
+      'https://rsssf.org/tablesk/kamsupcuphist.html',
+      'https://en.wikipedia.org/wiki/Cameroonian_Cup',
+    ],
   },
 
   'unisport bafang': {
@@ -770,19 +818,24 @@ const CLUBS_INFOS_EN = {
     ]
   },
   "aigle royal": {
-    "surnom": "El Pacha, the \"Rapide de la Menoua\"",
+    "surnom": "El Pacha, the \"Bird of the Menoua\"",
+    "couleurs": "Yellow and black",
     "histoire": [
-      "Founded in June 1932 in Dschang, in the West region, Aigle Royal de la Menoua is one of the oldest clubs in the country.",
-      "Runner-up in the Cameroonian league in 2005, it made its CAF Champions League debut in 2006, then reached the round of 16 of the Confederation Cup in 2009. It has played in two Cameroon Cup finals, in 2008 and 2024.",
-      "Elite Two champion in 2024-2025, the club returned to the top flight for the 2025-2026 season."
+      "Founded in 1932 in Dschang, in the West region, as Aigle Royal de Dschang (on the initiative, according to the club, of the administrator Félix Soulier), \"El Pacha\" is one of the oldest clubs in Cameroon and the pride of the whole Menoua department.",
+      "It quickly became one of the country's best teams: national cup finalist in 1947 and 1958, it also finished runner-up in the Cameroonian championship in 1955-1956.",
+      "After decades between the top flight and the lower divisions, the club enjoyed a revival in the mid-2000s. Second-division champion in 2004, it finished runner-up in the league straight after its return, in 2004-2005, and made its CAF Champions League debut in 2006. Cameroon Cup finalist in 2008, it then reached the round of 16 of the Confederation Cup in 2009.",
+      "From late 2021, the club was restructured under the presidency of Gautier Zomissi. Relegated to Elite Two at the end of the 2023-2024 season, it still enjoyed a fine run in the 2024 Cameroon Cup, all the way to the final against Colombe du Dja et Lobo (0-1). In 2025, it won Elite Two, returned to Elite One and represented Cameroon in the Confederation Cup.",
+      "At the Dschang municipal stadium, its fans create a fiery atmosphere, especially in the West derbies against Racing de Bafoussam or Fovu de Baham."
     ]
   },
   "canon": {
-    "surnom": "Kpa-Kum, Mekok Me Ngonda",
+    "surnom": "Kpa-Kum (the sound of a cannon shot), Mekok Me Ngonda, the \"Brazilians of Africa\"",
+    "couleurs": "Green and red",
     "histoire": [
-      "Founded on 11 November 1930, Canon Sportif de Yaoundé is one of the most decorated clubs in Africa. Tonnerre Kalara Club was born from a split with Canon, and the two contest the Yaoundé derby.",
-      "Its 1970s and 1980s were exceptional: around ten league titles, many Cameroon Cups and three African Cups of Champions Clubs, led in particular by captain Théophile Abega.",
-      "After years of administrative instability, the club returned to the top of Elite One in the early 2020s."
+      "Founded on 11 November 1930 in Yaoundé (in the Mvog-Mbi district, according to club tradition), Canon Sportif quickly became a symbol of popular pride in the capital. Its great rival, Tonnerre Kalara Club, born from a split with Canon, contests the Yaoundé derby.",
+      "Its 1970s and 1980s were a golden age: playing a spectacular style that earned it the nickname \"Brazilians of Africa\", Kpa-Kum won three African Cups of Champions Clubs (1971, 1978, 1980) and the African Cup Winners' Cup (1979), while dominating the league and the Cameroon Cup.",
+      "At its peak, the club provided the backbone of the Indomitable Lions at the 1982 World Cup and for their first Africa Cup of Nations title in 1984, with legends such as Thomas N'Kono (African Ballon d'Or 1979 and 1982), Jean Manga Onguéné (1980), Théophile Abega (1984), Emmanuel Kundé and Grégoire M'Bida.",
+      "After a tenth league title in 2002 and a Cup Winners' Cup final in 2000, the club went through a long period of internal crises and financial difficulties. It regained stability in the early 2020s and is again competing near the top of Elite One."
     ]
   },
   "colombe": {
@@ -793,11 +846,14 @@ const CLUBS_INFOS_EN = {
     ]
   },
   "cotonsport": {
-    "surnom": "Les Cotonniers (The Cotton Growers)",
+    "surnom": "Les Cotonniers (The Cottoners)",
+    "couleurs": "Green and white",
     "histoire": [
-      "Founded in 1986 in Garoua, in the North, Coton Sport reached the top division in 1992 and, from the late 1990s, became the dominant club in Cameroonian football.",
-      "The club has also made its mark on the African stage: runner-up in the CAF Cup in 2003, then in the CAF Champions League in 2008 against Al Ahly, it reached the Champions League semi-finals again in 2013.",
-      "With 18 league titles, including seven in a row from 2003 to 2008, Coton Sport is by far the most successful club in the Cameroonian championship."
+      "Created in 1986 in Garoua, in the North region, with the backing of the cotton company Sodecoton, Coton Sport rose quickly through the divisions: it reached the top flight in 1993 and finished league runner-up the very next season, in 1994, before winning its first title in 1997.",
+      "The club then ended the historic dominance of the Douala and Yaoundé clubs. With 18 league titles, including six in a row from 2003 to 2007-2008 and a final hat-trick from 2021 to 2023, it holds the Cameroonian championship record. It has also won seven Cameroon Cups.",
+      "Coton Sport regularly flies the Cameroonian flag on the African stage: CAF Cup finalist in 2003, then CAF Champions League finalist in 2008 against Al Ahly, it reached the Champions League semi-finals again in 2013.",
+      "Built on a professional structure and an effective academy, the club has been a springboard for several generations of Indomitable Lions.",
+      "After its hat-trick, it went through a rebuilding phase as new rivals emerged (4th in Elite One in 2025-2026) and starts the 2026-2027 season aiming to win back the title."
     ]
   },
   "dynamo de douala": {
@@ -822,11 +878,14 @@ const CLUBS_INFOS_EN = {
     ]
   },
   "panthère": {
-    "surnom": "Nzuimanto",
+    "surnom": "Nzuimanto (\"the panther\" in the local language), the Ndé Wildcat",
+    "couleurs": "Green and yellow",
     "histoire": [
-      "A club from Bangangté, in the Ndé department, Panthère Sportive is nicknamed \"Nzuimanto\".",
-      "It has made the Cameroon Cup its speciality: winner in 1988, 2009 and 2025, and runner-up two years in a row, in 2014 and 2015.",
-      "Elite One runner-up in 2024-2025, it won the Cameroon Cup and the Roger Milla Super Cup in the same year."
+      "Founded in 1952 in Bangangté, in the Ndé department, Panthère Sportive quickly made its mark in the region and, after independence, became one of the flag-bearers of football in the West.",
+      "In 1988, Nzuimanto made history by winning the Cameroon Cup against its great regional rival, Racing de Bafoussam (1-0): it was the first club from the West to lift the trophy.",
+      "After a spell in the second division, the club returned to the forefront in 2009 with a second Cameroon Cup, won 3-2 against Les Astres de Douala. It confirmed its consistency by reaching two consecutive finals, in 2014 and 2015.",
+      "Back from Elite Two, Panthère enjoyed an exceptional 2024-2025 season driven by its honorary president Célestine Ketcha Courtès: Elite One runner-up behind Colombe, it won its third Cameroon Cup on 14 December 2025 against the same Colombe (1-1, 3-1 on penalties). In February 2026, the Champions Trophy between the two sides was abandoned; FECAFOOT awarded Panthère a 3-0 win by default.",
+      "The club has trained or revealed many Cameroon internationals and has represented Cameroon in the African Cup Winners' Cup and the CAF Confederation Cup."
     ]
   },
   "pwd bamenda": {
@@ -837,9 +896,13 @@ const CLUBS_INFOS_EN = {
     ]
   },
   "stade renard": {
+    "surnom": "Les Renards (The Foxes)",
+    "couleurs": "Green and white",
     "histoire": [
-      "A club from Melong, in the Moungo department, Stade Renard rose from Ligue 2 to the top flight after its promotion to the first division.",
-      "Its greatest success remains the 2019 Cameroon Cup, won 3-2 in the final against AS FAP of Yaoundé."
+      "A club from Melong, in the Moungo department (Littoral region), Stade Renard already existed in the late 1960s: in 1969 it played in the second division, and it was there that a young Michel Kaham signed his first licence before shining with Aigle Royal de Nkongsamba.",
+      "After a long quiet spell, the club was revived in the early 2010s by local leaders, including Melong's mayor, Jean Kuete. Starting from the Littoral regional league, it climbed the ladder in three seasons and won the Ligue 2 title in 2016, earning promotion to the top flight. The Melong municipal stadium was renovated to mark the comeback.",
+      "2019 remains the greatest year in its history: Stade Renard won the Cameroon Cup (3-2 in the final against AS FAP of Yaoundé, at the Ahmadou-Ahidjo stadium), then the Roger Milla Super Cup in October (3-1 against UMS de Loum).",
+      "Now an established Elite One side, the club notably finished 3rd in 2021, its best top-flight finish."
     ]
   },
   "unisport bafang": {

@@ -9,14 +9,14 @@ import { useSyncExternalStore } from 'react';
 const COULEURS = {
   // ── MTN Elite One ──
   'colombe':                 { principale: '#c62828', secondaire: '#ffffff' },
-  'cotonsport':              { principale: '#1b8a3a', secondaire: '#f4d03f' },
+  'cotonsport':              { principale: '#1b8a3a', secondaire: '#ffffff' },   // vert et blanc
   'canon':                   { principale: '#2e7d32', secondaire: '#d32f2f' },
   'dynamo de douala':        { principale: '#1f4fa3', secondaire: '#f28c28' },
-  'panthere':                { principale: '#2e8b3e', secondaire: '#ffffff' },
+  'panthere':                { principale: '#1f8a3c', secondaire: '#f2c230' },   // vert et jaune
   'pwd bamenda':             { principale: '#1e6fd0', secondaire: '#ffffff' },
   'aigle royal':             { principale: '#f2c230', secondaire: '#1a1a1a' }, // de la Menoua
   'aigle royal de moungo':   { principale: '#1f4fa3', secondaire: '#ffffff' },
-  'stade renard':            { principale: '#e8742a', secondaire: '#ffffff' },
+  'stade renard':            { principale: '#169b46', secondaire: '#ffffff' },   // maillot vert, liserés blancs
   'apejes academy':          { principale: '#4b2c91', secondaire: '#35c4e8' },
   'unisport bafang':         { principale: '#f2c230', secondaire: '#d32f2f' },
   'victoria united':         { principale: '#1c1c1c', secondaire: '#ffffff' },   // noir, col et liserés blancs
