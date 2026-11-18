@@ -8,16 +8,16 @@ import { useSyncExternalStore } from 'react';
 
 const COULEURS = {
   // ── MTN Elite One ──
-  'colombe':                 { principale: '#c62828', secondaire: '#ffffff' },
+  'colombe':                 { principale: '#5b2a86', secondaire: '#ffffff' },   // violet et blanc (nouvelle identité)
   'cotonsport':              { principale: '#1b8a3a', secondaire: '#ffffff' },   // vert et blanc
   'canon':                   { principale: '#2e7d32', secondaire: '#d32f2f' },
-  'dynamo de douala':        { principale: '#1f4fa3', secondaire: '#f28c28' },
+  'dynamo de douala':        { principale: '#f6c700', secondaire: '#1a1a1a' },   // maillot jaune, liserés noirs
   'panthere':                { principale: '#1f8a3c', secondaire: '#f2c230' },   // vert et jaune
   'pwd bamenda':             { principale: '#1e6fd0', secondaire: '#ffffff' },
   'aigle royal':             { principale: '#f2c230', secondaire: '#1a1a1a' }, // de la Menoua
   'aigle royal de moungo':   { principale: '#1f4fa3', secondaire: '#ffffff' },
   'stade renard':            { principale: '#169b46', secondaire: '#ffffff' },   // maillot vert, liserés blancs
-  'apejes academy':          { principale: '#4b2c91', secondaire: '#35c4e8' },
+  'apejes academy':          { principale: '#1d4fa8', secondaire: '#ffffff' },   // bleu et blanc
   'unisport bafang':         { principale: '#f2c230', secondaire: '#d32f2f' },
   'victoria united':         { principale: '#1c1c1c', secondaire: '#ffffff' },   // noir, col et liserés blancs
   'union abong-mbang':       { principale: '#2e7d32', secondaire: '#f2c230' },

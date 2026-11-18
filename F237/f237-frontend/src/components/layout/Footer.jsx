@@ -192,8 +192,7 @@ function Footer() {
               ))}
             </div>
 
-            <p style={{ ...TITRE_COLONNE, marginTop: '28px' }}>{t('footer.projet')}</p>
-            <p style={{ color: theme.textMuted, fontSize: '14px', lineHeight: 1.6 }}>
+            <p style={{ color: theme.textMuted, fontSize: '14px', lineHeight: 1.6, marginTop: '28px' }}>
               {t('footer.creePar')}{' '}
               <a href="https://cyrjunior-tandia.com" target="_blank" rel="noopener noreferrer"
                 style={{ color: theme.text, fontWeight: 700, textDecoration: 'underline', textUnderlineOffset: '3px' }}>
