@@ -236,7 +236,9 @@ namespace F237.BLL.Services.Implementations
 
                 if (equipeExistante != null)
                 {
-                    equipeExistante.Nom = nom;
+                    // Un nom corrigé à la main n'est pas écrasé (on garde juste celui de l'API à côté)
+                    if (equipeExistante.NomManuel) equipeExistante.NomApi = nom;
+                    else equipeExistante.Nom = nom;
                     // Un logo remplacé à la main n'est pas écrasé (on garde juste celui de l'API à côté)
                     if (equipeExistante.LogoManuel) equipeExistante.LogoApi = logo;
                     else equipeExistante.LogoUrl = logo;

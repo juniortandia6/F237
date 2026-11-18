@@ -319,6 +319,8 @@ namespace F237.API.Controllers
                     e.LogoApi,
                     e.CouleurPrincipale,
                     e.CouleurSecondaire,
+                    e.NomManuel,
+                    e.NomApi,
                     NbMatchs = _context.Matchs.Count(m => m.EquipeDomicileId == e.Id || m.EquipeExterieurId == e.Id),
                     DernierMatch = _context.Matchs
                         .Where(m => m.EquipeDomicileId == e.Id || m.EquipeExterieurId == e.Id)
@@ -378,6 +380,53 @@ namespace F237.API.Controllers
             equipe.LogoManuel = false;
             await _context.SaveChangesAsync();
             return Ok(new { equipe.Id, equipe.LogoUrl, equipe.LogoManuel, equipe.LogoApi });
+        }
+
+        // PUT /api/admin/equipes/37/nom   { "nom": "Aigle Royal du Moungo" }
+        // Corrige le nom affiché partout sur le site ; l'import ne l'écrase plus.
+        // { "nom": null } = revenir au nom de l'API-Football.
+        // Les buts et événements déjà enregistrés sous l'ancien nom suivent le changement.
+        [HttpPut("equipes/{id:int}/nom")]
+        public async Task<IActionResult> RenommerEquipe(int id, [FromBody] SaisieNomEquipeDto saisie)
+        {
+            var equipe = await _context.Equipes.FirstOrDefaultAsync(e => e.Id == id);
+            if (equipe == null) return NotFound(new { message = "Équipe introuvable." });
+
+            var nouveau = saisie.Nom?.Trim();
+            if (string.IsNullOrEmpty(nouveau))
+            {
+                // Annulation : retour au nom de l'API
+                if (!equipe.NomManuel || string.IsNullOrWhiteSpace(equipe.NomApi))
+                    return BadRequest(new { message = "Ce nom n'a pas été corrigé." });
+                nouveau = equipe.NomApi!;
+            }
+            if (nouveau.Length > 100) return BadRequest(new { message = "Nom trop long (100 caractères maximum)." });
+            if (await _context.Equipes.AnyAsync(e => e.Id != id && e.Nom == nouveau))
+                return BadRequest(new { message = "Une autre équipe porte déjà ce nom." });
+
+            var ancien = equipe.Nom;
+            if (string.IsNullOrEmpty(saisie.Nom?.Trim()))
+            {
+                equipe.NomManuel = false;
+            }
+            else
+            {
+                if (!equipe.NomManuel) equipe.NomApi = equipe.Nom; // on retient le nom de l'API une seule fois
+                equipe.NomManuel = true;
+            }
+            equipe.Nom = nouveau;
+            await _context.SaveChangesAsync();
+
+            // Buts et événements enregistrés avec l'ancien nom (pour les matchs de cette équipe)
+            if (ancien != nouveau)
+            {
+                var idsMatchs = _context.Matchs.Where(m => m.EquipeDomicileId == id || m.EquipeExterieurId == id).Select(m => m.Id);
+                await _context.ButsMatch.Where(b => b.NomEquipe == ancien && idsMatchs.Contains(b.MatchId))
+                    .ExecuteUpdateAsync(u => u.SetProperty(b => b.NomEquipe, nouveau));
+                await _context.EvenementsMatch.Where(ev => ev.NomEquipe == ancien && idsMatchs.Contains(ev.MatchId))
+                    .ExecuteUpdateAsync(u => u.SetProperty(ev => ev.NomEquipe, nouveau));
+            }
+            return Ok(new { equipe.Id, equipe.Nom, equipe.NomManuel, equipe.NomApi });
         }
 
         // PUT /api/admin/equipes/37/couleurs   { "principale": "#c62828", "secondaire": "#ffffff" }
@@ -919,6 +968,11 @@ namespace F237.API.Controllers
         public string? NomJoueur { get; set; }      // vide = inconnu
         public string? NomEquipe { get; set; }      // équipe du joueur
         public int Minute { get; set; }             // 0 = minute inconnue
+    }
+
+    public class SaisieNomEquipeDto
+    {
+        public string? Nom { get; set; }   // null ou vide = revenir au nom de l'API
     }
 
     public class SaisieMiTempsDto

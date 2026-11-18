@@ -33,8 +33,10 @@ const CHIFFRES = '"Barlow Condensed", Arial, sans-serif';
 const CONTENEUR = { position: 'relative', maxWidth: '1150px', margin: '0 auto', padding: '0 var(--marge-page)', boxSizing: 'content-box' };
 
 // Zones de fin de saison (labelHaut / labelBas = clés de traduction classement.zones.*) (nombre d'équipes en haut / en bas) — à ajuster selon le règlement
+// Elite One : le champion va en Ligue des champions de la CAF (la place en Coupe de la Confédération
+// revient au vainqueur de la Coupe du Cameroun, pas à un rang) ; seul le dernier descend en Elite Two.
 const ZONES = {
-  one: { haut: 3, labelHaut: 'africaines', bas: 2, labelBas: 'relegation' },
+  one: { haut: 1, labelHaut: 'africaines', bas: 1, labelBas: 'relegation' },
   two: { haut: 2, labelHaut: 'promotion', bas: 2, labelBas: 'relegation' },
 };
 
@@ -333,14 +335,10 @@ const titreGroupe = (g, t) => {
   return t(`classement.groupes.${nom}`, { defaultValue: nom || t('classement.titre') });
 };
 
-// Zone d'une ligne : 'haut' (vert), 'bas' (rouge) ou null.
-// Si l'API a précisé ce que rapporte chaque place (description), on s'en sert ;
-// sinon on applique les règles par défaut de ZONES.
-const zoneDe = (l, rang, total, zones, parDescription) => {
-  if (parDescription) {
-    if (!l.description) return null;
-    return /relegation|relégation/i.test(l.description) ? 'bas' : 'haut';
-  }
+// Zone d'une ligne : 'haut' (vert), 'bas' (rouge) ou null, d'après le rang et les règles de ZONES.
+// On n'utilise plus les "descriptions" de l'API : pour le championnat camerounais, elles sont
+// incomplètes ou fausses (ex. place africaine affichée sur le 2e et pas sur le leader).
+const zoneDe = (rang, total, zones) => {
   if (rang <= zones.haut) return 'haut';
   if (rang > total - zones.bas) return 'bas';
   return null;
@@ -374,9 +372,8 @@ function TableauClassement({ lignes, zones, annee, avecZones = true }) {
   const { t } = useTranslation();
   const mobile = useEcranMobile();
   const total = lignes.length;
-  const parDescription = lignes.some(l => l.description);
   // Vues Domicile / Extérieur : les zones (titre, relégation) n'ont pas de sens
-  const zonesLignes = lignes.map((l, i) => (avecZones ? zoneDe(l, l.position ?? i + 1, total, zones, parDescription) : null));
+  const zonesLignes = lignes.map((l, i) => (avecZones ? zoneDe(l.position ?? i + 1, total, zones) : null));
   const entete = { fontSize: '11px', fontWeight: 800, color: CLAIR.doux, letterSpacing: '0.5px', textAlign: 'center' };
 
   if (mobile) {

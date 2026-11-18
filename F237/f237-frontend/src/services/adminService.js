@@ -94,6 +94,8 @@ export const adminService = {
     },
     /** Retour au logo fourni par l'API-Football. */
     retablirLogo: (id) => appel(`/api/admin/equipes/${id}/logo`, { method: 'DELETE' }),
+    /** Corrige le nom affiché (l'import ne l'écrase plus). null = revenir au nom de l'API. */
+    renommer: (id, nom) => appel(`/api/admin/equipes/${id}/nom`, { method: 'PUT', body: JSON.stringify({ nom }) }),
     /** couleurs = { principale: '#c62828', secondaire: '#ffffff' }, ou nulls pour revenir aux couleurs par défaut */
     couleurs: (id, principale, secondaire) => appel(`/api/admin/equipes/${id}/couleurs`, { method: 'PUT', body: JSON.stringify({ principale, secondaire }) }),
   },

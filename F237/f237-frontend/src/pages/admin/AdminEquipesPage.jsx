@@ -53,6 +53,8 @@ function EditeurEquipe({ e, doublons, onMaj }) {
   const [principale, setPrincipale] = useState(e.couleurPrincipale ?? defaut.principale);
   const [secondaire, setSecondaire] = useState(e.couleurSecondaire ?? defaut.secondaire);
   const [fichier, setFichier] = useState(null);       // { file, apercu }
+  const [nom, setNom] = useState(e.nom);
+  const nomChange = nom.trim() !== '' && nom.trim() !== e.nom;
   const [envoi, setEnvoi] = useState(false);
   const [message, setMessage] = useState(null);
   const champFichier = useRef(null);
@@ -122,6 +124,33 @@ function EditeurEquipe({ e, doublons, onMaj }) {
           <span>Doublon possible : {doublons.map(d => `${d.nom} (Id ${d.id}, ${d.nbMatchs} matchs)`).join(', ')}. Fusionner deux équipes déplace leurs matchs : on le fera en SQL, ensemble.</span>
         </div>
       )}
+
+      {/* Nom affiché sur le site */}
+      <div style={{ ...CARTE, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '14px', fontWeight: 800, color: CLAIR.texte }}>Nom du club</span>
+          {e.nomManuel && <Pastille couleur={CLAIR.vert} fond={CLAIR.vertClair}>Corrigé</Pastille>}
+        </div>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <input value={nom} onChange={ev => setNom(ev.target.value)} maxLength={100} aria-label="Nom du club"
+            style={{ flex: 1, minWidth: '200px', padding: '9px 12px', borderRadius: '8px', border: `1px solid ${CLAIR.bord}`, fontSize: '14px', color: CLAIR.texte }} />
+          <button disabled={envoi || !nomChange}
+            onClick={() => executer(() => adminService.equipes.renommer(e.id, nom.trim()), 'Nom enregistré.')}
+            style={{ ...BOUTON(CLAIR.vert, '#fff'), opacity: nomChange ? 1 : 0.5 }}>
+            Enregistrer
+          </button>
+          {e.nomManuel && (
+            <button disabled={envoi}
+              onClick={() => executer(() => adminService.equipes.renommer(e.id, null), 'Retour au nom de l\'API.', () => setNom(e.nomApi ?? e.nom))}
+              style={BOUTON('transparent', CLAIR.doux)}>
+              Revenir au nom de l'API{e.nomApi ? ` (${e.nomApi})` : ''}
+            </button>
+          )}
+        </div>
+        <span style={{ fontSize: '12px', color: CLAIR.doux }}>
+          Utilisé partout sur le site (matchs, classements, buteurs). Les imports ne l'écrasent plus.
+        </span>
+      </div>
 
       {message && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '11px 14px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, backgroundColor: message.type === 'ok' ? CLAIR.vertClair : CLAIR.rougeClair, color: message.type === 'ok' ? CLAIR.vert : CLAIR.rouge }}>

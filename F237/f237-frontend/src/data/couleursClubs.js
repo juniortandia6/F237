@@ -16,21 +16,33 @@ const COULEURS = {
   'pwd bamenda':             { principale: '#1e6fd0', secondaire: '#ffffff' },
   'aigle royal':             { principale: '#f2c230', secondaire: '#1a1a1a' }, // de la Menoua
   'aigle royal de moungo':   { principale: '#1f4fa3', secondaire: '#ffffff' },
+  'aigle royal du moungo':   { principale: '#1f4fa3', secondaire: '#ffffff' },   // même club, nom corrigé
   'stade renard':            { principale: '#169b46', secondaire: '#ffffff' },   // maillot vert, liserés blancs
   'apejes academy':          { principale: '#1d4fa8', secondaire: '#ffffff' },   // bleu et blanc
   'unisport bafang':         { principale: '#f2c230', secondaire: '#d32f2f' },
   'victoria united':         { principale: '#1c1c1c', secondaire: '#ffffff' },   // noir, col et liserés blancs
-  'union abong-mbang':       { principale: '#2e7d32', secondaire: '#f2c230' },
+  'union abong-mbang':       { principale: '#f6c700', secondaire: '#1a1a1a' },   // jaune et noir
   'gazelle':                 { principale: '#3a96dc', secondaire: '#ffffff' },   // bleu ciel et blanc (maillot domicile)
 
   // ── MTN Elite Two ──
   'bamboutos':               { principale: '#b71c1c', secondaire: '#1c2a5a' },
   'les astres':              { principale: '#2e9b45', secondaire: '#f2d230' },
   'avion academy':           { principale: '#1d35c9', secondaire: '#ffffff' },
-  'tonnerre':                { principale: '#1a1a1a', secondaire: '#ffffff' },
-  'elecsport':               { principale: '#e8742a', secondaire: '#ffffff' },
-  'mintack':                 { principale: '#c62828', secondaire: '#f2c230' },
+  'tonnerre':                { principale: '#ffffff', secondaire: '#1a1a1a' },   // maillot blanc, col noir et rouge
+  'elecsport':               { principale: '#f2c80f', secondaire: '#1f6b35' },   // jaune, motifs et short verts
+  'mintack':                 { principale: '#c9a227', secondaire: '#7a1f2b' },   // or, liserés bordeaux
   'atlantic':                { principale: '#1d4fa8', secondaire: '#ffffff' },
+  'sable':                   { principale: '#1f5fc4', secondaire: '#f6c700' },   // bleu, épaules jaunes
+  'fap':                     { principale: '#1e8a3e', secondaire: '#d62828' },   // vert, motifs rouges et jaunes
+  'as fap':                  { principale: '#1e8a3e', secondaire: '#d62828' },
+  'jeunes fauves':           { principale: '#f0d424', secondaire: '#1f7a3a' },   // Fauve Azur : jaune, côtés et short verts
+  'fauve azur':              { principale: '#f0d424', secondaire: '#1f7a3a' },
+  'fauve azur elite':        { principale: '#f0d424', secondaire: '#1f7a3a' },
+  'fortuna mfou':            { principale: '#d9232e', secondaire: '#ffffff' },   // rouge, motifs blancs
+  'as fortuna':              { principale: '#d9232e', secondaire: '#ffffff' },
+  'fortuna':                 { principale: '#d9232e', secondaire: '#ffffff' },
+  'kumba':                   { principale: '#1f6fd1', secondaire: '#7fd3f7' },   // bleu, motifs bleu ciel
+  'kumba city':              { principale: '#1f6fd1', secondaire: '#7fd3f7' },
 };
 
 // Palette de secours pour les clubs sans couleurs connues

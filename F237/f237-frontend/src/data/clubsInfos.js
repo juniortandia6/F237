@@ -88,7 +88,7 @@ export const CLUBS_INFOS = {
       { competition: "Coupe d'Afrique des clubs champions", type: 'titre', annees: [1971, 1978, 1980], continental: true },
       { competition: "Coupe d'Afrique des vainqueurs de coupe", type: 'titre', annees: [1979], continental: true },
       { competition: "Coupe d'Afrique des vainqueurs de coupe", type: 'finale', annees: [1977, 1984, 2000], continental: true },
-      { competition: 'Coupe du Cameroun', type: 'finale', annees: [1960, 1974, 1980, 1985, 1998] },
+      { competition: 'Coupe du Cameroun', type: 'finale', annees: [1960, 1974, 1980, 1985, 1998, 2013] },
       { competition: 'Super Coupe Roger Milla', type: 'finale', annees: [2000] },
     ],
     grandsJoueurs: ['Thomas N\'Kono', 'Théophile Abega', 'Jean Manga Onguéné', 'Emmanuel Kundé', 'Grégoire M\'Bida', 'Jean-Paul Akono'],
@@ -141,7 +141,7 @@ export const CLUBS_INFOS = {
       "Le club met alors fin à la domination historique des clubs de Douala et de Yaoundé. Avec 18 titres de champion, dont six d'affilée de 2003 à 2007-2008 et un dernier triplé de 2021 à 2023, il détient le record du championnat camerounais. Il compte aussi sept Coupes du Cameroun.",
       "Coton Sport porte régulièrement le drapeau camerounais sur la scène africaine : finaliste de la Coupe de la CAF en 2003, puis de la Ligue des champions de la CAF en 2008 face à Al Ahly, il atteint encore les demi-finales de la Ligue des champions en 2013.",
       "Appuyé sur une organisation professionnelle et un centre de formation performant, le club a servi de tremplin à plusieurs générations de Lions Indomptables.",
-      "Après son triplé, il traverse une phase de renouvellement face à l'émergence de nouveaux rivaux (4e de l'Elite One en 2025-2026) et aborde la saison 2026-2027 avec l'ambition de reconquérir le titre.",
+      "Après son triplé, il traverse une phase de renouvellement face à l'émergence de nouveaux rivaux et aborde la saison 2026-2027 avec l'ambition de reconquérir le titre.",
     ],
     palmares: [
       { competition: 'Championnat du Cameroun', type: 'titre', annees: [1997, 1998, 2001, 2003, 2004, 2005, 2006, 2007, '2007-08', '2009-10', '2010-11', 2013, 2014, 2015, 2018, '2020-21', 2022, '2022-23'] },
@@ -167,23 +167,24 @@ export const CLUBS_INFOS = {
     surnom: "Bon Ba Djob (« les enfants de Dieu » en bassa), le Peuple",
     ville: 'Douala',
     fondation: 1948,
-    couleurs: 'Jaune et blanc',
+    couleurs: 'Jaune et noir',
     stade: 'Stade de la Réunification',
     histoire: [
       "Fondé en 1948 dans le quartier de Nkongmondo, à Douala, le Dynamo naît avec une forte identité populaire et engagée, ce qui lui vaut le surnom de club du « Peuple ». Il rassemble une immense communauté de supporters dans la capitale économique.",
       "Les Bon Ba Djob connaissent leur apogée à la charnière des années 1970 et 1980. Ils remportent la Coupe du Cameroun en 1979 face au PWD de Bamenda (3-1), puis de nouveau en 1981 en battant en finale leur grand rival local, l'Union Sportive de Douala (2-0). La même année, le club termine vice-champion du Cameroun derrière le Tonnerre de Yaoundé.",
       "Un troisième trophée national arrive en 1998, avec une victoire 1-0 face au Canon de Yaoundé en finale de la Coupe du Cameroun.",
       "Club formateur, le Dynamo a notamment révélé le regretté Modeste M'Bami, champion olympique en 2000 et passé par le PSG et l'OM.",
-      "Le club connaît ensuite de longues années difficiles, entre divisions inférieures et crises internes. Restructuré, il retrouve l'Elite One pour la saison 2023-2024.",
+      "Le club connaît ensuite de longues années difficiles, entre divisions inférieures et crises internes. Restructuré, il retrouve l'Elite One pour la saison 2023-2024, puis termine vice-champion du Cameroun en 2025-2026, derrière la Colombe.",
     ],
     palmares: [
       { competition: 'Coupe du Cameroun', type: 'titre', annees: [1979, 1981, 1998] },
-      { competition: 'Championnat du Cameroun', type: 'finale', annees: [1981], libelle: 'Vice-champion' },
+      { competition: 'Championnat du Cameroun', type: 'finale', annees: [1981, '2025-26'], libelle: 'Vice-champion' },
     ],
     grandsJoueurs: ["Modeste M'Bami"],
     sources: [
       'https://rsssf.org/tablesk/kamcuphist.html',
       'https://rsssf.org/tablesk/kam81.html',
+      'https://cameroun24.net/article-amp/74736-officiel-colombe-du-sud-est-sacree-championne-du-cameroun-2026-decouvrez-le-classement-final-de-la-mtn-elite-one.html',
       'https://rsssf.org/tablesk/kamfound.html',
       'https://en.wikipedia.org/wiki/Cameroonian_Cup',
     ],
@@ -191,15 +192,24 @@ export const CLUBS_INFOS = {
 
   'fortuna mfou': {
     nomComplet: 'AS Fortuna de Mfou',
-    alias: ['as fortuna', 'fortuna', 'as fortuna de mfou'],
+    alias: ['as fortuna', 'fortuna', 'as fortuna de mfou', 'fortuna de mfou'],
     ville: 'Mfou',
     fondation: 1998,
+    couleurs: 'Rouge et blanc',
     histoire: [
-      "Fondée en 1998 à Mfou, près de Yaoundé, l'AS Fortuna monte en Elite One en 2018.",
-      "Après une première saison difficile (14e), le club s'installe rapidement dans le haut du tableau : 4e en 2019 et en 2020, puis 3e en 2020-2021, son meilleur classement.",
+      "Fondée en 1998 à Mfou (Mefou-et-Afamba, région du Centre) par Roger Noah, l'AS Fortuna s'est fait connaître comme un club formateur. Elle a notamment vu passer André-Frank Zambo Anguissa et Léonel Ateba. Le club compte aussi une équipe féminine.",
+      "Promue en Elite One en 2018, elle termine 14e de sa première saison, puis s'installe rapidement dans le haut du tableau : 4e en 2019 et en 2020, puis 3e en 2020-2021, son meilleur classement. En Coupe du Cameroun 2024, elle est éliminée en quart de finale par Mintack FC, alors en ligue régionale (0-1).",
+      "Le 3 septembre 2024, son fondateur et président Roger Noah meurt à 56 ans, une perte immense pour le club.",
+      "En 2025-2026, Fortuna termine 13e de l'Elite One et doit disputer un barrage contre le 2e des play-offs d'Elite Two, son voisin de l'APEJES de Mfou. Battue 2-0 le 1er juillet 2026, elle descend en Elite Two.",
     ],
     palmares: [],
-    sources: ['https://en.wikipedia.org/wiki/AS_Fortuna'],
+    sources: [
+      'https://en.wikipedia.org/wiki/AS_Fortuna',
+      'https://kick442.com/?p=19857',
+      'https://yop.l-frii.com/cameroun-en-pleine-tension-avec-letat-la-fecafoot-annonce-le-deces-de/',
+      'https://cameroon-tribune.cm/article.html/65413/fr.html/details_2',
+      'https://cameroon-tribune.cm/article.html/78313/fr.html/details_2',
+    ],
   },
 
   'gazelle': {
@@ -252,7 +262,7 @@ export const CLUBS_INFOS = {
       { competition: 'Coupe du Cameroun', type: 'finale', annees: [2014, 2015] },
       { competition: 'Championnat du Cameroun', type: 'finale', annees: ['2024-25'], libelle: 'Vice-champion' },
     ],
-    grandsJoueurs: ['Augustin Simo', 'Guy-Noël Tapoko', 'Charley Fomen', 'Franck Kom', 'Richard Towa'],
+    grandsJoueurs: ['Guy-Noël Tapoko', 'Charley Fomen', 'Franck Kom', 'Richard Towa'],
     sources: [
       'https://en.wikipedia.org/wiki/Panth%C3%A8re_Sportive_du_Nd%C3%A9_FC',
       'https://rsssf.org/tablesk/kamcuphist.html',
@@ -279,8 +289,10 @@ export const CLUBS_INFOS = {
       { competition: 'Coupe du Cameroun', type: 'titre', annees: [2021] },
       { competition: 'Coupe du Cameroun', type: 'finale', annees: [1967, 1979, 2023] },
     ],
+    grandsJoueurs: ['Augustine Simo'],
     sources: [
       'https://en.wikipedia.org/wiki/PWD_Bamenda',
+      'https://en.wikipedia.org/wiki/Augustine_Simo',
       'https://en.wikipedia.org/wiki/Cameroonian_Cup',
       'https://newframe.org/?p=21432',
       'https://www.hilltopvoices.com/2022/03/cameroon-cup-2021-pwd-defies.html',
@@ -298,7 +310,7 @@ export const CLUBS_INFOS = {
       "Club de Melong, dans le Moungo (région du Littoral), le Stade Renard existe déjà à la fin des années 1960 : en 1969, il évolue en deuxième division, et c'est chez lui qu'un jeune Michel Kaham signe sa première licence avant de briller avec l'Aigle Royal de Nkongsamba.",
       "Après une longue période discrète, le club est relancé au début des années 2010 sous l'impulsion de dirigeants locaux, dont le maire de Melong, Jean Kuete. Parti de la ligue régionale du Littoral, il grimpe les échelons en trois saisons et remporte le championnat de Ligue 2 en 2016, synonyme d'accession à l'élite. Le stade municipal de Melong est rénové pour accompagner ce retour au premier plan.",
       "2019 reste l'année la plus faste de son histoire : le Stade Renard remporte la Coupe du Cameroun (3-2 en finale face à l'AS FAP de Yaoundé, au stade Ahmadou-Ahidjo), puis la Super Coupe Roger Milla en octobre (3-1 contre l'UMS de Loum).",
-      "Installé durablement en Elite One, le club termine notamment 3e en 2021, son meilleur classement en première division.",
+      "Installé durablement en Elite One, le club joue le titre en 2023-2024 : lors de la dernière journée des play-offs, un nul 2-2 contre Victoria United offre le titre à ce dernier, et le Stade Renard termine 3e, à égalité de points avec Coton Sport.",
     ],
     palmares: [
       { competition: 'Coupe du Cameroun', type: 'titre', annees: [2019] },
@@ -309,6 +321,7 @@ export const CLUBS_INFOS = {
       'https://fr.wikipedia.org/wiki/Stade_Renard_de_Melong',
       'https://rsssf.org/tablesk/kamsupcuphist.html',
       'https://en.wikipedia.org/wiki/Cameroonian_Cup',
+      'https://cameroon-tribune.cm/articles/9356/fr/details_2',
     ],
   },
 
@@ -324,7 +337,7 @@ export const CLUBS_INFOS = {
       "Le club naît en 1958 de l'union de trois équipes du Haut-Nkam (Jupiter FC, l'Union de la Mission catholique et Tortue FC) et est officiellement déclaré le 2 octobre 1959, sous l'impulsion d'Antoine Kouenkam, ancien joueur de la première sélection camerounaise.",
       "Présent de longue date parmi l'élite, l'Unisport termine vice-champion du Cameroun en 1993, à un point du Racing de Bafoussam, avant d'entrer dans la légende en 1996 : sacré champion du Cameroun, il brise l'hégémonie des clubs de Douala et de Yaoundé et dispute la Ligue des champions de la CAF l'année suivante.",
       "Dans les années 2000, le « Flambeau de l'Ouest » devient un habitué des finales de Coupe du Cameroun. Après trois finales perdues (2000, 2005 et 2011, cette dernière aux tirs au but face à Coton Sport), il brise enfin la malédiction en 2012 en battant New Star de Douala (2-0).",
-      "Relégué en Elite Two en 2019, le club y passe six saisons avant de retrouver l'élite lors des play-offs de juin 2025. Pour son retour en Elite One, en 2025-2026, il crée la sensation en occupant longtemps la tête du championnat.",
+      "Relégué en Elite Two en 2019, le club y passe six saisons avant de retrouver l'élite lors des play-offs de juin 2025. Pour son retour en Elite One, en 2025-2026, il crée la sensation en occupant longtemps la tête du championnat, et termine finalement 3e.",
       "Le club est réputé pour l'ambiance de son stade à Bafang et pour ses derbys de l'Ouest face au Racing de Bafoussam ou à l'Aigle de la Menoua. Il a vu passer de nombreux talents camerounais.",
     ],
     palmares: [
@@ -361,6 +374,7 @@ export const CLUBS_INFOS = {
     palmares: [
       { competition: 'Championnat du Cameroun', type: 'titre', annees: ['2023-24'] },
       { competition: 'Elite Two', type: 'titre', annees: ['2022-23'] },
+      { competition: 'Super Coupe Roger Milla', type: 'finale', annees: [2024] },
     ],
     grandsJoueurs: ['Wilfried Nathan Douala'],
     sources: [
@@ -375,45 +389,57 @@ export const CLUBS_INFOS = {
     nomComplet: 'Tonnerre Kalara Club de Yaoundé',
     alias: ['tonnerre yaounde', 'tonnerre kalara club', 'tonnerre kalara club de yaounde', 'tkc'],
     surnom: 'Les Kalara Boys',
-    ville: 'Yaoundé',
+    ville: 'Yaoundé (Mvog-Ada)',
     fondation: 1934,
+    couleurs: 'Noir et blanc',
     stade: 'Stade Ahmadou-Ahidjo',
     histoire: [
-      "Fondé en 1934, le Tonnerre Kalara Club est l'un des deux géants de Yaoundé. Il est né d'une scission avec le Canon, son éternel rival du derby de la capitale.",
-      "Ses années 1980 sont glorieuses : cinq titres de champion entre 1981 et 1988, en plus de nombreuses Coupes du Cameroun. Sur le continent, le TKC remporte dès 1975 la Coupe d'Afrique des vainqueurs de coupe, puis atteint de nouveau la finale l'année suivante.",
-      "De grands noms ont porté son maillot, comme Roger Milla, Rigobert Song, Stephen Tataw ou le Libérien George Weah, futur Ballon d'or, qui y a fait ses débuts en Afrique centrale.",
+      "Le Tonnerre Kalara Club est fondé en 1934 à Yaoundé par Martin Omgba Zing, l'un des fondateurs du Canon, parti après des désaccords internes. « Kalara » signifie « le livre » en ewondo : le nouveau club devait être le livre qui apprendrait le football au Canon. De cette scission naît le derby de la capitale, l'un des plus passionnés du pays.",
+      "Le club du quartier Mvog-Ada entre dans l'histoire en 1975 en remportant la toute première Coupe d'Afrique des vainqueurs de coupe, face au Stella Club d'Adjamé (1-0 à Abidjan, 4-1 à Yaoundé). Il retrouve la finale dès l'année suivante, perdue contre les Shooting Stars du Nigeria.",
+      "Les années 1980 sont son âge d'or : cinq titres de champion entre 1981 et 1988, et des Coupes du Cameroun en 1987, 1989 et 1991. En 1989, il atteint les demi-finales de la Coupe d'Afrique des clubs champions, éliminé par le Raja de Casablanca.",
+      "Le TKC a vu passer de grands noms : Roger Milla (1974-1977, puis 1990-1994), Stephen Tataw, Rigobert Song, Jean II Makoun, le Tchadien Japhet N'Doram et le Libérien George Weah (1987-1988), futur Ballon d'or, que Claude Le Roy recommande ensuite à l'AS Monaco.",
+      "En 2002, il dispute encore une finale continentale, celle de la Coupe de la CAF. Il traverse ensuite de longues crises de direction et de finances. Aujourd'hui en Elite Two, il assure son maintien lors des play-offs de maintien de la saison 2025-2026.",
     ],
     palmares: [
       { competition: 'Championnat du Cameroun', type: 'titre', annees: [1981, '1982-83', '1983-84', '1986-87', '1987-88'] },
       { competition: 'Coupe du Cameroun', type: 'titre', annees: [1958, 1974, 1987, 1989, 1991] },
       { competition: "Coupe d'Afrique des vainqueurs de coupe", type: 'titre', annees: [1975], continental: true },
       { competition: "Coupe d'Afrique des vainqueurs de coupe", type: 'finale', annees: [1976], continental: true },
+      { competition: 'Coupe de la CAF', type: 'finale', annees: [2002], continental: true },
       { competition: 'Coupe du Cameroun', type: 'finale', annees: [1963, 1990, 1994] },
     ],
-    grandsJoueurs: ['Roger Milla', 'Rigobert Song', 'Stephen Tataw', 'George Weah', 'Jean II Makoun'],
-    sources: ['https://en.wikipedia.org/wiki/Tonnerre_Yaound%C3%A9', 'https://rsssf.org/tablesk/kamchamp.html', 'https://en.wikipedia.org/wiki/Cameroonian_Cup', 'https://en.wikipedia.org/wiki/List_of_African_Cup_Winners%27_Cup_finals'],
+    grandsJoueurs: ['Roger Milla', 'George Weah', 'Rigobert Song', 'Stephen Tataw', 'Jean II Makoun', "Japhet N'Doram"],
+    sources: [
+      'https://en.wikipedia.org/wiki/Tonnerre_Yaound%C3%A9',
+      'https://www.cameroon-tribune.cm/articles/11068/en/details_2',
+      'https://www.the-star.co.ke/sports/football/2022-01-12-the-captivating-names-of-cameroons-football-clubs/',
+      'https://rsssf.org/tablesa/afcup75.html',
+      'https://rsssf.org/tablesa/afcup89.html',
+      'https://rsssf.org/tablesk/kamchamp.html',
+      'https://cameroon-tribune.cm/article.html/78013/fr.html/details_2',
+    ],
   },
 
   'union douala': {
     nomComplet: 'Union Sportive de Douala',
     alias: ['union sportive de douala', 'us douala', 'union sportive douala'],
-    surnom: 'Kpa kum',
+    surnom: 'Les Nassaras Kamakaï',
     ville: 'Douala',
     stade: 'Stade de la Réunification',
     histoire: [
       "Né sous le nom de Jeunesse Bamiléké, l'Union Sportive de Douala est l'un des clubs les plus prestigieux du pays.",
       "Il est l'un des rares clubs camerounais à avoir remporté deux compétitions africaines : la Coupe d'Afrique des clubs champions en 1979, face à Hearts of Oak, puis la Coupe d'Afrique des vainqueurs de coupe en 1981.",
-      "Cinq fois champion du Cameroun, de 1969 à 2012, l'Union a aussi soulevé de nombreuses Coupes du Cameroun.",
+      "Cinq fois champion du Cameroun, de 1969 à 2012, l'Union a aussi soulevé six Coupes du Cameroun depuis l'indépendance.",
+      "Le 9 juin 2025, le club connaît la première relégation de son histoire en Elite Two (15e). La saison suivante, il passe par les play-offs de maintien, puis doit disputer les Interpoules 2026 pour tenter d'éviter une nouvelle descente.",
     ],
     palmares: [
       { competition: 'Championnat du Cameroun', type: 'titre', annees: [1969, '1975-76', '1977-78', '1989-90', '2011-12'] },
       { competition: 'Coupe du Cameroun', type: 'titre', annees: [1961, 1969, 1980, 1985, 1997, 2006] },
       { competition: "Coupe d'Afrique des clubs champions", type: 'titre', annees: [1979], continental: true },
       { competition: "Coupe d'Afrique des vainqueurs de coupe", type: 'titre', annees: [1981], continental: true },
-      { competition: "Supercoupe d'Afrique", type: 'finale', annees: [1982], continental: true },
       { competition: 'Coupe du Cameroun', type: 'finale', annees: [1962, 1978, 1981, 1983, 1984, 2004] },
     ],
-    sources: ['https://en.wikipedia.org/wiki/Union_Douala', 'https://en.wikipedia.org/wiki/1979_African_Cup_of_Champions_Clubs', 'https://rsssf.org/tablesk/kamchamp.html', 'https://en.wikipedia.org/wiki/Cameroonian_Cup'],
+    sources: ['https://en.wikipedia.org/wiki/Union_Douala', 'https://en.wikipedia.org/wiki/1979_African_Cup_of_Champions_Clubs', 'https://rsssf.org/tablesk/kamchamp.html', 'https://rsssf.org/tablesk/kamcuphist.html', 'https://cameroon-tribune.cm/article.html/79123/fr.html/details_2'],
   },
 
   'racing': {
@@ -424,7 +450,7 @@ export const CLUBS_INFOS = {
     histoire: [
       "Le Racing Club de Bafoussam est le grand club de la région de l'Ouest à la fin des années 1980 et dans les années 1990.",
       "Il remporte quatre titres de champion du Cameroun (1989, 1992, 1993 et 1995), dispute cinq fois la Ligue des champions de la CAF et gagne la Coupe du Cameroun en 1996, après trois finales perdues.",
-      "Le club a notamment formé Geremi Njitap, futur joueur du Real Madrid et de Chelsea. Après des années difficiles, il remporte l'Elite Two en 2020-2021.",
+      "Le club a notamment formé Geremi Njitap, futur joueur du Real Madrid et de Chelsea. Après des années difficiles, il remporte l'Elite Two en 2020-2021. En mai 2026, dernier de sa poule d'Elite Two, il est relégué en ligue régionale.",
     ],
     palmares: [
       { competition: 'Championnat du Cameroun', type: 'titre', annees: ['1988-89', 1992, 1993, 1995] },
@@ -445,28 +471,56 @@ export const CLUBS_INFOS = {
     stade: 'Stade de la Réunification',
     histoire: [
       "Fondé en 2002 dans le quartier de Bépanda, à Douala, le club est surnommé « les Brésiliens de Bépanda » pour son jeu tourné vers l'attaque.",
-      "Habitué des places d'honneur, il termine trois fois vice-champion du Cameroun (2010, 2011 et 2013) et dispute quatre finales de Coupe du Cameroun, sans parvenir à les gagner. Il a aussi participé plusieurs fois aux compétitions africaines.",
+      "Il s'installe vite parmi les meilleurs clubs du pays : trois fois vice-champion du Cameroun (2009-2010, 2010-2011 et 2013) et quatre fois finaliste de la Coupe du Cameroun (2007 contre Coton Sport, 2009 contre la Panthère du Ndé, puis 2010 et 2021), sans jamais soulever le trophée.",
+      "Ces résultats lui ouvrent les compétitions africaines à six reprises : la Coupe de la Confédération en 2006, 2007 (jusqu'à la phase de groupes) et 2008, puis la Ligue des champions en 2011, 2012 et 2014. Le club a aussi vu passer de futurs internationaux, comme le latéral Ernest Mabouka.",
+      "Champion d'Elite Two en 2019-2020, il retrouve l'élite, puis redescend à l'issue de la saison 2024-2025. En 2025-2026, il se qualifie pour les play-offs d'accession, remportés par l'Union sportive d'Abong-Mbang.",
     ],
     palmares: [
+      { competition: 'Elite Two', type: 'titre', annees: ['2019-20'] },
       { competition: 'Championnat du Cameroun', type: 'finale', annees: ['2009-10', '2010-11', 2013], libelle: '3 fois vice-champion' },
       { competition: 'Coupe du Cameroun', type: 'finale', annees: [2007, 2009, 2010, 2021] },
     ],
-    sources: ['https://en.wikipedia.org/wiki/Les_Astres_FC', 'https://en.wikipedia.org/wiki/Cameroonian_Cup'],
+    sources: [
+      'https://en.wikipedia.org/wiki/Les_Astres_FC',
+      'https://en.wikipedia.org/wiki/Cameroonian_Cup',
+      'https://cameroon-tribune.cm/article.html/46603/fr.html/details_2',
+      'https://rsssf.org/tablesa/afcup2011.html',
+      'https://rsssf.org/tablesa/afcup2012.html',
+      'https://au.soccerway.com/cameroon/elite-two-2020-2021/archive',
+      'https://cameroon-tribune.cm/article.html/77916/fr.html/details_2',
+    ],
   },
 
   'bamboutos': {
     nomComplet: 'Bamboutos FC de Mbouda',
-    alias: ['bamboutos fc', 'bamboutos de mbouda', 'bamboutos fc de mbouda'],
+    alias: ['bamboutos fc', 'bamboutos de mbouda', 'bamboutos fc de mbouda', 'bamboutos football club de mbouda'],
+    surnom: "Les Mangwa Boys, le Fer de l'Ouest",
     ville: 'Mbouda',
     fondation: 1966,
+    couleurs: 'Rouge et bleu',
+    stade: 'Stade de Mbouda',
     histoire: [
-      "Fondé en 1966 à Mbouda, dans le département des Bamboutos, le club porte le nom des monts qui dominent la région.",
-      "Il a atteint deux fois la finale de la Coupe du Cameroun, en 2016 face à l'APEJES puis en 2022 face à Coton Sport.",
+      "Fondé en 1966 à Mbouda, chef-lieu du département des Bamboutos (région de l'Ouest), le club porte le nom des monts qui dominent la région. Surnommé les « Mangwa Boys » ou le « Fer de l'Ouest », il est l'un des clubs les plus populaires du Cameroun.",
+      "Présent en première division au début des années 2000, il termine 3e du championnat en 2002. En 2004, il remporte la toute première Coupe UNIFFAC des clubs (Afrique centrale) face au FC 105 de Libreville : battu 2-1 à l'aller, il s'impose 2-1 au retour à Douala, puis 6-5 aux tirs au but.",
+      "En Coupe du Cameroun, il dispute deux finales sans parvenir à la gagner : en 2016 contre l'APEJES de Mfou (0-2), puis le 2 octobre 2022 contre Coton Sport (0-1). Trois semaines plus tard, le 22 octobre 2022 à Bafoussam, il prend sa revanche en battant Coton Sport 1-0 lors de la première édition du Trophée des champions (Super Coupe). En 2023, il termine vice-champion du Cameroun.",
+      "La saison 2024-2025 est agitée : en avril 2025, en conflit avec la FECAFOOT, le club annonce son retrait du championnat. Il termine finalement 13e et descend en Elite Two avec les Astres, l'Union de Douala et Yong Sports Academy.",
+      "En Elite Two, il dispute les play-offs de maintien en 2025-2026, puis lance la saison 2026-2027 avec deux victoires à domicile : 2-0 contre Fauve Azur et 3-0 contre le Tonnerre Kalara Club.",
     ],
     palmares: [
+      { competition: 'Coupe UNIFFAC des clubs', type: 'titre', annees: [2004], continental: true },
+      { competition: 'Super Coupe Roger Milla', type: 'titre', annees: [2022] },
+      { competition: 'Championnat du Cameroun', type: 'finale', annees: ['2022-23'], libelle: 'Vice-champion' },
       { competition: 'Coupe du Cameroun', type: 'finale', annees: [2016, 2022] },
     ],
-    sources: ['https://rsssf.org/tablesk/kamfound.html', 'https://en.wikipedia.org/wiki/Cameroonian_Cup'],
+    sources: [
+      'https://rsssf.org/tablesu/uniffac04.html',
+      'https://rsssf.org/tablesk/kamcuphist.html',
+      'https://rsssf.org/tablesk/kam02.html',
+      'https://en.wikipedia.org/wiki/Super_Coupe_Roger_Milla',
+      'https://cameroon-tribune.cm/article.html/52033/fr.html/details_2',
+      'https://cameroon-tribune.cm/article.html/71318/fr.html/details_2',
+      'https://cameroon-tribune.cm/article.html/82257/fr.html/details_2',
+    ],
   },
 
   'eding sport': {
@@ -477,6 +531,7 @@ export const CLUBS_INFOS = {
     histoire: [
       "Créé en 2012 et attaché au département de la Lékié, Eding Sport est l'une des belles réussites récentes du football camerounais.",
       "Quelques années seulement après sa création, il devient champion du Cameroun en 2017, puis enchaîne avec la Coupe du Cameroun en 2018, face au Lion Blessé de Fotouni.",
+      "En mai 2026, dernier de sa poule d'Elite Two, le club est relégué en ligue régionale du Centre.",
     ],
     palmares: [
       { competition: 'Championnat du Cameroun', type: 'titre', annees: [2017] },
@@ -487,18 +542,32 @@ export const CLUBS_INFOS = {
 
   'sable': {
     nomComplet: 'Sable FC de Batié',
-    alias: ['sable fc', 'sable de batie', 'sable fc de batie'],
+    alias: ['sable fc', 'sable de batie', 'sable fc de batie', 'sable batie'],
+    surnom: 'Les San San Boys',
     ville: 'Batié',
     fondation: 1995,
+    couleurs: 'Jaune et bleu',
+    stade: 'Stade de Bamendzi (Bafoussam)',
     histoire: [
-      "Fondé en 1995 à Batié, dans l'Ouest, le Sable FC connaît une ascension fulgurante : quatre ans plus tard, il est champion du Cameroun (1999).",
-      "Le club dispute ensuite deux finales de Coupe du Cameroun d'affilée, en 2002 et 2003, sans parvenir à les remporter.",
+      "Fondé en 1995 à Batié, dans le département des Hauts-Plateaux (région de l'Ouest), le Sable FC, surnommé les « San San Boys », connaît une ascension fulgurante : quatre ans seulement après sa création, il est sacré champion du Cameroun en 1999, devant Coton Sport. Il remporte aussi la Super Coupe Roger Milla de cette saison, 1-0 contre le Canon de Yaoundé, le 12 janvier 2000.",
+      "Ce titre lui ouvre la Ligue des champions de la CAF 2000, où il atteint la phase de groupes. En Coupe du Cameroun, il dispute deux finales d'affilée sans les gagner : en 2002 contre Mount Cameroon (1-2 après prolongation), puis en 2003 contre Coton Sport (1-2). En 2004, il atteint la phase de groupes de la Coupe de la Confédération de la CAF.",
+      "Le club finit par quitter l'élite et redescend jusqu'en ligue régionale de l'Ouest. En 2025, il remporte la finale des barrages de l'Ouest contre le Piment de Bayangam (3-1), puis obtient aux Interpoules sa remontée en Elite Two, avant de perdre la finale face à Kumba City (3-4 après prolongation).",
+      "Pour son retour en Elite Two, le club confie son banc à l'expérimenté Alexandre Belinga et reçoit ses adversaires au stade de Bamendzi, à Bafoussam.",
     ],
     palmares: [
       { competition: 'Championnat du Cameroun', type: 'titre', annees: [1999] },
+      { competition: 'Super Coupe Roger Milla', type: 'titre', annees: [1999] },
       { competition: 'Coupe du Cameroun', type: 'finale', annees: [2002, 2003] },
+      { competition: 'Interpoules nationales', type: 'finale', annees: [2025] },
     ],
-    sources: ['https://rsssf.org/tablesk/kamchamp.html', 'https://rsssf.org/tablesk/kamfound.html', 'https://en.wikipedia.org/wiki/Cameroonian_Cup'],
+    sources: [
+      'https://rsssf.org/tablesk/kam99.html',
+      'https://rsssf.org/tablesk/kamsupcuphist.html',
+      'https://rsssf.org/tablesk/kamcuphist.html',
+      'https://en.wikipedia.org/wiki/Sable_FC_(Cameroon)',
+      'https://cameroun24.net/article/70685-interpoules-2025-kumba-city-sacr-champion-au-bout-du-suspense-sable-de-bati-aussi-promu.html',
+      'https://kick442.com/?p=24903',
+    ],
   },
 
   'apejes academy': {
@@ -528,41 +597,74 @@ export const CLUBS_INFOS = {
   },
 
   'fap': {
-    nomComplet: 'AS FAP de Yaoundé',
-    alias: ['as fap', 'as fap yaounde', 'fap yaounde'],
+    nomComplet: 'AS Forces armées et police de Yaoundé (AS FAP)',
+    alias: ['as fap', 'as fap yaounde', 'fap yaounde', 'forces armees et police'],
     ville: 'Yaoundé',
+    couleurs: 'Vert, rouge et jaune',
     histoire: [
-      "L'AS FAP est le club des Forces armées et de la police, basé à Yaoundé.",
-      "Il a atteint la finale de la Coupe du Cameroun en 2019, perdue 3-2 face au Stade Renard de Melong.",
+      "L'AS FAP est la section football des Forces armées et police (FAP), l'institution sportive des militaires et des policiers camerounais créée en 1972 à Yaoundé. Les FAP sont présentes dans de nombreux sports, où elles comptent parmi les références du pays, en basket-ball, handball ou athlétisme. Leur équipe féminine de football, les Amazones FAP, est l'une des meilleures du Cameroun.",
+      "Le 30 juin 2019, l'AS FAP dispute la première finale de Coupe du Cameroun de son histoire, au stade Ahmadou-Ahidjo de Yaoundé. Sous une pluie battante, elle s'incline 3-2 face au Stade Renard de Melong.",
+      "Le club évolue ensuite en Elite Two. En 2025-2026, il passe par les play-offs de maintien et conserve sa place dans le championnat.",
     ],
     palmares: [
       { competition: 'Coupe du Cameroun', type: 'finale', annees: [2019] },
     ],
-    sources: ['https://en.wikipedia.org/wiki/Cameroonian_Cup'],
+    sources: [
+      'https://rsssf.org/tablesk/kamcuphist.html',
+      'https://africtelegraph.com/coupe-du-cameroun-de-football',
+      'https://fr.journalducameroun.com/coupe-du-cameroun-le-premier-ministre-preside-la-finale-ce-dimanche-cameroun/',
+      'https://bal.nba.com/teams/f-a-p-cameroon?view=team',
+      'https://cameroon-tribune.cm/article.html/33804/fr.html/details_2',
+      'https://cameroon-tribune.cm/article.html/78013/fr.html/details_2',
+    ],
   },
 
   'avion academy': {
-    nomComplet: 'Avion Academy FC',
-    alias: ['avion academy fc', 'avion'],
+    nomComplet: 'Avion Academy FC du Nkam',
+    alias: ['avion academy fc', 'avion', 'avion du nkam', 'avion fc nkam', 'avion academy du nkam'],
     ville: 'Douala',
     fondation: 2012,
     histoire: [
-      "Avion Academy est une académie de football fondée en 2012 à Douala, tournée vers la formation des jeunes joueurs.",
+      "Fondé en 2012 et rattaché au département du Nkam (région du Littoral), Avion Academy FC est présidé depuis sa création par Pierre Batamack, figure bien connue du football à Douala.",
+      "Champion d'Elite Two en 2018, le club découvre l'Elite One en 2019, où il termine 11e de sa première saison. Il reste dans l'élite jusqu'en 2024, puis redescend à l'issue des play-offs de maintien de la saison 2023-2024.",
+      "De retour en Elite Two, il fait partie des prétendants à la montée : leader de son groupe en début de saison 2024-2025, il dispute ensuite les play-offs d'accession, sans monter. Il les retrouve en 2025-2026 et signe notamment une large victoire contre Kumba City (6-1), mais termine derrière l'Union sportive d'Abong-Mbang, sacrée championne.",
     ],
-    palmares: [],
-    sources: ['https://rsssf.org/tablesk/kamfound.html'],
+    palmares: [
+      { competition: 'Elite Two', type: 'titre', annees: [2018] },
+    ],
+    sources: [
+      'https://www.cameroon-tribune.cm/article.html/23791/fr.html/details_2',
+      'https://ca.soccerway.com/cameroon/elite-two-2019/archive',
+      'https://www.national-football-teams.com/club/22540/2019_2/Avion_Fc_Nkam.html',
+      'https://cameroon-tribune.cm/article.html/64735/fr.html/details_2',
+      'https://cameroon-tribune.cm/article.html/68578/fr.html/details_2',
+      'https://cameroon-tribune.cm/article.html/77916/fr.html/details_2',
+      'https://rsssf.org/tablesk/kamfound.html',
+    ],
   },
 
   'union abong-mbang': {
     nomComplet: "Union Sportive d'Abong-Mbang",
-    alias: ['union abong mbang', 'us abong mbang', 'union sportive abong mbang'],
+    alias: ['union abong mbang', 'us abong mbang', 'union sportive abong mbang', "union sportive d'abong-mbang", 'usa abong-mbang'],
+    surnom: 'USA',
     ville: 'Abong-Mbang',
     fondation: 1954,
+    couleurs: 'Jaune et noir',
     histoire: [
-      "Fondée en 1954, l'Union Sportive d'Abong-Mbang est le club phare de cette ville de la région de l'Est.",
+      "Fondée en 1954 à Abong-Mbang, chef-lieu du Haut-Nyong, l'Union Sportive (USA) est le club emblématique de la région de l'Est.",
+      "Après avoir représenté l'Est parmi l'élite, le club quitte la première division à la fin des années 1990 et entame une longue traversée de 27 ans entre la deuxième division et les championnats régionaux.",
+      "Double champion régional de l'Est, il remonte en Elite Two grâce aux interpoules nationales.",
+      "En 2025-2026, sous la direction de l'entraîneur Basile Anyam, l'USA réalise une saison remarquable : le 17 juin 2026, une victoire 1-0 sur le terrain d'Atlantic de Kribi lui assure la montée en Elite One, puis elle est sacrée championne d'Elite Two trois jours plus tard, après un nul 1-1 contre Les Astres de Douala.",
+      "Pour son retour parmi l'élite, 27 ans après, le club ouvre la saison 2026-2027 de l'Elite One à Bertoua par un match nul spectaculaire face au Stade Renard de Melong (2-2).",
     ],
-    palmares: [],
-    sources: ['https://rsssf.org/tablesk/kamfound.html'],
+    palmares: [
+      { competition: 'Elite Two', type: 'titre', annees: ['2025-26'] },
+    ],
+    sources: [
+      'https://rsssf.org/tablesk/kamfound.html',
+      'https://cameroon-tribune.cm/article.html/77916/fr.html/details_2',
+      'https://kick442.com/?p=18325',
+    ],
   },
 
   'yafoot': {
@@ -570,10 +672,10 @@ export const CLUBS_INFOS = {
     alias: ['yafoot fc', 'yaounde fc ii', 'fc yaounde ii'],
     ville: 'Yaoundé',
     histoire: [
-      "Yafoot, aussi appelé Yaoundé FC II, est un club de la capitale qui évolue en Elite Two.",
+      "Yafoot, aussi appelé Yaoundé FC II, est un club de la capitale. Après plusieurs saisons en Elite Two, il termine 7e des play-offs de maintien en juin 2026 et descend en Super Ligue régionale.",
     ],
     palmares: [],
-    sources: ['https://cameroon-tribune.cm/article.html/71249/fr.html/details_2'],
+    sources: ['https://cameroon-tribune.cm/article.html/71249/fr.html/details_2', 'https://cameroon-tribune.cm/article.html/78013/fr.html/details_2'],
   },
 
   'foncha st': {
@@ -658,15 +760,25 @@ export const CLUBS_INFOS = {
   },
 
   'jeunes fauves': {
-    nomComplet: 'Fauve Azur Elite',
+    nomComplet: 'Fauve Azur Elite FC de Yaoundé',
     alias: ['fauve azur elite', 'fauve azur', 'fauve azur elite fc', 'fauve azur de yaounde'],
     ville: 'Yaoundé',
+    couleurs: 'Jaune et vert',
+    stade: 'Stade Ahmadou-Ahidjo',
     histoire: [
-      "Club de Yaoundé, Fauve Azur Elite fait son grand retour en MTN Elite One pour la saison 2023-2024, sous la présidence de Norbert Nya.",
-      "Pour cette saison disputée en deux phases, il termine dans la poule de maintien.",
+      "Fauve Azur Elite est la section professionnelle d'un projet sportif mené à Yaoundé par Norbert Nya Nkamenjo, ancien directeur général de la Panthère du Ndé. En septembre 2019, il rachète l'AS Etoa-Meki, club de Ligue 2 fondé par l'ancien Lion indomptable Jean II Makoun. Cette licence donne naissance à Fauve Azur Elite, tandis que l'équipe Fauve Azur FC continue en ligue régionale du Centre.",
+      "Troisième de l'Elite Two en 2021, il accède à la MTN Elite One et s'y installe : en 2024, il prépare déjà sa quatrième saison dans l'élite, avec l'expérimenté Gabriel Haman sur le banc. Le club n'a en revanche jamais remporté de titre.",
+      "La saison 2025-2026 est la plus difficile. Battu 4-2 par l'AS Fortuna lors de la 25e journée, Fauve Azur est officiellement relégué. Il termine dernier du championnat et dispute l'Elite Two en 2026-2027.",
     ],
     palmares: [],
-    sources: ['https://cameroon-tribune.cm/article.html/60447/fr.html/details_2'],
+    sources: [
+      'https://www.camer.be/77252/7:1/sport',
+      'https://camer.be/actualites/sport/cameroun-norbert-nkamenjonos-joueurs-doivent-avoir-un-statut-special-si-nous-voulons-gagner-le-chan-2020-cameroon.html',
+      'https://www.national-football-teams.com/club/25895/2021/Fauve_Azur_Yaounde.html',
+      'https://kick442.com/?p=18926',
+      'https://www.livefoot.fr/equipe/fauve-azur-elite/actualite/',
+      'https://cameroon-tribune.cm/articles/11385/fr/details_2',
+    ],
   },
 
   'renaissance': {
@@ -692,25 +804,29 @@ export const CLUBS_INFOS = {
     stade: 'Stade municipal de Mbalmayo',
     histoire: [
       "Fondé en 1928 sous le nom d'Allico Maritime, le Dragon Club de Yaoundé est l'un des plus anciens clubs du pays.",
-      "Il évolue en Elite Two, où il a terminé huitième en 2023-2024.",
+      "Il évolue en Elite Two, où il termine huitième en 2023-2024, avant d'être relégué en division régionale à l'issue de la saison 2024-2025.",
     ],
     palmares: [],
-    sources: ['https://en.wikipedia.org/wiki/Dragon_Club_(Yaound%C3%A9)', 'https://rsssf.org/tablesk/kamfound.html'],
+    sources: ['https://en.wikipedia.org/wiki/Dragon_Club_(Yaound%C3%A9)', 'https://rsssf.org/tablesk/kamfound.html', 'https://cameroon-tribune.cm/article.html/71249/fr.html/details_2'],
   },
 
   'feutcheu': {
-    nomComplet: 'Feutcheu FC',
-    alias: ['feutcheu fc', 'djiko', 'djiko fc', 'djiko fc de bandjoun'],
+    nomComplet: 'Djiko FC de Bandjoun',
+    alias: ['feutcheu fc', 'djiko', 'djiko fc', 'djiko fc de bandjoun', 'djiko bandjoun'],
     ville: 'Bandjoun',
     fondation: 2011,
-    couleurs: 'Rouge et blanc',
-    stade: 'Stade de Kouekong (Bafoussam)',
+    stade: 'Stade omnisports de Bafoussam',
     histoire: [
-      "Fondé en 2011 à Bandjoun sous le nom de Djiko FC, le club a disputé l'Elite One à la fin des années 2010.",
-      "En 2020, après sa reprise par Joseph Feutcheu, il est rebaptisé Feutcheu FC. Il joue ses matchs à domicile au stade de Kouekong, à Bafoussam.",
+      "Fondé en 2011 à Bandjoun, dans l'Ouest, le Djiko FC est présidé par l'homme d'affaires Joseph Feutcheu, d'où le nom « Feutcheu » sous lequel le club apparaît parfois. Il dispute l'Elite One jusqu'en 2022-2023, puis redescend en Elite Two.",
+      "Le 7 avril 2025, Joseph Feutcheu annonce son retrait de toutes les activités du football, dénonçant notamment l'arbitrage et la gestion du championnat. Le club ne se présente plus à ses matchs et quitte l'Elite Two à l'issue de la saison 2024-2025, reversé en division régionale.",
     ],
     palmares: [],
-    sources: ['https://en.wikipedia.org/wiki/Djiko_FC_de_Bandjoun', 'https://rsssf.org/tablesk/kamfound.html'],
+    sources: [
+      'https://cameroon-tribune.cm/article.html/70068/fr.html/details_2',
+      'https://national-football-teams.com/club/28741/2024_1/Djiko_Bandjoun.html',
+      'https://cameroon-tribune.cm/article.html/71249/fr.html/details_2',
+      'https://rsssf.org/tablesk/kamfound.html',
+    ],
   },
 
   'leopard de douala': {
@@ -761,30 +877,52 @@ export const CLUBS_INFOS = {
 
   'atlantic': {
     nomComplet: 'Atlantic Sports Academy de Kribi',
-    alias: ['atlantic sa', 'atlantic s.a', 'atlantic de kribi', 'atlantic sports academy'],
+    alias: ['atlantic sa', 'atlantic s.a', 'atlantic de kribi', 'atlantic sports academy', 'atlantic kribi', 'atlantic fc de kribi'],
+    surnom: 'ASA',
     ville: 'Kribi',
     histoire: [
-      "Club de Kribi, dans le Sud, Atlantic Sports Academy remporte les Interpoules nationales en août 2024 en battant l'Union Sportive d'Abong-Mbang (1-0) en finale. Les deux clubs montent ensemble en Elite Two.",
-      "En 2026, il se qualifie pour les play-offs d'accession à l'Elite One.",
+      "Jeune club de la cité balnéaire de Kribi, dans le département de l'Océan (région du Sud), l'Atlantic Sports Academy s'est donné pour mission de former les talents de la côte et de leur offrir une vitrine.",
+      "2024 marque le grand tournant de son histoire. En juillet, Atlantic devient champion régional du Sud en battant Dja Sports de Meyomessala 3-0 en finale. Aux interpoules nationales d'août, à Yaoundé, il élimine Mintack FC aux tirs au but pour décrocher sa montée en Elite Two, puis remporte le tournoi le 18 août en battant l'Union Sportive d'Abong-Mbang en finale (1-0, but de Laurent Nkoa), au stade de Ngoa-Ekellé.",
+      "Dès ses débuts en deuxième division, le club se fait remarquer : il atteint les demi-finales de la Coupe du Cameroun 2025, où il s'incline face à la Colombe du Dja-et-Lobo (2-1).",
+      "En 2025-2026, Atlantic se qualifie pour les play-offs d'accession à l'Elite One, mais s'incline 1-0 contre le futur champion, l'US Abong-Mbang, le 17 juin 2026. Il reste l'un des prétendants à la montée.",
     ],
     palmares: [
       { competition: 'Interpoules nationales', type: 'titre', annees: [2024] },
+      { competition: 'Championnat régional du Sud', type: 'titre', annees: [2024] },
     ],
-    sources: ['https://cameroon-tribune.cm/article.html/66594/fr.html/details_2', 'https://cameroon-tribune.cm/article.html/77091/fr.html/details_2'],
+    sources: [
+      'https://cameroon-tribune.cm/article.html/66594/fr.html/details_2',
+      'https://kick442.com/?p=19484',
+      'https://kick442.com/?p=18390',
+      'https://cameroon-tribune.cm/article.html/71763/fr.html/details_2',
+      'https://cameroon-tribune.cm/article.html/77091/fr.html/details_2',
+    ],
   },
 
   'kumba': {
     nomComplet: 'Kumba City FC',
     alias: ['kumba city', 'kumba city fc'],
+    surnom: 'Les K-Town Citizens',
     ville: 'Kumba',
+    couleurs: 'Bleu et bleu ciel',
+    stade: 'GPS School Field (Kumba)',
     histoire: [
-      "Représentant du Sud-Ouest, Kumba City FC remporte les Interpoules nationales en septembre 2025 au bout du suspense, face au Sable de Batié (4-3 après prolongation). Il découvre l'Elite Two dans la foulée.",
-      "Pour sa première saison, il se qualifie pour les play-offs d'accession à l'Elite One.",
+      "Club de Kumba, dans le département de la Meme (région du Sud-Ouest), Kumba City FC est surnommé les « K-Town Citizens ».",
+      "En 2025, il remporte la finale régionale du Sud-Ouest contre ses voisins de Legend FA (3-0) et se qualifie pour la première fois de son histoire pour les Interpoules nationales. À Odza, il bat Titanic FC Samar en demi-finale (4-0), ce qui lui assure la montée en Elite Two, puis s'offre le titre le 20 septembre 2025 face au Sable de Batié, 4-3 après prolongation.",
+      "Pour sa première saison en Elite Two (2025-2026), sous la direction de l'entraîneur Mbaboh Moses, il démarre par deux victoires à domicile, occupe longtemps la tête de son groupe et se qualifie pour les play-offs d'accession à l'Elite One.",
     ],
     palmares: [
       { competition: 'Interpoules nationales', type: 'titre', annees: [2025] },
+      { competition: 'Championnat régional du Sud-Ouest', type: 'titre', annees: [2025] },
     ],
-    sources: ['https://www.cameroon-tribune.cm/article.html/72740/fr.html/details_2', 'https://cameroun24.net/article/70685-interpoules-2025-kumba-city-sacr-champion-au-bout-du-suspense-sable-de-bati-aussi-promu.html', 'https://cameroon-tribune.cm/article.html/77091/fr.html/details_2'],
+    sources: [
+      'https://www.cameroon-tribune.cm/article.html/72740/fr.html/details_2',
+      'https://cameroun24.net/article/70685-interpoules-2025-kumba-city-sacr-champion-au-bout-du-suspense-sable-de-bati-aussi-promu.html',
+      'https://cameroun24.net/article/70664-interpoules-2025-kumba-city-fc-ecrase-titanic-4-0-et-decroche-son-ticket-pour-l-elite-two.html',
+      'https://kick442.com/?p=22600',
+      'https://kick442.com/?p=27437',
+      'https://cameroon-tribune.cm/article.html/77091/fr.html/details_2',
+    ],
   },
 
   'ofta': {
@@ -835,7 +973,7 @@ export const CLUBS_INFOS = {
     stade: 'Stade de la Réunification',
     histoire: [
       "Club de Douala, New Star dispute la finale de la Coupe du Cameroun en 2012, perdue face à Unisport de Bafang (2-0).",
-      "Il prend sa revanche en 2017 en remportant le trophée face à l'UMS de Loum (1-0), après avoir découvert les compétitions africaines avec la Coupe de la Confédération 2016.",
+      "Il prend sa revanche en 2017 en remportant le trophée face à l'UMS de Loum (1-0).",
     ],
     palmares: [
       { competition: 'Coupe du Cameroun', type: 'titre', annees: [2017] },
@@ -846,30 +984,62 @@ export const CLUBS_INFOS = {
 
   'mintack': {
     nomComplet: 'Mintack FC de la Haute-Sanaga',
-    alias: ['mintack fc', 'mintack de la haute sanaga', 'mintack fc de haute-sanaga'],
+    alias: ['mintack fc', 'mintack de la haute sanaga', 'mintack fc de haute-sanaga', 'mintack haute sanaga'],
+    surnom: 'Les Lions de la Haute-Sanaga',
     ville: 'Nanga-Eboko',
     fondation: 2015,
+    couleurs: 'Or et bordeaux',
     histoire: [
-      "Fondé en 2015 à Nanga-Eboko, dans la Haute-Sanaga, Mintack FC remporte les Interpoules nationales en 2026 en battant Elecsport de Limbé en finale (1-0), à Yaoundé.",
-      "Il découvre l'Elite Two lors de la saison 2026-2027.",
+      "Fondé en 2015 à Nanga-Eboko, dans la Haute-Sanaga (région du Centre), Mintack FC se révèle au grand public en 2024. Champion régional du Centre après une finale gagnée 2-0 contre la Foudre d'Akonolinga, il réalise surtout un parcours remarqué en Coupe du Cameroun. Club de ligue régionale, il élimine l'AS Fortuna, pensionnaire d'Elite One, en quart de finale (1-0), avant de tomber en demi-finale contre l'Aigle Royal de la Menoua (0-1, but à la 85e minute).",
+      "La même année, aux Interpoules, il est battu en demi-finale par Atlantic de Kribi, puis remporte le match pour la troisième place contre Volcan du Noun (5-1). En 2025, il conserve son titre régional en battant de nouveau la Foudre d'Akonolinga (3-0), mais ne passe pas la phase de groupes des Interpoules.",
+      "La troisième tentative est la bonne. Aux Interpoules 2026, il termine en tête de sa poule, bat Mintack FC du Septentrion en demi-finale le 31 juillet (2-1), ce qui lui assure la première montée de son histoire en Elite Two, puis remporte le titre le 2 août face à Elecsport de Limbé (1-0).",
+      "Pour ses débuts en Elite Two, il ouvre la saison 2026-2027 par un match nul à Limbé contre Elecsport (1-1).",
     ],
     palmares: [
       { competition: 'Interpoules nationales', type: 'titre', annees: [2026] },
+      { competition: 'Championnat régional du Centre', type: 'titre', annees: [2024, 2025] },
     ],
-    sources: ['https://cameroon-tribune.cm/article.html/79371/fr.html/details_2', 'https://rsssf.org/tablesk/kamfound.html'],
+    sources: [
+      'https://cameroon-tribune.cm/article.html/79371/fr.html/details_2',
+      'https://www.237online.com/interpoules-2026-mintack-fc-yaounde/',
+      'https://cameroon-tribune.cm/article.html/65413/fr.html/details_2',
+      'https://cameroon-tribune.cm/articles/9529/en/details_2',
+      'https://kick442.com/?p=18968',
+      'https://crtv.cm/?p=279331',
+      'https://cameroun24.net/article/70384-mintack-fc-la-foudre-ne-frappe-pas-deux-fois-les-lions-de-la-haute-sanaga-conservent-leur-couronne-en-balayant-akonolinga-3-0.html',
+      'https://cameroon-tribune.cm/article.html/81971/fr.html/details_2',
+      'https://rsssf.org/tablesk/kamfound.html',
+    ],
   },
 
   'elecsport': {
-    nomComplet: 'Elecsport de Limbé',
-    alias: ['electsport', 'elecsport de limbe', 'elecsport fc'],
+    nomComplet: 'Elecsport Football and Sports Academy de Limbé',
+    alias: ['electsport', 'elecsport de limbe', 'elecsport fc', 'elecsport fsa', 'elecsport football sa'],
     ville: 'Limbé',
     fondation: 1983,
+    couleurs: 'Jaune et vert',
+    stade: 'Limbe Centenary Stadium',
     histoire: [
-      "Club de Limbé fondé en 1983, Elecsport atteint la finale des Interpoules nationales en 2026, perdue face à Mintack FC (1-0). Les deux finalistes montent en Elite Two pour la saison 2026-2027.",
+      "Club de Limbé (département du Fako, région du Sud-Ouest) fondé en 1983, Elecsport a déjà goûté à l'élite : il dispute le championnat de première division en 1990, mais termine 16e et dernier et redescend aussitôt.",
+      "Après une longue absence du football professionnel, le club, devenu Elecsport Football and Sports Academy, remporte en 2026 le championnat régional du Sud-Ouest, avec une large victoire 5-0 contre Cinyodev Football Academy au stade de Middle Farms, à Limbé.",
+      "Aux Interpoules 2026, il termine en tête de sa poule, bat Mankon United en demi-finale (2-1) et obtient ainsi sa montée en Elite Two. Il perd ensuite la finale contre Mintack FC (0-1).",
+      "Pour son retour au niveau national, il confie son banc au vétéran Emmanuel Ndoumbe Bosso et ouvre la saison 2026-2027 de l'Elite Two au Centenary Stadium de Limbé par un nul 1-1 contre Mintack FC, l'autre promu.",
     ],
-    palmares: [],
-    sources: ['https://cameroon-tribune.cm/article.html/79371/fr.html/details_2', 'https://rsssf.org/tablesk/kamfound.html'],
+    palmares: [
+      { competition: 'Championnat régional du Sud-Ouest', type: 'titre', annees: [2026] },
+      { competition: 'Interpoules nationales', type: 'finale', annees: [2026] },
+    ],
+    sources: [
+      'https://en.wikipedia.org/wiki/1990_Cameroonian_Premier_League',
+      'https://kick442.com/?p=29020',
+      'https://www.237online.com/interpoules-2026-mintack-fc-yaounde/',
+      'https://cameroon-tribune.cm/article.html/79371/fr.html/details_2',
+      'https://cameroon-tribune.cm/article.html/81869/fr.html/details_2',
+      'https://cameroon-tribune.cm/article.html/81971/fr.html/details_2',
+      'https://rsssf.org/tablesk/kamfound.html',
+    ],
   },
+
 };
 
 // "Panthère Sportive du Ndé" -> "panthere sportive du nde"
@@ -885,6 +1055,17 @@ for (const [cle, infos] of Object.entries(CLUBS_INFOS)) {
 // Textes traduits par club (même clé que CLUBS_INFOS). Les noms propres
 // (stades, villes, grands joueurs) ne changent pas.
 const CLUBS_INFOS_EN = {
+  "bamboutos": {
+    "surnom": "The Mangwa Boys, the Iron of the West",
+    "couleurs": "Red and blue",
+    "histoire": [
+      "Founded in 1966 in Mbouda, capital of the Bamboutos department (West region), the club is named after the mountains that overlook the area. Nicknamed the \"Mangwa Boys\" or the \"Iron of the West\", it is one of the most popular clubs in Cameroon.",
+      "A top-flight club in the early 2000s, it finished 3rd in the league in 2002. In 2004 it won the very first UNIFFAC Clubs Cup (Central Africa) against FC 105 of Libreville: beaten 2-1 in the first leg, it won 2-1 in the return leg in Douala, then 6-5 on penalties.",
+      "It reached two Cameroon Cup finals without winning one: in 2016 against APEJES of Mfou (0-2), then on 2 October 2022 against Coton Sport (0-1). Three weeks later, on 22 October 2022 in Bafoussam, it took its revenge by beating Coton Sport 1-0 in the first edition of the Champions' Trophy (Super Cup). In 2023 it finished runner-up in the league.",
+      "The 2024-2025 season was turbulent: in April 2025, in a dispute with FECAFOOT, the club announced it was withdrawing from the league. It eventually finished 13th and went down to Elite Two with Les Astres, Union de Douala and Yong Sports Academy.",
+      "In Elite Two, it played the relegation play-offs in 2025-2026, then opened the 2026-2027 season with two home wins: 2-0 against Fauve Azur and 3-0 against Tonnerre Kalara Club."
+    ]
+  },
   "aigle royal de moungo": {
     "couleurs": "Blue and white",
     "histoire": [
@@ -935,26 +1116,30 @@ const CLUBS_INFOS_EN = {
       "The club then ended the historic dominance of the Douala and Yaoundé clubs. With 18 league titles, including six in a row from 2003 to 2007-2008 and a final hat-trick from 2021 to 2023, it holds the Cameroonian championship record. It has also won seven Cameroon Cups.",
       "Coton Sport regularly flies the Cameroonian flag on the African stage: CAF Cup finalist in 2003, then CAF Champions League finalist in 2008 against Al Ahly, it reached the Champions League semi-finals again in 2013.",
       "Built on a professional structure and an effective academy, the club has been a springboard for several generations of Indomitable Lions.",
-      "After its hat-trick, it went through a rebuilding phase as new rivals emerged (4th in Elite One in 2025-2026) and starts the 2026-2027 season aiming to win back the title."
+      "After its hat-trick, it went through a rebuilding phase as new rivals emerged and starts the 2026-2027 season aiming to win back the title."
     ]
   },
   "dynamo de douala": {
     "surnom": "Bon Ba Djob (\"the children of God\" in Bassa), the People",
-    "couleurs": "Yellow and white",
+    "couleurs": "Yellow and black",
     "histoire": [
       "Founded in 1948 in the Nkongmondo district of Douala, Dynamo was born with a strong popular and committed identity, earning it the nickname of the \"People's\" club. It gathers a huge community of supporters in the economic capital.",
       "The Bon Ba Djob reached their peak at the turn of the 1970s and 1980s. They won the Cameroon Cup in 1979 against PWD Bamenda (3-1), then again in 1981 by beating their great local rival, Union Sportive de Douala, in the final (2-0). That same year, the club finished league runner-up behind Tonnerre Yaoundé.",
       "A third national trophy came in 1998, with a 1-0 win over Canon Yaoundé in the Cameroon Cup final.",
       "A club known for developing players, Dynamo notably revealed the late Modeste M'Bami, Olympic champion in 2000, who went on to play for PSG and Marseille.",
-      "The club then went through long, difficult years between the lower divisions and internal crises. After a restructuring, it returned to Elite One for the 2023-2024 season."
+      "The club then went through long, difficult years between the lower divisions and internal crises. After a restructuring, it returned to Elite One for the 2023-2024 season, then finished league runner-up in 2025-2026, behind Colombe."
     ]
   },
   "fortuna mfou": {
+    "couleurs": "Red and white",
     "histoire": [
-      "Founded in 1998 in Mfou, near Yaoundé, AS Fortuna was promoted to Elite One in 2018.",
-      "After a difficult first season (14th), the club quickly settled in the top half of the table: 4th in 2019 and 2020, then 3rd in 2020-2021, its best finish."
+      "Founded in 1998 in Mfou (Mefou-et-Afamba, Centre region) by Roger Noah, AS Fortuna made its name as a player-development club, producing notably André-Frank Zambo Anguissa and Léonel Ateba. The club also has a women's team.",
+      "Promoted to Elite One in 2018, it finished 14th in its first season, then quickly settled in the top half of the table: 4th in 2019 and 2020, then 3rd in 2020-2021, its best finish. In the 2024 Cameroon Cup it was knocked out in the quarter-final by Mintack FC, then a regional-league side (0-1).",
+      "On 3 September 2024, its founder and president Roger Noah died aged 56, a huge loss for the club.",
+      "In 2025-2026 Fortuna finished 13th in Elite One and had to play a play-off against the runner-up of the Elite Two play-offs, its Mfou neighbour APEJES. Beaten 2-0 on 1 July 2026, it went down to Elite Two."
     ]
   },
+
   "gazelle": {
     "couleurs": "Sky blue and white",
     "histoire": [
@@ -994,7 +1179,7 @@ const CLUBS_INFOS_EN = {
       "A club from Melong, in the Moungo department (Littoral region), Stade Renard already existed in the late 1960s: in 1969 it played in the second division, and it was there that a young Michel Kaham signed his first licence before shining with Aigle Royal de Nkongsamba.",
       "After a long quiet spell, the club was revived in the early 2010s by local leaders, including Melong's mayor, Jean Kuete. Starting from the Littoral regional league, it climbed the ladder in three seasons and won the Ligue 2 title in 2016, earning promotion to the top flight. The Melong municipal stadium was renovated to mark the comeback.",
       "2019 remains the greatest year in its history: Stade Renard won the Cameroon Cup (3-2 in the final against AS FAP of Yaoundé, at the Ahmadou-Ahidjo stadium), then the Roger Milla Super Cup in October (3-1 against UMS de Loum).",
-      "Now an established Elite One side, the club notably finished 3rd in 2021, its best top-flight finish."
+      "Now an established Elite One side, the club challenged for the title in 2023-2024: on the last day of the play-offs, a 2-2 draw against Victoria United handed the title to Victoria, and Stade Renard finished 3rd, level on points with Coton Sport."
     ]
   },
   "unisport bafang": {
@@ -1004,7 +1189,7 @@ const CLUBS_INFOS_EN = {
       "The club was born in 1958 from the merger of three teams from the Haut-Nkam (Jupiter FC, Union de la Mission catholique and Tortue FC) and was officially registered on 2 October 1959, driven by Antoine Kouenkam, a former player in Cameroon's first national team.",
       "A long-time top-flight side, Unisport finished league runner-up in 1993, one point behind Racing de Bafoussam, before entering legend in 1996: crowned Cameroonian champion, it broke the dominance of the Douala and Yaoundé clubs and played in the CAF Champions League the following year.",
       "In the 2000s, the \"Torch of the West\" became a Cameroon Cup final regular. After three lost finals (2000, 2005 and 2011, the last one on penalties against Coton Sport), it finally broke the curse in 2012 by beating New Star de Douala (2-0).",
-      "Relegated to Elite Two in 2019, the club spent six seasons there before returning to the top flight through the June 2025 play-offs. On its return to Elite One, in 2025-2026, it caused a stir by leading the league for a long time.",
+      "Relegated to Elite Two in 2019, the club spent six seasons there before returning to the top flight through the June 2025 play-offs. On its return to Elite One, in 2025-2026, it caused a stir by leading the league for a long time, and eventually finished 3rd.",
       "The club is known for the atmosphere at its stadium in Bafang and for its West derbies against Racing de Bafoussam and Aigle de la Menoua. Many Cameroonian talents have passed through it."
     ]
   },
@@ -1022,50 +1207,56 @@ const CLUBS_INFOS_EN = {
   },
   "tonnerre": {
     "surnom": "The Kalara Boys",
+    "couleurs": "Black and white",
     "histoire": [
-      "Founded in 1934, Tonnerre Kalara Club is one of the two giants of Yaoundé. It was born from a split with Canon, its eternal rival in the capital's derby.",
-      "Its 1980s were glorious: five league titles between 1981 and 1988, plus many Cameroon Cups. On the continent, TKC won the African Cup Winners' Cup as early as 1975, then reached the final again the following year.",
-      "Big names have worn its shirt, such as Roger Milla, Rigobert Song, Stephen Tataw and the Liberian George Weah, a future Ballon d'Or winner, who made his debut in Central Africa there."
+      "Tonnerre Kalara Club was founded in 1934 in Yaoundé by Martin Omgba Zing, one of the founders of Canon, who left after internal disagreements. \"Kalara\" means \"the book\" in Ewondo: the new club was meant to be the book that would teach Canon how to play football. This split gave birth to the capital's derby, one of the most passionate in the country.",
+      "The Mvog-Ada club made history in 1975 by winning the very first African Cup Winners' Cup, against Stella Club d'Adjamé (1-0 in Abidjan, 4-1 in Yaoundé). It reached the final again the following year, losing to Nigeria's Shooting Stars.",
+      "The 1980s were its golden age: five league titles between 1981 and 1988, and Cameroon Cups in 1987, 1989 and 1991. In 1989 it reached the semi-finals of the African Cup of Champions Clubs, knocked out by Raja Casablanca.",
+      "Big names have played for TKC: Roger Milla (1974-1977, then 1990-1994), Stephen Tataw, Rigobert Song, Jean II Makoun, Chad's Japhet N'Doram and Liberia's George Weah (1987-1988), a future Ballon d'Or winner whom Claude Le Roy then recommended to AS Monaco.",
+      "In 2002 it played one more continental final, in the CAF Cup. It then went through long leadership and financial crises. Now in Elite Two, it secured its survival in the relegation play-offs of the 2025-2026 season."
     ]
   },
   "union douala": {
-    "surnom": "Kpa kum",
+    "surnom": "The Nassaras Kamakaï",
     "histoire": [
       "Founded as Jeunesse Bamiléké, Union Sportive de Douala is one of the most prestigious clubs in the country.",
       "It is one of the few Cameroonian clubs to have won two African competitions: the African Cup of Champions Clubs in 1979, against Hearts of Oak, then the African Cup Winners' Cup in 1981.",
-      "Five-time Cameroonian champion, from 1969 to 2012, Union has also lifted many Cameroon Cups."
+      "Five-time Cameroonian champion, from 1969 to 2012, Union has also lifted six Cameroon Cups since independence.",
+      "On 9 June 2025, the club suffered the first relegation in its history, to Elite Two (15th). The following season it went through the relegation play-offs, then had to play the 2026 Inter-pools to try to avoid another drop."
     ]
   },
   "racing": {
     "histoire": [
       "Racing Club de Bafoussam was the leading club of the West region in the late 1980s and the 1990s.",
       "It won four Cameroonian league titles (1989, 1992, 1993 and 1995), played in the CAF Champions League five times and won the Cameroon Cup in 1996, after losing three finals.",
-      "The club notably developed Geremi Njitap, who went on to play for Real Madrid and Chelsea. After some difficult years, it won Elite Two in 2020-2021."
+      "The club notably developed Geremi Njitap, who went on to play for Real Madrid and Chelsea. After some difficult years, it won Elite Two in 2020-2021. In May 2026, bottom of its Elite Two group, it was relegated to the regional league."
     ]
   },
   "les astres": {
     "surnom": "The Brazilians of Bépanda",
     "histoire": [
       "Founded in 2002 in the Bépanda district of Douala, the club is nicknamed \"the Brazilians of Bépanda\" for its attacking style of play.",
-      "A regular among the leading places, it finished runner-up in the Cameroonian league three times (2010, 2011 and 2013) and played in four Cameroon Cup finals without managing to win one. It has also taken part in African competitions several times."
+      "It quickly established itself among the country's best clubs: three-time league runner-up (2009-2010, 2010-2011 and 2013) and four-time Cameroon Cup finalist (2007 against Coton Sport, 2009 against Panthère du Ndé, then 2010 and 2021), without ever lifting the trophy.",
+      "These results took it to African competitions six times: the Confederation Cup in 2006, 2007 (reaching the group stage) and 2008, then the Champions League in 2011, 2012 and 2014. The club has also launched future internationals, such as full-back Ernest Mabouka.",
+      "Elite Two champion in 2019-2020, it returned to the top flight, then went down again at the end of the 2024-2025 season. In 2025-2026 it qualified for the promotion play-offs, won by Union Sportive d'Abong-Mbang."
     ]
   },
-  "bamboutos": {
-    "histoire": [
-      "Founded in 1966 in Mbouda, in the Bamboutos department, the club is named after the mountains that dominate the region.",
-      "It has reached the Cameroon Cup final twice, in 2016 against APEJES and in 2022 against Coton Sport."
-    ]
-  },
+
   "eding sport": {
     "histoire": [
       "Created in 2012 and attached to the Lékié department, Eding Sport is one of the great recent success stories of Cameroonian football.",
-      "Only a few years after its creation, it became Cameroonian champion in 2017, then followed up with the Cameroon Cup in 2018, against Lion Blessé de Fotouni."
+      "Only a few years after its creation, it became Cameroonian champion in 2017, then followed up with the Cameroon Cup in 2018, against Lion Blessé de Fotouni.",
+      "In May 2026, bottom of its Elite Two group, the club was relegated to the Centre regional league."
     ]
   },
   "sable": {
+    "surnom": "The San San Boys",
+    "couleurs": "Yellow and blue",
     "histoire": [
-      "Founded in 1995 in Batié, in the West, Sable FC enjoyed a meteoric rise: four years later, it was Cameroonian champion (1999).",
-      "The club then played in two consecutive Cameroon Cup finals, in 2002 and 2003, without managing to win them."
+      "Founded in 1995 in Batié, in the Hauts-Plateaux department (West region), Sable FC, nicknamed the \"San San Boys\", enjoyed a meteoric rise: only four years after its creation, it was crowned Cameroonian champion in 1999, ahead of Coton Sport. It also won that season's Roger Milla Super Cup, 1-0 against Canon Yaoundé, on 12 January 2000.",
+      "This title took it to the 2000 CAF Champions League, where it reached the group stage. In the Cameroon Cup it played two consecutive finals without winning: in 2002 against Mount Cameroon (1-2 after extra time), then in 2003 against Coton Sport (1-2). In 2004 it reached the group stage of the CAF Confederation Cup.",
+      "The club eventually left the top flight and dropped down to the West regional league. In 2025 it won the West play-off final against Piment de Bayangam (3-1), then earned its return to Elite Two at the Inter-pools, before losing the final to Kumba City (3-4 after extra time).",
+      "For its return to Elite Two, the club handed the bench to the experienced Alexandre Belinga and hosts its opponents at the Bamendzi stadium in Bafoussam."
     ]
   },
   "apejes academy": {
@@ -1080,24 +1271,34 @@ const CLUBS_INFOS_EN = {
     ]
   },
   "fap": {
+    "couleurs": "Green, red and yellow",
     "histoire": [
-      "AS FAP is the club of the Armed Forces and Police, based in Yaoundé.",
-      "It reached the Cameroon Cup final in 2019, losing 3-2 to Stade Renard de Melong."
+      "AS FAP is the football section of the Forces Armées et Police (FAP), the sports institution of Cameroon's military and police, created in 1972 in Yaoundé. FAP is present in many sports, where it ranks among the country's leading clubs, in basketball, handball and athletics. Its women's football team, Amazones FAP, is one of the best in Cameroon.",
+      "On 30 June 2019, AS FAP played the first Cameroon Cup final in its history, at the Ahmadou-Ahidjo stadium in Yaoundé. In pouring rain, it lost 3-2 to Stade Renard de Melong.",
+      "The club then played in Elite Two. In 2025-2026, it went through the relegation play-offs and kept its place in the league."
     ]
   },
+
   "avion academy": {
     "histoire": [
-      "Avion Academy is a football academy founded in 2012 in Douala, focused on developing young players."
+      "Founded in 2012 and attached to the Nkam department (Littoral region), Avion Academy FC has been chaired since its creation by Pierre Batamack, a well-known figure in Douala football.",
+      "Elite Two champion in 2018, the club reached Elite One in 2019, finishing 11th in its first season. It stayed in the top flight until 2024, then went down after the relegation play-offs of the 2023-2024 season.",
+      "Back in Elite Two, it has been among the promotion contenders: group leader early in the 2024-2025 season, it then played the promotion play-offs without going up. It returned to them in 2025-2026, notably thrashing Kumba City (6-1), but finished behind Union Sportive d'Abong-Mbang, who were crowned champions."
     ]
   },
   "union abong-mbang": {
+    "couleurs": "Yellow and black",
     "histoire": [
-      "Founded in 1954, Union Sportive d'Abong-Mbang is the flagship club of this town in the East region."
+      "Founded in 1954 in Abong-Mbang, the capital of the Haut-Nyong department, Union Sportive (USA) is the flagship club of the East region.",
+      "After representing the East in the top flight, the club left the first division in the late 1990s and began a long 27-year spell between the second division and the regional leagues.",
+      "Two-time East regional champion, it moved back up to Elite Two through the national inter-pools.",
+      "In 2025-2026, under coach Basile Anyam, USA had a remarkable season: on 17 June 2026, a 1-0 away win at Atlantic de Kribi secured promotion to Elite One, and three days later it was crowned Elite Two champion after a 1-1 draw with Les Astres de Douala.",
+      "Back in the top flight 27 years later, the club opened the 2026-2027 Elite One season in Bertoua with a thrilling draw against Stade Renard de Melong (2-2)."
     ]
   },
   "yafoot": {
     "histoire": [
-      "Yafoot, also known as Yaoundé FC II, is a club from the capital that plays in Elite Two."
+      "Yafoot, also known as Yaoundé FC II, is a club from the capital. After several seasons in Elite Two, it finished 7th in the relegation play-offs in June 2026 and went down to the regional Super League."
     ]
   },
   "foncha st": {
@@ -1133,11 +1334,14 @@ const CLUBS_INFOS_EN = {
     ]
   },
   "jeunes fauves": {
+    "couleurs": "Yellow and green",
     "histoire": [
-      "A club from Yaoundé, Fauve Azur Elite made its big comeback in MTN Elite One for the 2023-2024 season, under the presidency of Norbert Nya.",
-      "In that season, played in two phases, it finished in the relegation pool."
+      "Fauve Azur Elite is the professional section of a sports project led in Yaoundé by Norbert Nya Nkamenjo, former general manager of Panthère du Ndé. In September 2019 he bought AS Etoa-Meki, a second-division club founded by former Indomitable Lion Jean II Makoun. That licence gave birth to Fauve Azur Elite, while the Fauve Azur FC team carried on in the Centre regional league.",
+      "Third in Elite Two in 2021, it was promoted to MTN Elite One and settled there: in 2024 it was already preparing its fourth top-flight season, with the experienced Gabriel Haman on the bench. The club has, however, never won a title.",
+      "The 2025-2026 season was the toughest. Beaten 4-2 by AS Fortuna on matchday 25, Fauve Azur was officially relegated. It finished bottom of the league and plays in Elite Two in 2026-2027."
     ]
   },
+
   "renaissance": {
     "surnom": "RFC",
     "histoire": [
@@ -1148,14 +1352,13 @@ const CLUBS_INFOS_EN = {
   "dragon de yaounde": {
     "histoire": [
       "Founded in 1928 as Allico Maritime, Dragon Club de Yaoundé is one of the oldest clubs in the country.",
-      "It plays in Elite Two, where it finished eighth in 2023-2024."
+      "It played in Elite Two, finishing eighth in 2023-2024, before being relegated to the regional division at the end of the 2024-2025 season."
     ]
   },
   "feutcheu": {
-    "couleurs": "Red and white",
     "histoire": [
-      "Founded in 2011 in Bandjoun as Djiko FC, the club played in Elite One in the late 2010s.",
-      "In 2020, after being taken over by Joseph Feutcheu, it was renamed Feutcheu FC. It plays its home games at the Kouekong stadium in Bafoussam."
+      "Founded in 2011 in Bandjoun, in the West, Djiko FC is chaired by businessman Joseph Feutcheu, hence the name \"Feutcheu\" under which the club sometimes appears. It played in Elite One until 2022-2023, then dropped to Elite Two.",
+      "On 7 April 2025, Joseph Feutcheu announced his withdrawal from all football activities, criticising refereeing and the running of the league in particular. The club stopped turning up for its matches and left Elite Two at the end of the 2024-2025 season, sent down to the regional division."
     ]
   },
   "leopard de douala": {
@@ -1178,14 +1381,19 @@ const CLUBS_INFOS_EN = {
   },
   "atlantic": {
     "histoire": [
-      "A club from Kribi, in the South, Atlantic Sports Academy won the National Inter-pools in August 2024 by beating Union Sportive d'Abong-Mbang (1-0) in the final. Both clubs were promoted to Elite Two together.",
-      "In 2026, it qualified for the Elite One promotion play-offs."
+      "A young club from the seaside town of Kribi, in the Océan department (South region), Atlantic Sports Academy has set itself the mission of training talent from the coast and giving it a showcase.",
+      "2024 was the big turning point in its history. In July, Atlantic became South regional champion by beating Dja Sports de Meyomessala 3-0 in the final. At the national inter-pools in August, in Yaoundé, it knocked out Mintack FC on penalties to earn promotion to Elite Two, then won the tournament on 18 August by beating Union Sportive d'Abong-Mbang in the final (1-0, goal by Laurent Nkoa) at the Ngoa-Ekellé stadium.",
+      "From its first second-division seasons, the club made its mark: it reached the semi-finals of the 2025 Cameroon Cup, losing to Colombe du Dja-et-Lobo (2-1).",
+      "In 2025-2026, Atlantic qualified for the Elite One promotion play-offs, but lost 1-0 to the eventual champions, US Abong-Mbang, on 17 June 2026. It remains one of the contenders for promotion."
     ]
   },
   "kumba": {
+    "surnom": "The K-Town Citizens",
+    "couleurs": "Blue and sky blue",
     "histoire": [
-      "Representing the South-West, Kumba City FC won the National Inter-pools in September 2025 after a thrilling final against Sable de Batié (4-3 after extra time). It went straight into Elite Two.",
-      "In its first season, it qualified for the Elite One promotion play-offs."
+      "A club from Kumba, in the Meme department (South-West region), Kumba City FC is nicknamed the \"K-Town Citizens\".",
+      "In 2025 it won the South-West regional final against its neighbours Legend FA (3-0) and qualified for the National Inter-pools for the first time in its history. In Odza it beat Titanic FC Samar in the semi-final (4-0), securing promotion to Elite Two, then won the title on 20 September 2025 against Sable de Batié, 4-3 after extra time.",
+      "In its first Elite Two season (2025-2026), under coach Mbaboh Moses, it started with two home wins, led its group for a long time and qualified for the Elite One promotion play-offs."
     ]
   },
   "ofta": {
@@ -1209,18 +1417,27 @@ const CLUBS_INFOS_EN = {
   "new star": {
     "histoire": [
       "A club from Douala, New Star played in the 2012 Cameroon Cup final, losing to Unisport de Bafang (2-0).",
-      "It took its revenge in 2017 by winning the trophy against UMS de Loum (1-0), after making its African debut in the 2016 Confederation Cup."
+      "It took its revenge in 2017 by winning the trophy against UMS de Loum (1-0)."
     ]
   },
   "mintack": {
+    "surnom": "The Lions of Haute-Sanaga",
+    "couleurs": "Gold and burgundy",
     "histoire": [
-      "Founded in 2015 in Nanga-Eboko, in the Haute-Sanaga department, Mintack FC won the 2026 National Inter-pools by beating Elecsport de Limbé in the final (1-0), in Yaoundé.",
-      "It makes its Elite Two debut in the 2026-2027 season."
+      "Founded in 2015 in Nanga-Eboko, in the Haute-Sanaga department (Centre region), Mintack FC broke through in 2024. Centre regional champion after a 2-0 final win over Foudre d'Akonolinga, it above all made a remarkable Cameroon Cup run. As a regional-league club, it knocked out Elite One side AS Fortuna in the quarter-final (1-0), before falling in the semi-final to Aigle Royal de la Menoua (0-1, 85th-minute goal).",
+      "That same year, at the Inter-pools, it lost in the semi-final to Atlantic de Kribi, then won the third-place match against Volcan du Noun (5-1). In 2025 it retained its regional title by beating Foudre d'Akonolinga again (3-0), but did not get past the Inter-pools group stage.",
+      "The third attempt was the right one. At the 2026 Inter-pools it topped its group, beat Mintack FC du Septentrion in the semi-final on 31 July (2-1), securing the first promotion in its history to Elite Two, then won the title on 2 August against Elecsport de Limbé (1-0).",
+      "For its Elite Two debut, it opened the 2026-2027 season with a draw in Limbé against Elecsport (1-1)."
     ]
   },
+
   "elecsport": {
+    "couleurs": "Yellow and green",
     "histoire": [
-      "A club from Limbé founded in 1983, Elecsport reached the 2026 National Inter-pools final, losing to Mintack FC (1-0). Both finalists were promoted to Elite Two for the 2026-2027 season."
+      "A club from Limbé (Fako department, South-West region) founded in 1983, Elecsport has already had a taste of the top flight: it played in the first division in 1990, but finished 16th and last and went straight back down.",
+      "After a long absence from professional football, the club, now Elecsport Football and Sports Academy, won the 2026 South-West regional championship, with a resounding 5-0 win over Cinyodev Football Academy at the Middle Farms stadium in Limbé.",
+      "At the 2026 Inter-pools it topped its group, beat Mankon United in the semi-final (2-1) and thus earned promotion to Elite Two. It then lost the final to Mintack FC (0-1).",
+      "For its return to the national level, it handed the bench to veteran coach Emmanuel Ndoumbe Bosso and opened the 2026-2027 Elite Two season at Limbe's Centenary Stadium with a 1-1 draw against Mintack FC, the other promoted side."
     ]
   }
 };
@@ -1233,11 +1450,15 @@ const COMPETITIONS_EN = {
   'Elite Two': 'Elite Two',
   'Interpoules nationales': 'National Inter-pools',
   'Championnat régional du Nord': 'North Regional Championship',
+  'Championnat régional du Sud': 'South Regional Championship',
+  'Championnat régional du Sud-Ouest': 'South-West Regional Championship',
+  'Championnat régional du Centre': 'Centre Regional Championship',
   'Championnat départemental': 'Departmental Championship',
   "Coupe d'Afrique des clubs champions": 'African Cup of Champions Clubs',
   "Coupe d'Afrique des vainqueurs de coupe": "African Cup Winners' Cup",
   'Ligue des champions de la CAF': 'CAF Champions League',
   'Coupe de la CAF': 'CAF Cup',
+  'Coupe UNIFFAC des clubs': 'UNIFFAC Clubs Cup',
   "Supercoupe d'Afrique": 'CAF Super Cup',
 };
 const LIBELLES_EN = {

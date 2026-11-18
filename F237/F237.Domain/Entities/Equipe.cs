@@ -8,6 +8,11 @@ namespace F237.Domain.Entities
         public int Id { get; set; }
         public int ApiFootballId { get; set; }
         public string Nom { get; set; } = string.Empty;
+
+        // Nom corrigé à la main dans l'admin (ex. "Aigle Royal du Moungo") : l'import ne le touche plus.
+        public bool NomManuel { get; set; } = false;
+        // Nom d'origine de l'API-Football, gardé pour pouvoir annuler la correction
+        public string? NomApi { get; set; }
         public string Pays { get; set; } = string.Empty;
         public string? LogoUrl { get; set; }
         public DivisionEnum Division { get; set; }

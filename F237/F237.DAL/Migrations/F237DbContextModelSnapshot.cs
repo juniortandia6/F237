@@ -280,6 +280,12 @@ namespace F237.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("NomApi")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("NomManuel")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Pays")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
