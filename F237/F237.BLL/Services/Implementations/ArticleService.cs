@@ -86,9 +86,16 @@ namespace F237.BLL.Services.Implementations
                 return $"Catégorie inconnue. Valeurs possibles : {string.Join(", ", TagsArticle.Tous)}.";
             if (!string.IsNullOrWhiteSpace(s.ImageUrl))
             {
-                var ok = Uri.TryCreate(s.ImageUrl.Trim(), UriKind.Absolute, out var uri)
-                         && (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp);
-                if (!ok || s.ImageUrl.Trim().Length > 500) return "L'image doit être une adresse http(s) complète (500 caractères max).";
+                var image = s.ImageUrl.Trim();
+                // Image du site lui-même (dossier public du frontend), ex. /actualites/equipe-type-j5.png :
+                // chemin simple, sans "//" (qui désignerait un autre site) ni caractères spéciaux.
+                var cheminLocal = System.Text.RegularExpressions.Regex.IsMatch(image, @"^/(?!/)[A-Za-z0-9/_\-.]+$")
+                                  && !image.Contains("..");
+                var adresseWeb = !image.StartsWith('/')
+                                 && Uri.TryCreate(image, UriKind.Absolute, out var uri)
+                                 && (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp);
+                if (!(cheminLocal || adresseWeb) || image.Length > 500)
+                    return "L'image doit être une adresse http(s) complète ou un chemin du site comme /actualites/image.png (500 caractères max).";
             }
             return null;
         }

@@ -13,6 +13,7 @@ import { adminService, TAGS_ARTICLE, dateApi } from '../../services/adminService
 import { rechargerActualites } from '../../hooks/useActualites';
 import { IMAGES_DEFAUT } from '../../data/actualites';
 import { locale } from '../../i18n';
+import ContenuArticle from '../../components/ContenuArticle';
 import { CLAIR, CARTE, TITRE_CARTE } from './styleAdmin';
 
 const LIMITES = { titre: 200, resume: 400 };
@@ -62,7 +63,10 @@ function verifier(f) {
   if (!f.contenuFr.trim()) erreurs.push('Le contenu français est obligatoire.');
   if (f.titreFr.trim().length > LIMITES.titre || f.titreEn.trim().length > LIMITES.titre) erreurs.push(`Un titre dépasse ${LIMITES.titre} caractères.`);
   if (f.resumeFr.trim().length > LIMITES.resume || f.resumeEn.trim().length > LIMITES.resume) erreurs.push(`Un résumé dépasse ${LIMITES.resume} caractères.`);
-  if (f.imageUrl.trim() && !/^https?:\/\/\S+$/i.test(f.imageUrl.trim())) erreurs.push("L'image doit être une adresse complète (https://...).");
+  // Adresse web complète, ou image du site lui-même (dossier public), ex. /actualites/equipe-type-j5.png
+  const image = f.imageUrl.trim();
+  if (image && !/^https?:\/\/\S+$/i.test(image) && !(/^\/(?!\/)[A-Za-z0-9/_\-.]+$/.test(image) && !image.includes('..')))
+    erreurs.push("L'image doit être une adresse complète (https://...) ou un chemin du site (/actualites/image.png).");
   return erreurs;
 }
 
@@ -133,7 +137,7 @@ function Apercu({ f, langue, idImage }) {
         <p style={{ fontSize: '17px', fontWeight: 600, color: CLAIR.texte, lineHeight: 1.55, marginBottom: '16px' }}>{resume || 'Résumé de l\'article.'}</p>
         {contenu.length === 0
           ? <p style={{ color: CLAIR.doux, fontSize: '15px' }}>Le contenu apparaîtra ici.</p>
-          : contenu.map((p, i) => <p key={i} style={{ fontSize: '15px', color: '#2c312e', lineHeight: 1.7, marginBottom: '12px' }}>{p}</p>)}
+          : <ContenuArticle paragraphes={contenu} compact />}
       </div>
     </div>
   );
@@ -273,7 +277,7 @@ export default function AdminArticleEditionPage() {
                 <textarea value={form[`resume${suffixe}`]} onChange={maj(`resume${suffixe}`)} rows={3} style={{ ...STYLE_CHAMP, resize: 'vertical', lineHeight: 1.5 }} />
               </Champ>
               <Champ label={enCours ? 'Content' : 'Contenu'} valeur={form[`contenu${suffixe}`]}
-                aide={`Laisse une ligne vide entre deux paragraphes · ${paragraphes(form[`contenu${suffixe}`]).length} paragraphe(s)`}>
+                aide={`Laisse une ligne vide entre deux paragraphes · ${paragraphes(form[`contenu${suffixe}`]).length} paragraphe(s) · Intertitre : ## Mon titre · Image : ![Légende](/actualites/photo.jpg) · Citation : > texte · **gras** · [lien](https://...)`}>
                 <textarea value={form[`contenu${suffixe}`]} onChange={maj(`contenu${suffixe}`)} rows={16} style={{ ...STYLE_CHAMP, resize: 'vertical', lineHeight: 1.6 }} />
               </Champ>
             </div>
@@ -317,7 +321,7 @@ export default function AdminArticleEditionPage() {
             <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <img src={form.imageUrl.trim() || IMAGES_DEFAUT[(charge?.id ?? 0) % IMAGES_DEFAUT.length]} alt=""
                 style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '10px', backgroundColor: CLAIR.tuile }} />
-              <Champ label="Adresse de l'image" aide="https://... · vide = image par défaut du site">
+              <Champ label="Adresse de l'image" aide="https://... ou /actualites/mon-image.png (fichier du dossier public) · vide = image par défaut du site">
                 <input value={form.imageUrl} onChange={maj('imageUrl')} placeholder="https://" style={STYLE_CHAMP} />
               </Champ>
             </div>

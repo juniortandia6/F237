@@ -144,8 +144,10 @@ namespace F237.BLL.Services.Implementations
         private static DivisionEnum DivisionDe(int leagueId) =>
             leagueId == 411 ? DivisionEnum.EliteOne : DivisionEnum.EliteTwo;
 
-        // Ajoute les buts d'un match à partir de son tableau "events"
-        private async Task<int> AjouterButsAsync(int matchId, JsonElement events)
+        // Ajoute les buts d'un match à partir de son tableau "events".
+        // scoreDomicile / scoreExterieur : score officiel, pour ne jamais créer plus de buts que le score
+        // (penaltys ratés et buts annulés écartés : voir FiltreButsApi).
+        private async Task<int> AjouterButsAsync(int matchId, JsonElement events, int? scoreDomicile, int? scoreExterieur)
         {
             // Les équipes du match : pour créditer le but sous NOTRE nom d'équipe (voir RattachementButeurs)
             var match = await _context.Matchs
@@ -155,14 +157,9 @@ namespace F237.BLL.Services.Implementations
                 .FirstOrDefaultAsync(m => m.Id == matchId);
 
             var ajoutes = 0;
-            foreach (var evt in events.EnumerateArray())
+            foreach (var evt in FiltreButsApi.ButsValides(events, scoreDomicile, scoreExterieur))
             {
-                if (evt.GetProperty("type").GetString() != "Goal") continue;
-
                 var detail = evt.GetProperty("detail").GetString();
-                // Un penalty raté est aussi un événement "Goal" chez API-Football : on l'ignore
-                if (detail == "Missed Penalty") continue;
-
                 var joueur = evt.GetProperty("player");
                 await _context.ButsMatch.AddAsync(new ButMatch
                 {
@@ -183,18 +180,11 @@ namespace F237.BLL.Services.Implementations
             return ajoutes;
         }
 
-        // Compte les buts d'un tableau "events" : (total, avec un buteur connu)
-        private static (int total, int connus) CompterButs(JsonElement events)
+        // Compte les vrais buts d'un tableau "events" : (total, avec un buteur connu)
+        private static (int total, int connus) CompterButs(JsonElement events, int? scoreDomicile, int? scoreExterieur)
         {
-            int total = 0, connus = 0;
-            foreach (var evt in events.EnumerateArray())
-            {
-                if (evt.GetProperty("type").GetString() != "Goal") continue;
-                if (evt.GetProperty("detail").GetString() == "Missed Penalty") continue;
-                total++;
-                if (TexteOuNull(evt.GetProperty("player"), "name") != null) connus++;
-            }
-            return (total, connus);
+            var buts = FiltreButsApi.ButsValides(events, scoreDomicile, scoreExterieur);
+            return (buts.Count, buts.Count(b => TexteOuNull(b.GetProperty("player"), "name") != null));
         }
 
         // ── Méthodes existantes (inchangées sauf mention) ──────────────────
@@ -566,7 +556,7 @@ namespace F237.BLL.Services.Implementations
 
                 var json = await response.Content.ReadAsStringAsync();
                 var data = JsonDocument.Parse(json);
-                await AjouterButsAsync(match.Id, data.RootElement.GetProperty("response"));
+                await AjouterButsAsync(match.Id, data.RootElement.GetProperty("response"), match.ScoreDomicile, match.ScoreExterieur);
                 await _context.SaveChangesAsync();
                 await RattachementButeurs.RelierButsAsync(_context, new[] { match.Id });
             }
@@ -767,21 +757,26 @@ namespace F237.BLL.Services.Implementations
                     var match = lot.FirstOrDefault(m => m.ApiFootballId == apiId);
                     if (match == null || !fixture.TryGetProperty("events", out var events)) continue;
 
+                    var (scoreDom, scoreExt) = FiltreButsApi.Score(fixture);
                     var existants = await _context.ButsMatch.Where(b => b.MatchId == match.Id).ToListAsync();
                     if (existants.Count == 0)
                     {
-                        total += await AjouterButsAsync(match.Id, events);
+                        total += await AjouterButsAsync(match.Id, events, scoreDom, scoreExt);
                         continue;
                     }
 
                     // Déjà des buts : on ne les remplace que si l'API en sait PLUS qu'avant
-                    // (plus de buts, ou plus de buteurs connus). Sinon on ne touche à rien.
-                    var (nouveauxTotal, nouveauxConnus) = CompterButs(events);
+                    // (plus de buts, ou plus de buteurs connus)... ou si on a PLUS de buts que le score
+                    // (but annulé ou penalty raté enregistré par erreur). Sinon on ne touche à rien.
+                    var (nouveauxTotal, nouveauxConnus) = CompterButs(events, scoreDom, scoreExt);
                     var anciensConnus = existants.Count(b => !string.IsNullOrWhiteSpace(b.NomJoueur) && b.NomJoueur != BUTEUR_INCONNU);
-                    if (nouveauxTotal > existants.Count || (nouveauxTotal == existants.Count && nouveauxConnus > anciensConnus))
+                    var tropDeButs = scoreDom.HasValue && scoreExt.HasValue && existants.Count > scoreDom.Value + scoreExt.Value;
+                    if (tropDeButs
+                        || nouveauxTotal > existants.Count
+                        || (nouveauxTotal == existants.Count && nouveauxConnus > anciensConnus))
                     {
                         _context.ButsMatch.RemoveRange(existants);
-                        total += await AjouterButsAsync(match.Id, events);
+                        total += await AjouterButsAsync(match.Id, events, scoreDom, scoreExt);
                     }
                 }
                 await _context.SaveChangesAsync(); // on sauvegarde à chaque lot : reprise possible

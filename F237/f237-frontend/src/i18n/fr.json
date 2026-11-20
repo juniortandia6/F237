@@ -498,7 +498,13 @@
     "erreur": "Impossible de charger les actualités pour le moment.",
     "bientot": "Les premières actualités arrivent bientôt.",
     "publication": "Publication {{reseau}}",
-    "voirSur": "Voir la publication sur {{reseau}}"
+    "voirSur": "Voir la publication sur {{reseau}}",
+    "dernieres": "Dernières actualités",
+    "voirToutes": "Voir toutes les actualités",
+    "partager": "Partager",
+    "lienCopie": "Lien copié",
+    "minLecture": "{{n}} min de lecture",
+    "sommaire": "Sommaire"
   },
   "profil": {
     "chargement": "Chargement du profil...",

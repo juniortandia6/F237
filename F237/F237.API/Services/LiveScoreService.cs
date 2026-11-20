@@ -305,15 +305,15 @@ namespace F237.API.Services
                     int? minute = statusEl.TryGetProperty("elapsed", out var el) && el.ValueKind == JsonValueKind.Number
                         ? el.GetInt32() : null;
 
-                    // Buts (événements "Goal", sans les penaltys ratés)
+                    // Buts : uniquement les VRAIS buts (sans penaltys ratés ni buts annulés,
+                    // et jamais plus que le score affiché) -> voir FiltreButsApi
                     var buts = new List<ButLive>();
                     if (item.TryGetProperty("events", out var events) && events.ValueKind == JsonValueKind.Array)
                     {
-                        foreach (var evt in events.EnumerateArray())
+                        var (scoreDom, scoreExt) = FiltreButsApi.Score(item);
+                        foreach (var evt in FiltreButsApi.ButsValides(events, scoreDom, scoreExt))
                         {
-                            if (evt.GetProperty("type").GetString() != "Goal") continue;
                             var detail = evt.GetProperty("detail").GetString();
-                            if (detail == "Missed Penalty") continue;
                             var joueur = evt.GetProperty("player");
                             var time = evt.GetProperty("time");
                             buts.Add(new ButLive

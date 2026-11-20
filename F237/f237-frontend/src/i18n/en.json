@@ -498,7 +498,13 @@
     "erreur": "News can't be loaded right now.",
     "bientot": "The first news stories are coming soon.",
     "publication": "{{reseau}} post",
-    "voirSur": "View the post on {{reseau}}"
+    "voirSur": "View the post on {{reseau}}",
+    "dernieres": "Latest news",
+    "voirToutes": "View all news",
+    "partager": "Share",
+    "lienCopie": "Link copied",
+    "minLecture": "{{n}} min read",
+    "sommaire": "Contents"
   },
   "profil": {
     "chargement": "Loading profile...",
