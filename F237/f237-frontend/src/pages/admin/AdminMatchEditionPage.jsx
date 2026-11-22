@@ -232,7 +232,10 @@ function CarteScore({ m, action }) {
 
   return (
     <div style={CARTE}>
-      <div style={TITRE_CARTE}>Score final</div>
+      <div style={{ ...TITRE_CARTE, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+        <span>Score final</span>
+        {m.scoreVerrouille && <span style={{ fontSize: '11px', fontWeight: 800, color: CLAIR.vert, textTransform: 'uppercase' }}>🔒 Verrouillé</span>}
+      </div>
       <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <input type="number" min={0} max={30} value={dom} onChange={e => setDom(e.target.value)} aria-label={`Score ${m.equipeDomicile?.nom}`} style={champ} />
@@ -241,7 +244,7 @@ function CarteScore({ m, action }) {
         </div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button disabled={action.envoi || vide}
-            onClick={() => action.executer(() => adminService.matchs.score(m.id, Number(dom), Number(ext)), 'Score final enregistré : match terminé, classement recalculé.')}
+            onClick={() => action.executer(() => adminService.matchs.score(m.id, Number(dom), Number(ext)), 'Score final enregistré et verrouillé : match terminé, classement recalculé.')}
             style={{ ...BOUTON(CLAIR.vert, '#fff'), opacity: vide ? 0.5 : 1 }}>
             <Check size={14} /> {termine ? 'Corriger' : 'Terminer le match'}
           </button>
@@ -252,9 +255,18 @@ function CarteScore({ m, action }) {
               Annuler la saisie
             </button>
           )}
+          {m.scoreVerrouille && (
+            <button disabled={action.envoi}
+              onClick={() => action.executer(() => adminService.matchs.deverrouillerScore(m.id), 'Score déverrouillé : le prochain import reprendra le score de l\'API.')}
+              style={BOUTON('transparent', CLAIR.orange)}>
+              Déverrouiller (revenir au score de l'API)
+            </button>
+          )}
         </div>
         <span style={{ fontSize: '12px', color: CLAIR.doux }}>
-          Gardé lors des imports tant que l'API n'a pas le résultat. Dès qu'elle l'a, c'est son score qui compte.
+          {m.scoreVerrouille
+            ? "Score verrouillé : les imports et le direct ne le modifient plus, même si l'API donne un autre score."
+            : "Le score enregistré ici est verrouillé : l'API ne pourra plus le remplacer (utile quand elle se trompe)."}
         </span>
       </div>
     </div>
@@ -527,7 +539,7 @@ export default function AdminMatchEditionPage() {
         {/* Colonne droite */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {etat !== 'live' && etat !== 'annule' && new Date(match.dateMatch).getTime() < OUVERTURE_PAGE && (
-            <CarteScore key={`sc-${match.statut}-${match.scoreDomicile}-${match.scoreExterieur}`} m={match} action={action} />
+            <CarteScore key={`sc-${match.statut}-${match.scoreDomicile}-${match.scoreExterieur}-${match.scoreVerrouille}`} m={match} action={action} />
           )}
           {joue && <CarteMiTemps key={`mt-${match.scoreMiTempsDomicile}-${match.scoreMiTempsExterieur}`} m={match} action={action} />}
           <CarteHeure key={`h-${match.dateMatch}`} m={match} action={action} />

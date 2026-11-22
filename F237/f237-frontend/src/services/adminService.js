@@ -61,6 +61,8 @@ export const adminService = {
     supprimerBut: (butId) => appel(`/api/admin/buts/${butId}`, { method: 'DELETE' }),
     /** Score final saisi à la main (match -> Terminé, classement recalculé). null + null = annuler la saisie */
     score: (matchId, domicile, exterieur) => appel(`/api/admin/matchs/${matchId}/score`, { method: 'PUT', body: JSON.stringify({ domicile, exterieur }) }),
+    /** Le score reste affiché, mais le prochain import le remplacera par celui de l'API */
+    deverrouillerScore: (matchId) => appel(`/api/admin/matchs/${matchId}/score/verrou`, { method: 'DELETE' }),
     /** Événements (penalty manqué...) : ev = { type: 1, nomJoueur, nomEquipe (équipe du joueur), minute } */
     evenements: (matchId) => appel(`/api/matchs/${matchId}/evenements`).then(l => l ?? []),
     ajouterEvenement: (matchId, ev) => appel(`/api/admin/matchs/${matchId}/evenements`, { method: 'POST', body: JSON.stringify(ev) }),

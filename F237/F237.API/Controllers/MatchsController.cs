@@ -32,6 +32,7 @@ namespace F237.API.Controllers
             Journee = m.Journee,
             SaisonId = m.SaisonId,
             HeureManuelle = m.HeureManuelle,
+            ScoreVerrouille = m.ScoreVerrouille,
             EquipeDomicile = m.EquipeDomicile == null ? null : new EquipeSimpleDto
             {
                 Id = m.EquipeDomicile.Id,

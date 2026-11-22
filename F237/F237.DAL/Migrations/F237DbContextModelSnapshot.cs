@@ -431,6 +431,9 @@ namespace F237.DAL.Migrations
                     b.Property<int?>("ScoreMiTempsExterieur")
                         .HasColumnType("int");
 
+                    b.Property<bool>("ScoreVerrouille")
+                        .HasColumnType("bit");
+
                     b.Property<int>("Statut")
                         .HasColumnType("int");
 

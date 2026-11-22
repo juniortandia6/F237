@@ -296,10 +296,13 @@ namespace F237.BLL.Services.Implementations
 
                 if (matchsExistants.TryGetValue(apiFixtureId, out var matchExistant))
                 {
-                    // Score saisi à la main (match terminé chez nous) alors que l'API n'a encore rien
-                    // ("NS", sans score) : on le garde. Dès que l'API a le résultat, c'est elle qui gagne.
-                    var resultatManuel = matchExistant.Statut == StatutMatchEnum.Terminé
-                        && statut == StatutMatchEnum.Planifié && scoreDomicile == null && scoreExterieur == null;
+                    // Score saisi à la main gardé dans 2 cas :
+                    //  - score verrouillé par l'admin (l'API a un mauvais score) : toujours gardé ;
+                    //  - match terminé chez nous alors que l'API n'a encore rien ("NS", sans score).
+                    //    Dans ce cas, dès que l'API a le résultat, c'est elle qui gagne.
+                    var resultatManuel = matchExistant.ScoreVerrouille
+                        || (matchExistant.Statut == StatutMatchEnum.Terminé
+                            && statut == StatutMatchEnum.Planifié && scoreDomicile == null && scoreExterieur == null);
                     if (resultatManuel)
                     {
                         _scoresManuelsGardes++;
@@ -372,7 +375,7 @@ namespace F237.BLL.Services.Implementations
                 var match = await _context.Matchs
                     .FirstOrDefaultAsync(m => m.ApiFootballId == apiFixtureId);
 
-                if (match == null) continue;
+                if (match == null || match.ScoreVerrouille) continue;
 
                 match.ScoreDomicile = EntierOuNull(goals.GetProperty("home"));
                 match.ScoreExterieur = EntierOuNull(goals.GetProperty("away"));
@@ -734,10 +737,10 @@ namespace F237.BLL.Services.Implementations
         private async Task<int> ImporterButsParLotsAsync(int saisonId)
         {
             var sansButs = await RequeteMatchsSansButs(saisonId)
-                .Select(m => new { m.Id, m.ApiFootballId })
+                .Select(m => new { m.Id, m.ApiFootballId, m.ScoreVerrouille, m.ScoreDomicile, m.ScoreExterieur })
                 .ToListAsync();
             var incomplets = await RequeteMatchsButsIncomplets(saisonId, DateTime.UtcNow.AddDays(-JOURS_RELECTURE_BUTS))
-                .Select(m => new { m.Id, m.ApiFootballId })
+                .Select(m => new { m.Id, m.ApiFootballId, m.ScoreVerrouille, m.ScoreDomicile, m.ScoreExterieur })
                 .ToListAsync();
             var aTraiter = sansButs.Concat(incomplets).DistinctBy(m => m.Id).ToList();
 
@@ -757,7 +760,10 @@ namespace F237.BLL.Services.Implementations
                     var match = lot.FirstOrDefault(m => m.ApiFootballId == apiId);
                     if (match == null || !fixture.TryGetProperty("events", out var events)) continue;
 
-                    var (scoreDom, scoreExt) = FiltreButsApi.Score(fixture);
+                    // Score qui fait foi pour valider les buts : le nôtre s'il est verrouillé, sinon celui de l'API
+                    var (scoreDom, scoreExt) = match.ScoreVerrouille
+                        ? (match.ScoreDomicile, match.ScoreExterieur)
+                        : FiltreButsApi.Score(fixture);
                     var existants = await _context.ButsMatch.Where(b => b.MatchId == match.Id).ToListAsync();
                     if (existants.Count == 0)
                     {

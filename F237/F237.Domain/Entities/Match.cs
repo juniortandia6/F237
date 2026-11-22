@@ -17,6 +17,10 @@ namespace F237.Domain.Entities
         public DateTime? DateApi { get; set; }
         public bool HeureManuelle { get; set; } = false;
 
+        // Score corrigé à la main par l'admin : les imports et le direct ne le touchent plus
+        // (ni le statut, ni le score). Utile quand l'API elle-même a un mauvais score.
+        public bool ScoreVerrouille { get; set; } = false;
+
         // Score à la mi-temps (API : score.halftime). Utile quand l'API ne donne pas
         // le détail des buts (ex. Elite Two) : 1re MT = mi-temps, 2e MT = final - mi-temps.
         public int? ScoreMiTempsDomicile { get; set; }

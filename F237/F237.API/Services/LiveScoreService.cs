@@ -169,6 +169,14 @@ namespace F237.API.Services
                     continue;
                 }
 
+                // Score corrigé et verrouillé par l'admin : l'API ne le change plus (ni score, ni buts, ni statut)
+                if (match.ScoreVerrouille)
+                {
+                    _logger.LogInformation("🔒 Match {Id} : score verrouillé ({Score}), API ignorée", match.Id,
+                        $"{match.ScoreDomicile}-{match.ScoreExterieur}");
+                    continue;
+                }
+
                 // Match qui vient de se terminer : réimport auto de sa saison (classement, flèches, buts)
                 if (fixture.Statut == 2 && (int)match.Statut != 2)
                 {

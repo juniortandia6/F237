@@ -13,6 +13,7 @@
         public int? Journee { get; set; }
         public int SaisonId { get; set; }
         public bool HeureManuelle { get; set; }          // heure corrigée à la main par l'admin
+        public bool ScoreVerrouille { get; set; }        // score corrigé à la main : l'API ne le change plus
         public int? MinuteLive { get; set; }
         public EquipeSimpleDto? EquipeDomicile { get; set; }
         public EquipeSimpleDto? EquipeExterieur { get; set; }

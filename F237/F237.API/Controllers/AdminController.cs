@@ -242,6 +242,7 @@ namespace F237.API.Controllers
                 match.ScoreDomicile = null;
                 match.ScoreExterieur = null;
                 match.Statut = StatutMatchEnum.Planifié;
+                match.ScoreVerrouille = false;
             }
             else
             {
@@ -250,6 +251,8 @@ namespace F237.API.Controllers
                 match.ScoreDomicile = saisie.Domicile;
                 match.ScoreExterieur = saisie.Exterieur;
                 match.Statut = StatutMatchEnum.Terminé;
+                // Score saisi par l'admin = score qui fait foi : les imports ne le remplacent plus
+                match.ScoreVerrouille = true;
                 // Mi-temps devenue impossible avec le nouveau score : on l'efface
                 if (match.ScoreMiTempsDomicile > saisie.Domicile || match.ScoreMiTempsExterieur > saisie.Exterieur)
                 {
@@ -267,8 +270,23 @@ namespace F237.API.Controllers
                 match.ScoreExterieur,
                 Statut = (int)match.Statut,
                 match.ScoreMiTempsDomicile,
-                match.ScoreMiTempsExterieur
+                match.ScoreMiTempsExterieur,
+                match.ScoreVerrouille
             });
+        }
+
+        // DELETE /api/admin/matchs/1645/score/verrou
+        // Déverrouille le score : il reste affiché tel quel, mais le prochain import
+        // (ou le direct) le remplacera par celui de l'API.
+        [HttpDelete("matchs/{matchId:int}/score/verrou")]
+        public async Task<IActionResult> DeverrouillerScore(int matchId)
+        {
+            var match = await _context.Matchs.FirstOrDefaultAsync(m => m.Id == matchId);
+            if (match == null) return NotFound(new { message = "Match introuvable." });
+
+            match.ScoreVerrouille = false;
+            await _context.SaveChangesAsync();
+            return Ok(new { match.Id, match.ScoreVerrouille });
         }
 
         // PUT /api/admin/matchs/1444/mi-temps   { "domicile": 1, "exterieur": 0 }   (null + null = effacer)
