@@ -1,6 +1,7 @@
 // f237-frontend/src/pages/admin/AdminMatchEditionPage.jsx
 // Corrections d'un match (/admin/matchs/:id) :
 // - buteurs : ajouter, modifier, supprimer (penalty, but contre son camp)
+// - cartons (jaune, rouge, 2e jaune) et penaltys manqués
 // - score à la mi-temps
 // - heure du coup d'envoi (heure du Cameroun), ou retour à l'heure de l'API
 // Convention des buts : nomEquipe = équipe CRÉDITÉE du but. Pour un CSC, le but
@@ -14,6 +15,7 @@ import { infosSaison } from '../../data/saisons';
 import { etatMatch } from '../../data/statutMatch';
 import { estInconnu, butsDe, problemesMatch } from './analyseMatch';
 import { CLAIR, CARTE, TITRE_CARTE, CHIFFRES } from './styleAdmin';
+import IconeEvenement from '../../components/IconeEvenement';
 
 const FUSEAU_CAMEROUN = 'Africa/Douala'; // UTC+1, sans heure d'été
 const LIBELLE_ETAT = { aVenir: 'À venir', enAttente: 'Résultat en attente', live: 'En direct', termine: 'Terminé', reporte: 'Reporté', annule: 'Annulé', nonDispute: 'Non disputé' };
@@ -152,40 +154,55 @@ function ColonneButs({ m, equipe, suggestions, suggestionsCsc, action }) {
   );
 }
 
-// ── Penaltys manqués (n'entrent ni dans le score ni au classement des buteurs) ──
-const PENALTY_MANQUE = 1;
-function CartePenaltysManques({ m, liste, noms, action }) {
+// ── Cartons et penaltys manqués (n'entrent ni dans le score ni au classement des buteurs) ──
+const TYPES_EVENEMENT = [
+  { valeur: 2, libelle: 'Carton jaune', court: 'jaune' },
+  { valeur: 3, libelle: 'Carton rouge (direct)', court: 'rouge' },
+  { valeur: 4, libelle: '2e jaune → rouge', court: '2e jaune' },
+  { valeur: 1, libelle: 'Penalty manqué', court: 'penalty manqué' },
+];
+const LIBELLE_COURT = Object.fromEntries(TYPES_EVENEMENT.map(t => [t.valeur, t.court]));
+
+function CarteEvenements({ m, liste, noms, action }) {
   const equipes = [m.equipeDomicile, m.equipeExterieur].filter(Boolean);
   const [ouvert, setOuvert] = useState(false);
+  const [type, setType] = useState(2);
   const [equipe, setEquipe] = useState(equipes[0]?.nom ?? '');
   const [nom, setNom] = useState('');
   const [minute, setMinute] = useState('');
   const minuteNum = minute === '' ? 0 : Number(minute);
   const minuteValide = Number.isInteger(minuteNum) && minuteNum >= 0 && minuteNum <= 130;
-  const idListe = 'tireurs-penalty';
+  const idListe = 'joueurs-evenement';
+  const triee = [...liste].sort((x, y) => (x.minute || 999) - (y.minute || 999));
+
+  // Un 2e jaune sans 1er jaune saisi pour ce joueur : on le signale (sans bloquer)
+  const nomNet = nom.trim().toLowerCase();
+  const sansPremierJaune = type === 4 && nomNet !== '' && !liste.some(ev =>
+    ev.type === 2 && ev.nomEquipe === equipe && ev.nomJoueur.trim().toLowerCase() === nomNet);
 
   const valider = () => action.executer(
-    () => adminService.matchs.ajouterEvenement(m.id, { type: PENALTY_MANQUE, nomJoueur: nom.trim(), nomEquipe: equipe, minute: minuteNum }),
-    'Penalty manqué ajouté.',
+    () => adminService.matchs.ajouterEvenement(m.id, { type, nomJoueur: nom.trim(), nomEquipe: equipe, minute: minuteNum }),
+    `${TYPES_EVENEMENT.find(t => t.valeur === type)?.libelle} ajouté.`,
   ).then(ok => { if (ok) { setNom(''); setMinute(''); setOuvert(false); } });
 
   return (
     <div style={CARTE}>
       <div style={TITRE_CARTE}>
-        Penaltys manqués
+        Cartons et penaltys manqués
         <span style={{ fontSize: '12px', color: CLAIR.doux, fontWeight: 600 }}>affichés dans la chronologie, sans changer le score</span>
       </div>
       <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {liste.length === 0 && !ouvert && <span style={{ fontSize: '14px', color: CLAIR.doux }}>Aucun penalty manqué saisi.</span>}
-        {liste.map(ev => (
+        {liste.length === 0 && !ouvert && <span style={{ fontSize: '14px', color: CLAIR.doux }}>Aucun carton ni penalty manqué saisi.</span>}
+        {triee.map(ev => (
           <div key={ev.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', borderRadius: '10px', backgroundColor: CLAIR.tuile }}>
             <span style={{ fontFamily: CHIFFRES, fontWeight: 800, fontSize: '17px', minWidth: '38px', color: CLAIR.texte }}>{ev.minute > 0 ? `${ev.minute}'` : '–'}</span>
-            <span aria-hidden="true">❌</span>
+            <span style={{ width: '22px', display: 'inline-flex', justifyContent: 'center' }}><IconeEvenement type={ev.type} /></span>
             <span style={{ flex: 1, fontSize: '14px', color: CLAIR.texte }}>
-              <strong>{ev.nomJoueur === 'Inconnu' ? 'Tireur inconnu' : ev.nomJoueur}</strong> <span style={{ color: CLAIR.doux }}>· {ev.nomEquipe}</span>
+              <strong>{estInconnu(ev.nomJoueur) ? 'Joueur inconnu' : ev.nomJoueur}</strong>{' '}
+              <span style={{ color: CLAIR.doux }}>· {ev.nomEquipe} · {LIBELLE_COURT[ev.type] ?? '?'}</span>
             </span>
             <button disabled={action.envoi} title="Supprimer"
-              onClick={() => action.executer(() => adminService.matchs.supprimerEvenement(ev.id), 'Penalty manqué supprimé.')}
+              onClick={() => action.executer(() => adminService.matchs.supprimerEvenement(ev.id), 'Événement supprimé.')}
               style={BOUTON('transparent', CLAIR.rouge)}>
               <Trash2 size={14} />
             </button>
@@ -193,26 +210,48 @@ function CartePenaltysManques({ m, liste, noms, action }) {
         ))}
 
         {ouvert ? (
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-            <select value={equipe} onChange={e => setEquipe(e.target.value)} aria-label="Équipe du tireur" style={{ ...CHAMP, minWidth: '160px' }}>
-              {equipes.map(e => <option key={e.id ?? e.nom} value={e.nom}>{e.nom}</option>)}
-            </select>
-            <input value={nom} onChange={e => setNom(e.target.value)} list={idListe} placeholder="Tireur (vide = inconnu)" aria-label="Tireur"
-              style={{ ...CHAMP, flex: 1, minWidth: '180px' }} autoFocus />
-            <datalist id={idListe}>{noms(equipes.find(e => e.nom === equipe)).map(n => <option key={n} value={n} />)}</datalist>
-            <input type="number" min={0} max={130} value={minute} onChange={e => setMinute(e.target.value)} placeholder="Min." aria-label="Minute"
-              style={{ ...CHAMP, width: '80px' }} />
-            <button disabled={action.envoi || !minuteValide} onClick={valider} style={{ ...BOUTON(CLAIR.vert, '#fff'), opacity: minuteValide ? 1 : 0.5 }}>
-              <Check size={14} /> Ajouter
-            </button>
-            <button onClick={() => setOuvert(false)} style={BOUTON('transparent', CLAIR.doux)}><X size={14} /></button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {/* Type : boutons (plus rapide qu'une liste quand on saisit plusieurs cartons d'affilée) */}
+            <div role="radiogroup" aria-label="Type d'événement" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              {TYPES_EVENEMENT.map(t => {
+                const actif = t.valeur === type;
+                return (
+                  <button key={t.valeur} type="button" role="radio" aria-checked={actif} onClick={() => setType(t.valeur)}
+                    style={{ ...BOUTON(actif ? CLAIR.vertClair : '#fff', actif ? CLAIR.vert : CLAIR.texte), border: `1px solid ${actif ? CLAIR.vert : CLAIR.bord}` }}>
+                    <IconeEvenement type={t.valeur} taille={14} /> {t.libelle}
+                  </button>
+                );
+              })}
+            </div>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+              <select value={equipe} onChange={e => setEquipe(e.target.value)} aria-label="Équipe du joueur" style={{ ...CHAMP, minWidth: '160px' }}>
+                {equipes.map(e => <option key={e.id ?? e.nom} value={e.nom}>{e.nom}</option>)}
+              </select>
+              <input value={nom} onChange={e => setNom(e.target.value)} list={idListe} placeholder="Joueur (vide = inconnu)" aria-label="Joueur"
+                style={{ ...CHAMP, flex: 1, minWidth: '180px' }} autoFocus />
+              <datalist id={idListe}>{noms(equipes.find(e => e.nom === equipe)).map(n => <option key={n} value={n} />)}</datalist>
+              <input type="number" min={0} max={130} value={minute} onChange={e => setMinute(e.target.value)} placeholder="Min." aria-label="Minute"
+                style={{ ...CHAMP, width: '80px' }} />
+              <button disabled={action.envoi || !minuteValide} onClick={valider} style={{ ...BOUTON(CLAIR.vert, '#fff'), opacity: minuteValide ? 1 : 0.5 }}>
+                <Check size={14} /> Ajouter
+              </button>
+              <button onClick={() => setOuvert(false)} style={BOUTON('transparent', CLAIR.doux)}><X size={14} /></button>
+            </div>
+            {sansPremierJaune && (
+              <span style={{ fontSize: '12px', color: CLAIR.orange }}>
+                Aucun 1er carton jaune saisi pour ce joueur : pense à l'ajouter aussi (type « Carton jaune »).
+              </span>
+            )}
           </div>
         ) : (
           <button onClick={() => setOuvert(true)} style={{ ...BOUTON('transparent', CLAIR.vert), alignSelf: 'flex-start', border: `1px dashed ${CLAIR.bord}` }}>
-            <Plus size={14} /> Ajouter un penalty manqué
+            <Plus size={14} /> Ajouter un carton ou un penalty manqué
           </button>
         )}
-        <span style={{ fontSize: '12px', color: CLAIR.doux }}>Minute vide = inconnue. Le tireur est relié à sa fiche joueur s'il est dans l'effectif.</span>
+        <span style={{ fontSize: '12px', color: CLAIR.doux }}>
+          Minute vide = inconnue. Expulsion sur 2e jaune : saisis le 1er jaune, puis « 2e jaune → rouge » à la minute de l'expulsion.
+          Le joueur est relié à sa fiche s'il est dans l'effectif.
+        </span>
       </div>
     </div>
   );
@@ -365,7 +404,7 @@ export default function AdminMatchEditionPage() {
   const [erreur, setErreur] = useState(null);
   const [envoi, setEnvoi] = useState(false);
   const [message, setMessage] = useState(null);
-  // Penaltys manqués du match (rechargés après chaque modification)
+  // Cartons et penaltys manqués du match (rechargés après chaque modification)
   const [evenements, setEvenements] = useState({ cle: null, liste: [] });
   useEffect(() => {
     let ignore = false;
@@ -532,7 +571,7 @@ export default function AdminMatchEditionPage() {
           </p>
         </div>
         {joue && match.equipeDomicile && match.equipeExterieur && (
-          <CartePenaltysManques m={match} liste={evenements.liste} noms={noms} action={action} />
+          <CarteEvenements m={match} liste={evenements.liste} noms={noms} action={action} />
         )}
         </div>
 

@@ -1,5 +1,5 @@
 ﻿// F237.Domain/Entities/EvenementMatch.cs
-// Événement d'un match autre qu'un but (penalty manqué, plus tard cartons), saisi dans l'admin.
+// Événement d'un match autre qu'un but (penalty manqué, cartons), saisi dans l'admin.
 // Affiché dans la chronologie du match. N'est jamais touché par l'import ni par le direct.
 using F237.Domain.Enums;
 

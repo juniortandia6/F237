@@ -129,7 +129,7 @@ namespace F237.API.Controllers
             return Ok(VersDto(but));
         }
 
-        // ── Événements de match (penalty manqué...) : saisie à la main ────────
+        // ── Événements de match (penalty manqué, cartons) : saisie à la main ────────
         // Lecture publique : GET /api/matchs/{id}/evenements
         // POST /api/admin/matchs/1444/evenements   { "type": 1, "nomJoueur": "...", "nomEquipe": "...", "minute": 33 }
         [HttpPost("matchs/{matchId:int}/evenements")]
@@ -982,7 +982,7 @@ namespace F237.API.Controllers
 
     public class SaisieEvenementDto
     {
-        public int Type { get; set; }               // 1 = penalty manqué (2/3 : cartons, plus tard)
+        public int Type { get; set; }               // 1 = penalty manqué, 2 = jaune, 3 = rouge direct, 4 = 2e jaune
         public string? NomJoueur { get; set; }      // vide = inconnu
         public string? NomEquipe { get; set; }      // équipe du joueur
         public int Minute { get; set; }             // 0 = minute inconnue

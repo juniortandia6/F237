@@ -18,7 +18,12 @@ async function appel(chemin, options = {}) {
 
   // 207 = import partiel (réponse utilisable, avec un champ "erreur")
   if (!reponse.ok && reponse.status !== 207) {
-    const message = (typeof donnees === 'string' ? donnees : donnees?.message ?? donnees?.title) || `Erreur ${reponse.status}`;
+    // 401 = token absent, expiré ou signé avec une autre clé ; 403 = connecté mais pas Admin
+    const message = reponse.status === 401
+      ? 'Session expirée : clique sur « Quitter », reconnecte-toi, puis recommence (ta saisie n\'a pas été enregistrée).'
+      : reponse.status === 403
+        ? 'Accès refusé : ce compte n\'a pas le rôle Admin.'
+        : (typeof donnees === 'string' ? donnees : donnees?.message ?? donnees?.title) || `Erreur ${reponse.status}`;
     const erreur = new Error(message);
     erreur.statut = reponse.status;
     throw erreur;

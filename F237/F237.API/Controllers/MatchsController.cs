@@ -131,7 +131,7 @@ namespace F237.API.Controllers
         }
 
         // Événements d'un match autres que les buts (penalty manqué...), saisis dans l'admin.
-        // GET /api/matchs/1470/evenements -> [{ id, type (1 = penalty manqué), minute, joueurId, nomJoueur, nomEquipe }]
+        // GET /api/matchs/1470/evenements -> [{ id, type (1 = penalty manqué, 2 = jaune, 3 = rouge, 4 = 2e jaune), minute, joueurId, nomJoueur, nomEquipe }]
         [HttpGet("{id:int}/evenements")]
         public async Task<IActionResult> GetEvenements(int id, [FromServices] F237DbContext context)
         {

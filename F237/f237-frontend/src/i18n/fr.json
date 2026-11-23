@@ -217,7 +217,11 @@
     "enAttenteMaj": "RÉSULTAT EN ATTENTE",
     "scoreFinMatch": "Le score sera affiché à la fin du match.",
     "penManque": "penalty manqué",
-    "tireurInconnu": "Tireur inconnu"
+    "tireurInconnu": "Tireur inconnu",
+    "cartonJaune": "carton jaune",
+    "cartonRouge": "carton rouge",
+    "deuxiemeJaune": "2e jaune, expulsé",
+    "joueurInconnu": "Joueur inconnu"
   },
   "classement": {
     "aucunBut": "Aucun but enregistré pour l'instant.",

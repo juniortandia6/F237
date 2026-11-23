@@ -217,7 +217,11 @@
     "enAttenteMaj": "RESULT PENDING",
     "scoreFinMatch": "The score will be shown at the end of the match.",
     "penManque": "missed penalty",
-    "tireurInconnu": "Unknown taker"
+    "tireurInconnu": "Unknown taker",
+    "cartonJaune": "yellow card",
+    "cartonRouge": "red card",
+    "deuxiemeJaune": "second yellow, sent off",
+    "joueurInconnu": "Unknown player"
   },
   "classement": {
     "aucunBut": "No goals recorded yet.",

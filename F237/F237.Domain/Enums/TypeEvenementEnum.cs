@@ -5,8 +5,9 @@ namespace F237.Domain.Enums
 {
     public enum TypeEvenementEnum
     {
-        PenaltyManque = 1,   // penalty raté ou arrêté
-        CartonJaune = 2,     // prévu pour plus tard
-        CartonRouge = 3,     // prévu pour plus tard
+        PenaltyManque = 1,        // penalty raté ou arrêté
+        CartonJaune = 2,
+        CartonRouge = 3,          // rouge direct
+        CartonRougeDeuxJaunes = 4 // 2e jaune = rouge (le 1er jaune reste saisi à part)
     }
 }

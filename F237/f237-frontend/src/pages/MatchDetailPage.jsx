@@ -11,6 +11,7 @@ import i18n, { locale } from '../i18n';
 import { ChevronRight, ArrowLeft, CalendarDays, Clock, MapPin, Trophy, Hash } from 'lucide-react';
 import { matchService } from '../services/matchService';
 import { evenementService, TYPE_EVENEMENT } from '../services/evenementService';
+import IconeEvenement from '../components/IconeEvenement';
 import { useLiveScores } from '../hooks/useLiveScores';
 import { TOUS_LES_SAISON_IDS, infosSaison, libelleSaison } from '../data/saisons';
 import theme from '../theme';
@@ -321,15 +322,30 @@ function Jalon({ texte }) {
 function Evenement({ ev }) {
   const { t } = useTranslation();
   const gauche = ev.cote === 'dom';
-  // ev.autre = événement qui n'est pas un but (penalty manqué) : ne compte pas dans le score
+  // ev.autre = événement qui n'est pas un but (penalty manqué, carton) : ne compte pas dans le score
   const penManque = ev.autre && ev.type === TYPE_EVENEMENT.PENALTY_MANQUE;
+  const carton = ev.autre && !penManque;
+  const inconnu = !ev.nomJoueur || ev.nomJoueur === 'Inconnu';
+  const libelleCarton = {
+    [TYPE_EVENEMENT.CARTON_JAUNE]: t('matchDetail.cartonJaune'),
+    [TYPE_EVENEMENT.CARTON_ROUGE]: t('matchDetail.cartonRouge'),
+    [TYPE_EVENEMENT.DEUXIEME_JAUNE]: t('matchDetail.deuxiemeJaune'),
+  }[ev.type];
+  const icone = ev.autre ? <IconeEvenement type={ev.type} taille={15} /> : '⚽';
+  const nom = penManque && inconnu ? t('matchDetail.tireurInconnu')
+    : carton && inconnu ? t('matchDetail.joueurInconnu')
+    : <LienButeur b={ev} />;
   const bloc = (
     <div style={{ textAlign: gauche ? 'right' : 'left' }}>
-      <div style={{ fontWeight: 700, color: penManque ? CLAIR.doux : CLAIR.texte, fontSize: '15px' }}>
-        {penManque ? <span aria-hidden="true">❌</span> : '⚽'} {penManque && (!ev.nomJoueur || ev.nomJoueur === 'Inconnu') ? t('matchDetail.tireurInconnu') : <LienButeur b={ev} />}
-        {penManque && <span style={{ color: theme.red, fontSize: '12px', fontWeight: 700 }}> ({t('matchDetail.penManque')})</span>}
-        {ev.estPenalty && <span style={{ color: theme.green, fontSize: '12px', fontWeight: 700 }}> ({t('matchDetail.pen')})</span>}
-        {ev.estButCSC && <span style={{ color: theme.red, fontSize: '12px', fontWeight: 700 }}> ({t('matchDetail.csc')})</span>}
+      <div style={{ fontWeight: 700, color: penManque ? CLAIR.doux : CLAIR.texte, fontSize: '15px', display: 'inline-flex', alignItems: 'center', gap: '6px', flexDirection: gauche ? 'row-reverse' : 'row', flexWrap: 'wrap' }}>
+        {icone}
+        <span>
+          {nom}
+          {penManque && <span style={{ color: theme.red, fontSize: '12px', fontWeight: 700 }}> ({t('matchDetail.penManque')})</span>}
+          {carton && libelleCarton && <span style={{ color: CLAIR.doux, fontSize: '12px', fontWeight: 700 }}> ({libelleCarton})</span>}
+          {ev.estPenalty && <span style={{ color: theme.green, fontSize: '12px', fontWeight: 700 }}> ({t('matchDetail.pen')})</span>}
+          {ev.estButCSC && <span style={{ color: theme.red, fontSize: '12px', fontWeight: 700 }}> ({t('matchDetail.csc')})</span>}
+        </span>
       </div>
       <div style={{ fontSize: '12px', color: CLAIR.doux }}>{ev.nomEquipe}{ev.score ? ` · ${ev.score}` : ''}</div>
     </div>
@@ -348,7 +364,7 @@ function Evenement({ ev }) {
   );
 }
 
-// ── Onglet Chronologie : frise des buts (+ penaltys manqués saisis dans l'admin) ──
+// ── Onglet Chronologie : frise des buts (+ cartons et penaltys manqués saisis dans l'admin) ──
 function Chronologie({ m, autres = [] }) {
   const { t } = useTranslation();
   const joue = m.statut === 1 || m.statut === 2;
@@ -553,7 +569,7 @@ function MatchDetailPage() {
   const { matchsLive } = useLiveScores();
   const [donnees, setDonnees] = useState(null); // { tous: [...] } une fois chargé
   const [ongletChoisi, setOngletChoisi] = useState({ id: null, cle: 'apercu' });
-  // Penaltys manqués (saisis dans l'admin), pour la chronologie
+  // Cartons et penaltys manqués (saisis dans l'admin), pour la chronologie
   const [evenements, setEvenements] = useState({ id: null, liste: [] });
   useEffect(() => {
     let ignore = false;
