@@ -1,4 +1,4 @@
-// f237-frontend/src/data/clubsInfos.js
+
 // Histoire et palmarès des clubs, que l'API-Football ne fournit pas.
 //
 // Sources : Wikipédia (licence CC BY-SA 4.0) et RSSSF (dates de fondation,
@@ -6,11 +6,7 @@
 // quels ; les textes d'histoire sont des résumés rédigés pour F237.
 // Les champs absents (fondation, couleurs...) étaient incertains ou
 // contradictoires entre les sources : on préfère ne rien afficher que du faux.
-//
-// Pour ajouter un club : une entrée de plus, avec son nom tel qu'il apparaît
-// dans F237 (ou ajoute un alias).
 
-// type : 'titre' = vainqueur, 'finale' = finaliste
 export const CLUBS_INFOS = {
   'aigle royal de moungo': {
     nomComplet: 'Aigle Royal du Moungo',

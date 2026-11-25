@@ -3,7 +3,7 @@
 // Les sections pas encore construites sont affichées "Bientôt" (non cliquables).
 
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Newspaper, CalendarDays, Shield, Users, UserCog } from 'lucide-react';
+import { LayoutDashboard, Newspaper, CalendarDays, Shield, Users, UserCog, Shirt } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import theme from '../../theme';
 import { CLAIR } from './styleAdmin';
@@ -16,6 +16,7 @@ const SECTIONS = [
   { to: '/admin/matchs', label: 'Matchs et buteurs', Icone: CalendarDays },
   { to: '/admin/equipes', label: 'Équipes', Icone: Shield },
   { to: '/admin/effectifs', label: 'Effectifs', Icone: Users },
+  { to: '/admin/equipe-type', label: 'Équipe type', Icone: Shirt },
   { to: '/admin/utilisateurs', label: 'Utilisateurs', Icone: UserCog },
 ];
 
