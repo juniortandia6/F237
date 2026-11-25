@@ -250,6 +250,14 @@ function RegisterPage() {
             </button>
           </form>
 
+          {/* Acceptation des conditions (vaut aussi pour l'inscription avec Google) */}
+          <p style={{ marginTop: "14px", fontSize: "12px", lineHeight: 1.5, color: CLAIR.doux, textAlign: "center" }}>
+            {t('legal.inscription')}{" "}
+            <Link to="/conditions" style={{ color: CLAIR.vert, fontWeight: 700 }}>{t('legal.lienConditions')}</Link>{" "}
+            {t('legal.et')}{" "}
+            <Link to="/confidentialite" style={{ color: CLAIR.vert, fontWeight: 700 }}>{t('legal.lienConfidentialite')}</Link>.
+          </p>
+
           <p style={{ textAlign: "center", marginTop: "20px", fontSize: "14px", color: CLAIR.doux }}>
             {t('auth.register.dejaCompte')}{" "}
             <Link to="/login" style={{ color: CLAIR.vert, fontWeight: 800 }}>{t('jouer.connecter')}</Link>

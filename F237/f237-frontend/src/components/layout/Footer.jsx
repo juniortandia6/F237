@@ -11,6 +11,15 @@ import { FaYoutube, FaInstagram, FaFacebookF, FaXTwitter, FaTiktok, FaWhatsapp }
 import LogoF237 from './LogoF237';
 import logo from '../../assets/logof.png';
 import theme from '../../theme';
+import { CONTACT_LEGAL } from '../../data/pagesLegales';
+
+// Barre légale du bas : pages du site, ou e-mail pour le contact
+const LIENS_LEGAUX = [
+  { cle: 'cgu', vers: '/conditions' },
+  { cle: 'confidentialite', vers: '/confidentialite' },
+  { cle: 'cookies', vers: '/confidentialite#cookies' },
+  { cle: 'contact', vers: `mailto:${CONTACT_LEGAL}` },
+];
 
 // Remplace les "#" par tes vrais comptes quand ils existeront
 const RESEAUX = [
@@ -216,16 +225,21 @@ function Footer() {
             </span>
           </div>
           <nav style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-            {['cgu', 'confidentialite', 'cookies', 'contact'].map(c => t(`footer.${c}`)).map((l, i) => (
-              <span key={l} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                {i > 0 && <span style={{ color: theme.border }}>|</span>}
-                <a href="#" className="transition-colors" style={{ fontSize: '13px', color: theme.textMuted, textDecoration: 'none' }}
-                  onMouseEnter={e => { e.currentTarget.style.color = theme.text; }}
-                  onMouseLeave={e => { e.currentTarget.style.color = theme.textMuted; }}>
-                  {l}
-                </a>
-              </span>
-            ))}
+            {LIENS_LEGAUX.map(({ cle, vers }, i) => {
+              const style = { fontSize: '13px', color: theme.textMuted, textDecoration: 'none' };
+              const survol = {
+                onMouseEnter: e => { e.currentTarget.style.color = theme.text; },
+                onMouseLeave: e => { e.currentTarget.style.color = theme.textMuted; },
+              };
+              return (
+                <span key={cle} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  {i > 0 && <span style={{ color: theme.border }}>|</span>}
+                  {vers.startsWith('mailto:')
+                    ? <a href={vers} className="transition-colors" style={style} {...survol}>{t(`footer.${cle}`)}</a>
+                    : <Link to={vers} className="transition-colors" style={style} {...survol}>{t(`footer.${cle}`)}</Link>}
+                </span>
+              );
+            })}
           </nav>
         </div>
       </div>

@@ -573,5 +573,16 @@
       "age": "Age"
     },
     "matchsCourt": "Matches"
+  },
+  "legal": {
+    "accueil": "Home",
+    "filAriane": "Breadcrumb",
+    "sommaire": "Contents",
+    "miseAJour": "Last updated: {{date}}",
+    "nousEcrire": "Contact us",
+    "inscription": "By creating an account (16 or older), with your email or with Google, you accept the",
+    "lienConditions": "terms of use",
+    "et": "and the",
+    "lienConfidentialite": "privacy policy"
   }
 }

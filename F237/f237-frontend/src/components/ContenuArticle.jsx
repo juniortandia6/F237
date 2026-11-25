@@ -8,7 +8,7 @@
 //   ![Légende de la photo](/actualites/photo.jpg)   -> image avec légende
 //   > Une citation                        -> citation
 //
-// Dans un paragraphe normal :  **texte en gras**   et   [un lien](https://...)
+// Dans un paragraphe normal :  **texte en gras**   et   [un lien](https://...)   ou   [un e-mail](mailto:...)
 //
 // Sécurité : aucun HTML n'est injecté (pas de dangerouslySetInnerHTML). Les liens et images
 // n'acceptent que http(s) ou un chemin du site (/...).
@@ -29,6 +29,9 @@ function TexteEnrichi({ texte }) {
     if (m.index > dernier) morceaux.push(texte.slice(dernier, m.index));
     if (m[1] !== undefined) {
       morceaux.push(<strong key={m.index} style={{ fontWeight: 700, color: COULEURS_ARTICLE.texte }}>{m[1]}</strong>);
+    } else if (/^mailto:[^\s@]+@[^\s@]+\.[^\s@]+$/i.test(m[3])) {
+      // Adresse e-mail : [écris-nous](mailto:contact@exemple.com)
+      morceaux.push(<a key={m.index} href={m[3]} style={{ color: COULEURS_ARTICLE.vert, fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: '3px' }}>{m[2]}</a>);
     } else if (ADRESSE_SURE.test(m[3])) {
       const style = { color: COULEURS_ARTICLE.vert, fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: '3px' };
       morceaux.push(/^https?:/i.test(m[3])

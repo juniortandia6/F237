@@ -573,5 +573,16 @@
       "age": "Âge"
     },
     "matchsCourt": "Matchs"
+  },
+  "legal": {
+    "accueil": "Accueil",
+    "filAriane": "Fil d'Ariane",
+    "sommaire": "Sommaire",
+    "miseAJour": "Dernière mise à jour : {{date}}",
+    "nousEcrire": "Nous écrire",
+    "inscription": "En créant un compte (16 ans minimum), avec ton e-mail ou avec Google, tu acceptes les",
+    "lienConditions": "conditions d'utilisation",
+    "et": "et la",
+    "lienConfidentialite": "politique de confidentialité"
   }
 }
