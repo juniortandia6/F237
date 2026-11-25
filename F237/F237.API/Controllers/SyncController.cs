@@ -48,8 +48,9 @@ namespace F237.API.Controllers
                 return BadRequest($"Ligue inconnue : utilise {ELITE_ONE_ID} (Elite One) ou {ELITE_TWO_ID} (Elite Two).");
 
             var resultat = await _apiFootballService.ImporterSaisonAsync(league, season);
-            // Scores saisis à la main que l'API n'a pas encore : le classement de l'API ne les compte pas
-            if (resultat.ScoresManuelsGardes > 0 && resultat.SaisonId != 0)
+            // Classement calculé depuis nos matchs : toujours pour l'Elite Two, et pour l'Elite One
+            // quand des scores saisis à la main ont été gardés (le classement de l'API ne les compte pas)
+            if (resultat.DoitRecalculerClassement)
                 await _classementService.RecalculerClassementAsync(resultat.SaisonId);
             return resultat.Erreur == null ? Ok(resultat) : StatusCode(207, resultat);
         }

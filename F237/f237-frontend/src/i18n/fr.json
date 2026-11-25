@@ -278,7 +278,9 @@
     },
     "abrV": "V",
     "abrN": "N",
-    "abrD": "D"
+    "abrD": "D",
+    "enDirect": "Match en cours",
+    "enDirectScore": "En direct : {{dom}} {{score}} {{ext}} (compté provisoirement)"
   },
   "equipes": {
     "tri": {

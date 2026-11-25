@@ -278,7 +278,9 @@
     },
     "abrV": "W",
     "abrN": "D",
-    "abrD": "L"
+    "abrD": "L",
+    "enDirect": "Match in progress",
+    "enDirectScore": "Live: {{dom}} {{score}} {{ext}} (counted provisionally)"
   },
   "equipes": {
     "tri": {

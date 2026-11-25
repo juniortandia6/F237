@@ -2,6 +2,8 @@
 // Classement inspiré de FIBA :
 // - zone haute sombre : saison, titre, choix du championnat + carte "Meilleurs buteurs"
 // - zone basse claire : tableau du classement (zones, forme récente cliquable)
+// - classement EN DIRECT (comme Sofascore) : les matchs en cours comptent provisoirement
+//   (1-1 = +1 point, défaite = 0...) ; ligne qui scintille en rouge + score du match
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Link, useSearchParams, useLocation } from 'react-router-dom';
@@ -41,6 +43,108 @@ const ZONES = {
 };
 
 const FOND_BANDE = `linear-gradient(120deg, ${theme.greenDeep} 0%, #12462c 45%, #0f3a25 100%)`;
+
+// ── Équipes en direct : scintillement rouge (CSS pur, aucune bibliothèque) ──
+// Fond de ligne qui « respire » + point rouge qui clignote. Sans mouvement si
+// l'utilisateur l'a désactivé dans son système (fond rouge pâle fixe).
+const ROUGE_LIVE = theme.red;
+const STYLE_LIVE = `
+@keyframes f237-live-fond { 0%, 100% { background-color: rgba(225, 37, 43, 0.035); } 50% { background-color: rgba(225, 37, 43, 0.13); } }
+@keyframes f237-live-point { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.2; transform: scale(0.65); } }
+.f237-ligne-live { animation: f237-live-fond 1.6s ease-in-out infinite; }
+.f237-point-live { animation: f237-live-point 1.1s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .f237-ligne-live { animation: none; background-color: rgba(225, 37, 43, 0.08); }
+  .f237-point-live { animation: none; }
+}`;
+
+/** Point rouge qui clignote, à côté du nom d'une équipe en train de jouer */
+function PointLive() {
+  const { t } = useTranslation();
+  return <span className="f237-point-live" role="img" aria-label={t('classement.enDirect')} title={t('classement.enDirect')}
+    style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: ROUGE_LIVE, flexShrink: 0, display: 'inline-block' }} />;
+}
+
+/** Score du match en cours (ex. 1-1), en rouge. lien = false dans une ligne déjà cliquable (mobile). */
+function PastilleLive({ live, lien = true }) {
+  const { t } = useTranslation();
+  const titre = t('classement.enDirectScore', { dom: live.nomDomicile, ext: live.nomExterieur, score: live.score });
+  const style = {
+    display: 'inline-flex', alignItems: 'center', padding: '2px 7px', borderRadius: '6px',
+    backgroundColor: ROUGE_LIVE, color: '#fff', fontFamily: CHIFFRES, fontSize: '14px', fontWeight: 800,
+    lineHeight: 1.2, textDecoration: 'none', flexShrink: 0, whiteSpace: 'nowrap',
+  };
+  return lien && live.matchId != null
+    ? <Link to={`/matchs/${live.matchId}`} title={titre} aria-label={titre} style={style}>{live.score}</Link>
+    : <span title={titre} aria-label={titre} style={style}>{live.score}</span>;
+}
+
+/**
+ * Équipes qui jouent en ce moment : Map(idEquipe -> { matchId, score, pour, contre, nomDomicile, nomExterieur }).
+ * pour / contre = buts de l'équipe et de son adversaire dans le match en cours.
+ * Source principale : le direct (SignalR) ; secours : nos matchs au statut « en cours » (1).
+ */
+function equipesEnDirect(matchsLive, matchs, saisonId) {
+  const map = new Map();
+  const ajouter = (m) => {
+    const dom = m.equipeDomicile, ext = m.equipeExterieur;
+    if (!dom?.id || !ext?.id) return;
+    const sd = m.scoreDomicile ?? 0, se = m.scoreExterieur ?? 0;
+    const commun = { matchId: m.id, score: `${sd}-${se}`, nomDomicile: dom.nom, nomExterieur: ext.nom };
+    map.set(dom.id, { ...commun, pour: sd, contre: se });
+    map.set(ext.id, { ...commun, pour: se, contre: sd });
+  };
+  for (const m of matchs ?? []) if (m.statut === 1) ajouter(m);
+  for (const l of matchsLive ?? []) {
+    if (l.saisonId != null && saisonId != null && l.saisonId !== saisonId) continue; // autre championnat
+    ajouter(l); // le direct est plus à jour que nos matchs : il remplace
+  }
+  return map;
+}
+
+/**
+ * Classement en direct : ajoute provisoirement le match en cours de chaque équipe
+ * (match joué +1, victoire +3, nul +1, défaite 0, buts), puis refait l'ordre dans chaque groupe.
+ * Le classement officiel reprend la main à la fin du match (recalcul après l'import).
+ */
+function classementEnDirect(lignes, enDirect) {
+  if (enDirect.size === 0) return lignes;
+  let touche = false;
+  const avecLive = lignes.map(l => {
+    const live = enDirect.get(idEquipe(l.brut));
+    if (!live) return l;
+    touche = true;
+    const victoire = live.pour > live.contre, nul = live.pour === live.contre;
+    const bp = (l.bp ?? 0) + live.pour, bc = (l.bc ?? 0) + live.contre;
+    return {
+      ...l, live,
+      j: (l.j ?? 0) + 1,
+      v: (l.v ?? 0) + (victoire ? 1 : 0),
+      n: (l.n ?? 0) + (nul ? 1 : 0),
+      d: (l.d ?? 0) + (!victoire && !nul ? 1 : 0),
+      bp, bc, db: bp - bc,
+      pts: (l.pts ?? 0) + (victoire ? 3 : nul ? 1 : 0),
+    };
+  });
+  if (!touche) return lignes;
+
+  // Nouvel ordre, groupe par groupe (saisons en poules), comme le calcul du serveur
+  const parGroupe = new Map();
+  for (const l of avecLive) {
+    const g = l.groupe ?? '';
+    if (!parGroupe.has(g)) parGroupe.set(g, []);
+    parGroupe.get(g).push(l);
+  }
+  return [...parGroupe.values()].flatMap(liste => liste
+    .sort((x, y) => y.pts - x.pts || (y.db ?? 0) - (x.db ?? 0) || (y.bp ?? 0) - (x.bp ?? 0) || x.nom.localeCompare(y.nom, 'fr'))
+    .map((l, i) => {
+      const position = i + 1;
+      const avant = l.position ?? position;
+      // Pendant les matchs : flèche = place gagnée / perdue par rapport au classement d'avant
+      const evolution = position < avant ? 'up' : position > avant ? 'down' : 'same';
+      return { ...l, position, evolution };
+    }));
+}
 
 function EclatsBande() {
   return (
@@ -389,8 +493,10 @@ function TableauClassement({ lignes, zones, annee, avecZones = true }) {
           const couleurZone = COULEUR_ZONE[zonesLignes[i]] ?? 'transparent';
           const finDeZone = i < total - 1 && zonesLignes[i] !== zonesLignes[i + 1];
           const id = idEquipe(l.brut);
+          const live = l.live ?? null;
           return (
             <Link key={`${l.nom}-${rang}`} to={id != null ? `/equipes/${id}?saison=${annee}` : '#'}
+              className={live ? 'f237-ligne-live' : undefined}
               style={{
                 display: 'grid', gridTemplateColumns: COLONNES_MOBILE, gap: '6px', alignItems: 'center',
                 padding: '10px 12px', textDecoration: 'none', color: CLAIR.texte,
@@ -399,7 +505,7 @@ function TableauClassement({ lignes, zones, annee, avecZones = true }) {
                 borderBottom: finDeZone ? `2px dashed ${CLAIR.bord}` : undefined,
               }}>
               <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                <span style={{ fontWeight: 800, fontSize: '15px' }}>{rang}</span>
+                <span style={{ fontWeight: 800, fontSize: '15px', color: live ? ROUGE_LIVE : undefined }}>{rang}</span>
                 <Evolution valeur={l.evolution} />
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
@@ -407,7 +513,10 @@ function TableauClassement({ lignes, zones, annee, avecZones = true }) {
                   ? <img src={l.logo} alt="" style={{ width: '26px', height: '26px', objectFit: 'contain', flexShrink: 0 }} />
                   : <span style={{ width: '26px', height: '26px', borderRadius: '50%', backgroundColor: CLAIR.tuile, flexShrink: 0 }} />}
                 <span style={{ minWidth: 0 }}>
-                  <span style={{ display: 'block', fontSize: '15px', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.nom}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                    <span style={{ fontSize: '15px', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: live ? ROUGE_LIVE : undefined }}>{l.nom}</span>
+                    {live && <PastilleLive live={live} lien={false} />}
+                  </span>
                   <span style={{ display: 'block', fontSize: '11px', color: CLAIR.doux, fontWeight: 600 }}>
                     <span style={{ color: theme.green }}>{l.v ?? 0}{t('classement.abrV')}</span>
                     {' · '}{l.n ?? 0}{t('classement.abrN')}
@@ -419,7 +528,7 @@ function TableauClassement({ lignes, zones, annee, avecZones = true }) {
               <span style={{ textAlign: 'center', fontSize: '14px', color: l.db > 0 ? theme.green : l.db < 0 ? theme.red : '#3d4441' }}>
                 {l.db == null ? '–' : l.db > 0 ? `+${l.db}` : l.db}
               </span>
-              <span style={{ textAlign: 'center', fontFamily: CHIFFRES, fontSize: '20px', fontWeight: 800 }}>{l.pts}</span>
+              <span style={{ textAlign: 'center', fontFamily: CHIFFRES, fontSize: '20px', fontWeight: 800, color: live ? ROUGE_LIVE : undefined }}>{l.pts}</span>
             </Link>
           );
         })}
@@ -443,13 +552,14 @@ function TableauClassement({ lignes, zones, annee, avecZones = true }) {
           // Séparateur quand la zone change à la ligne suivante
           const finDeZone = i < total - 1 && zonesLignes[i] !== zonesLignes[i + 1];
           const id = idEquipe(l.brut);
+          const live = l.live ?? null;
           const nombre = (v, couleur) => (
             <span style={{ textAlign: 'center', fontSize: '15px', color: couleur ?? '#3d4441' }}>{v ?? '–'}</span>
           );
 
           return (
             <div key={`${l.nom}-${rang}`}
-              className="transition-colors"
+              className={live ? 'f237-ligne-live' : 'transition-colors'}
               style={{
                 display: 'grid', gridTemplateColumns: COLONNES, alignItems: 'center',
                 padding: '12px 16px', borderTop: i ? `1px solid ${CLAIR.bord}` : 'none',
@@ -461,17 +571,21 @@ function TableauClassement({ lignes, zones, annee, avecZones = true }) {
               onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
             >
               <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                <span style={{ minWidth: '20px', textAlign: 'right', fontWeight: 800, fontSize: '15px', color: CLAIR.texte }}>{rang}</span>
+                <span style={{ minWidth: '20px', textAlign: 'right', fontWeight: 800, fontSize: '15px', color: live ? ROUGE_LIVE : CLAIR.texte }}>{rang}</span>
                 <Evolution valeur={l.evolution} />
               </span>
 
-              <Link to={id != null ? `/equipes/${id}?saison=${annee}` : '#'}
-                style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, textDecoration: 'none', color: CLAIR.texte }}>
-                {l.logo
-                  ? <img src={l.logo} alt="" style={{ width: '30px', height: '30px', objectFit: 'contain', flexShrink: 0 }} />
-                  : <span style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: CLAIR.tuile, flexShrink: 0 }} />}
-                <span style={{ fontSize: '16px', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.nom}</span>
-              </Link>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                <Link to={id != null ? `/equipes/${id}?saison=${annee}` : '#'}
+                  style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, textDecoration: 'none', color: live ? ROUGE_LIVE : CLAIR.texte }}>
+                  {l.logo
+                    ? <img src={l.logo} alt="" style={{ width: '30px', height: '30px', objectFit: 'contain', flexShrink: 0 }} />
+                    : <span style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: CLAIR.tuile, flexShrink: 0 }} />}
+                  <span style={{ fontSize: '16px', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.nom}</span>
+                </Link>
+                {live && <PointLive />}
+                {live && <PastilleLive live={live} />}
+              </span>
 
               {nombre(l.j)}
               {nombre(l.v, theme.green)}
@@ -480,7 +594,7 @@ function TableauClassement({ lignes, zones, annee, avecZones = true }) {
               {nombre(l.bp)}
               {nombre(l.bc)}
               {nombre(l.db == null ? null : l.db > 0 ? `+${l.db}` : l.db, l.db > 0 ? theme.green : l.db < 0 ? theme.red : undefined)}
-              <span style={{ textAlign: 'center', fontFamily: CHIFFRES, fontSize: '22px', fontWeight: 800, color: CLAIR.texte }}>{l.pts}</span>
+              <span style={{ textAlign: 'center', fontFamily: CHIFFRES, fontSize: '22px', fontWeight: 800, color: live ? ROUGE_LIVE : CLAIR.texte }}>{l.pts}</span>
               <Forme matchs={l.forme} nom={l.nom} />
             </div>
           );
@@ -596,9 +710,11 @@ function ClassementPage() {
   }, [donnees, cle]);
 
   // Lignes affichées selon la vue choisie (Global / Domicile / Extérieur)
+  // Matchs en cours : comptés provisoirement dans le classement global (comme Sofascore)
+  const enDirect = useMemo(() => equipesEnDirect(matchsLive, matchs, saisonId), [matchsLive, matchs, saisonId]);
   const lignesVue = useMemo(
-    () => (vue === 'global' ? lignes : lignesParLieu(lignes, matchs, vue)),
-    [lignes, matchs, vue],
+    () => (vue === 'global' ? classementEnDirect(lignes, enDirect) : lignesParLieu(lignes, matchs, vue)),
+    [lignes, matchs, vue, enDirect],
   );
 
   // Saisons en plusieurs poules / phases : un tableau par groupe (dans l'ordre de l'API)
@@ -633,6 +749,7 @@ function ClassementPage() {
 
   return (
     <div>
+      <style>{STYLE_LIVE}</style>
       {/* ── ZONE HAUTE ─────────────────────────────────────────────────── */}
       <section style={{ position: 'relative', overflow: 'hidden', background: FOND_BANDE, padding: mobile ? '28px 0 32px' : '48px 0 56px' }}>
         <EclatsBande />

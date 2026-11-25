@@ -144,6 +144,9 @@ namespace F237.BLL.Services.Implementations
         private static DivisionEnum DivisionDe(int leagueId) =>
             leagueId == 411 ? DivisionEnum.EliteOne : DivisionEnum.EliteTwo;
 
+        /// <summary>Ligues dont le classement est toujours recalculé depuis nos matchs (Elite Two).</summary>
+        public static bool ClassementCalculeDepuisNosMatchs(int leagueId) => DivisionDe(leagueId) == DivisionEnum.EliteTwo;
+
         // Ajoute les buts d'un match à partir de son tableau "events".
         // scoreDomicile / scoreExterieur : score officiel, pour ne jamais créer plus de buts que le score
         // (penaltys ratés et buts annulés écartés : voir FiltreButsApi).
@@ -388,6 +391,9 @@ namespace F237.BLL.Services.Implementations
 
         public async Task SyncClassementAsync(int leagueId, int saison, int saisonId = 1)
         {
+            // Elite Two : jamais le classement de l'API (il écraserait celui calculé depuis nos matchs)
+            if (ClassementCalculeDepuisNosMatchs(leagueId)) return;
+
             var response = await _httpClient.GetAsync($"/standings?league={leagueId}&season={saison}");
             if (!response.IsSuccessStatusCode) return;
 
@@ -666,9 +672,19 @@ namespace F237.BLL.Services.Implementations
                     if (aAligner.Count > 0) await _context.SaveChangesAsync();
                 }
 
-                // 5. Classement (1 requête)
-                var standings = await GetApiAsync($"/standings?league={leagueId}&season={saison}");
-                resultat.EquipesClassement = await EnregistrerClassementAsync(standings, entiteSaison.Id);
+                // 5. Classement
+                //    Elite Two : calculé depuis NOS matchs (scores corrigés à la main compris) par l'appelant,
+                //    le classement de l'API n'est pas fiable pour cette ligue. Aucune requête.
+                //    Elite One : classement de l'API (1 requête).
+                if (ClassementCalculeDepuisNosMatchs(leagueId))
+                {
+                    resultat.ClassementCalcule = true;
+                }
+                else
+                {
+                    var standings = await GetApiAsync($"/standings?league={leagueId}&season={saison}");
+                    resultat.EquipesClassement = await EnregistrerClassementAsync(standings, entiteSaison.Id);
+                }
 
                 // 6. Buts, par lots de 20 matchs (≈ 1 requête pour 20 matchs),
                 //    seulement si l'API fournit les événements de cette ligue

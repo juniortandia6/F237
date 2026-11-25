@@ -31,23 +31,29 @@ namespace F237.BLL.Services.Implementations
             return await _classementRepository.GetClassementEquipeAsync(equipeId, saisonId);
         }
 
+        // Calcule le classement d'une saison à partir de NOS matchs (scores corrigés à la main compris).
+        // Utilisé pour l'Elite Two à chaque import, et pour l'Elite One quand un score a été saisi dans l'admin.
+        //  - Seuls les matchs terminés avec un score comptent (reportés, annulés, à venir : ignorés).
+        //  - Toutes les équipes de la saison apparaissent, même sans match joué (0 point).
+        //  - Égalité : points, puis différence de buts, puis buts marqués, puis ordre alphabétique
+        //    (pour que deux équipes à égalité parfaite gardent toujours le même ordre).
         public async Task RecalculerClassementAsync(int saisonId)
         {
-            var matchs = await _matchRepository.GetMatchsParSaisonAsync(saisonId);
-            var matchsTermines = matchs.Where(m => m.Statut == StatutMatchEnum.Terminé).ToList();
+            var matchs = (await _matchRepository.GetMatchsParSaisonAsync(saisonId)).ToList();
 
-            // Construire stats depuis zéro
+            // Toutes les équipes de la saison (calendrier), même celles qui n'ont pas encore joué
             var stats = new Dictionary<int, Classement>();
-
-            foreach (var m in matchsTermines)
+            var noms = new Dictionary<int, string>();
+            foreach (var m in matchs)
             {
+                AjouterEquipe(stats, noms, m.EquipeDomicileId, m.EquipeDomicile?.Nom, saisonId);
+                AjouterEquipe(stats, noms, m.EquipeExterieurId, m.EquipeExterieur?.Nom, saisonId);
+            }
+
+            foreach (var m in matchs)
+            {
+                if (m.Statut != StatutMatchEnum.Terminé) continue;
                 if (m.ScoreDomicile == null || m.ScoreExterieur == null) continue;
-
-                if (!stats.ContainsKey(m.EquipeDomicileId))
-                    stats[m.EquipeDomicileId] = new Classement { EquipeId = m.EquipeDomicileId, SaisonId = saisonId };
-
-                if (!stats.ContainsKey(m.EquipeExterieurId))
-                    stats[m.EquipeExterieurId] = new Classement { EquipeId = m.EquipeExterieurId, SaisonId = saisonId };
 
                 var dom = stats[m.EquipeDomicileId];
                 var ext = stats[m.EquipeExterieurId];
@@ -79,6 +85,8 @@ namespace F237.BLL.Services.Implementations
                 .OrderByDescending(c => c.Points)
                 .ThenByDescending(c => c.DifferenceDesButs)
                 .ThenByDescending(c => c.ButsPour)
+                .ThenBy(c => noms.GetValueOrDefault(c.EquipeId, string.Empty), StringComparer.CurrentCultureIgnoreCase)
+                .ThenBy(c => c.EquipeId)
                 .ToList();
 
             for (int i = 0; i < classementTrie.Count; i++)
@@ -92,6 +100,13 @@ namespace F237.BLL.Services.Implementations
             // Insérer nouveaux
             foreach (var c in classementTrie)
                 await _classementRepository.AddAsync(c);
+        }
+
+        private static void AjouterEquipe(Dictionary<int, Classement> stats, Dictionary<int, string> noms, int equipeId, string? nom, int saisonId)
+        {
+            if (!stats.ContainsKey(equipeId))
+                stats[equipeId] = new Classement { EquipeId = equipeId, SaisonId = saisonId };
+            if (!string.IsNullOrEmpty(nom)) noms[equipeId] = nom;
         }
 
         public async Task MettreAJourClassementApresMatchAsync(int matchId)

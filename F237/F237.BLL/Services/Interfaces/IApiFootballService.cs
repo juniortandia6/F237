@@ -52,6 +52,15 @@ namespace F237.BLL.Services.Interfaces
         /// </summary>
         public int ScoresManuelsGardes { get; set; }
 
+        /// <summary>
+        /// True pour l'Elite Two : l'import n'a pas pris le classement de l'API, l'appelant doit
+        /// le recalculer depuis nos matchs (IClassementService.RecalculerClassementAsync).
+        /// </summary>
+        public bool ClassementCalcule { get; set; }
+
+        /// <summary>Faut-il recalculer le classement depuis nos matchs après cet import ?</summary>
+        public bool DoitRecalculerClassement => SaisonId != 0 && (ClassementCalcule || ScoresManuelsGardes > 0);
+
         /// <summary>False si l'API ne fournit pas les buteurs de cette ligue (ex. Elite Two) : étape des buts sautée.</summary>
         public bool ButsFournis { get; set; } = true;
         public int MatchsSansButsRestants { get; set; }
