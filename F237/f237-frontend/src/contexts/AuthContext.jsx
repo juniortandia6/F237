@@ -32,6 +32,12 @@ export function AuthProvider({ children }) {
     return data;
   };
 
+  const loginGoogle = async (credential) => {
+    const data = await authService.loginGoogle(credential);
+    setUser(depuisSession(data));
+    return data;
+  };
+
   const logout = () => {
     authService.logout();
     setUser(null);
@@ -45,7 +51,7 @@ export function AuthProvider({ children }) {
   const estAdmin = user?.role === "Admin";
 
   return (
-    <AuthContext.Provider value={{ user, estAdmin, login, register, logout, updateSolde }}>
+    <AuthContext.Provider value={{ user, estAdmin, login, loginGoogle, register, logout, updateSolde }}>
       {children}
     </AuthContext.Provider>
   );

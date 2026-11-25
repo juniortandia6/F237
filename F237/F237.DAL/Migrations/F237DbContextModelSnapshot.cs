@@ -644,6 +644,10 @@ namespace F237.DAL.Migrations
                     b.Property<bool>("EstActif")
                         .HasColumnType("bit");
 
+                    b.Property<string>("GoogleId")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
                     b.Property<string>("MotDePasseHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -664,6 +668,10 @@ namespace F237.DAL.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GoogleId")
+                        .IsUnique()
+                        .HasFilter("[GoogleId] IS NOT NULL");
 
                     b.ToTable("Utilisateurs");
                 });

@@ -10,6 +10,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { Loader2, AlertCircle, Eye, EyeOff, Mail, Lock, Trophy, Target, Coins, ArrowRight } from "lucide-react";
 import theme from "../theme";
 import { useEcranMobile } from '../hooks/useEcranMobile';
+import BoutonGoogle, { SeparateurOu } from "../components/BoutonGoogle";
 
 const CLAIR = {
   texte: "#141414",
@@ -82,7 +83,7 @@ function LoginPage() {
   const [voirMdp, setVoirMdp] = useState(false);
   const [erreur, setErreur] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, loginGoogle } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -92,6 +93,19 @@ function LoginPage() {
 
     try {
       await login(email, motDePasse);
+      navigate("/jouer");
+    } catch (err) {
+      setErreur(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const connexionGoogle = async (credential) => {
+    setErreur("");
+    setLoading(true);
+    try {
+      await loginGoogle(credential);
       navigate("/jouer");
     } catch (err) {
       setErreur(err.message);
@@ -151,6 +165,9 @@ function LoginPage() {
               <AlertCircle size={16} style={{ flexShrink: 0 }} /> {erreur}
             </div>
           )}
+
+          <BoutonGoogle onJeton={connexionGoogle} />
+          <SeparateurOu />
 
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <Champ

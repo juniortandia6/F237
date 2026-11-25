@@ -3,6 +3,7 @@
 using F237.API.DTOs;
 using F237.DAL.Data;
 using F237.Domain.Entities;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -42,48 +43,8 @@ namespace F237.API.Controllers
             // Hasher le mot de passe
             var hash = HashMotDePasse(dto.MotDePasse);
 
-            // Créer l'utilisateur
-            var utilisateur = new Utilisateur
-            {
-                Nom = dto.Nom,
-                Prenom = dto.Prenom,
-                Email = dto.Email,
-                MotDePasseHash = hash,
-                SoldePoints = 1000, // Bonus de bienvenue !
-                DateInscription = DateTime.UtcNow,
-                EstActif = true,
-                Role = Roles.Utilisateur // jamais Admin à l'inscription
-            };
-
-            _context.Utilisateurs.Add(utilisateur);
-            await _context.SaveChangesAsync();
-
-            // Créer transaction bonus bienvenue
-            var transaction = new Transaction
-            {
-                UtilisateurId = utilisateur.Id,
-                Montant = 1000,
-                Type = "Bonus",
-                Description = "Bonus de bienvenue",
-                DateTransaction = DateTime.UtcNow
-            };
-            _context.Transactions.Add(transaction);
-            await _context.SaveChangesAsync();
-
-            // Générer token JWT
-            var token = GenererToken(utilisateur);
-            var expiration = DateTime.UtcNow.AddHours(
-                _configuration.GetValue<int>("Jwt:ExpirationHours"));
-
-            return Ok(new AuthResponseDto
-            {
-                Token = token,
-                Nom = utilisateur.Nom,
-                Prenom = utilisateur.Prenom,
-                Email = utilisateur.Email,
-                SoldePoints = utilisateur.SoldePoints,
-                Expiration = expiration
-            });
+            var utilisateur = await CreerUtilisateurAsync(dto.Nom, dto.Prenom, dto.Email, hash, googleId: null);
+            return Ok(Reponse(utilisateur));
         }
 
         // POST /api/auth/login
@@ -96,6 +57,10 @@ namespace F237.API.Controllers
             if (utilisateur == null)
                 return Unauthorized(new { message = "Email ou mot de passe incorrect." });
 
+            // Compte créé avec Google : pas de mot de passe F237
+            if (string.IsNullOrEmpty(utilisateur.MotDePasseHash) && utilisateur.GoogleId != null)
+                return Unauthorized(new { message = "Ce compte utilise la connexion Google : clique sur « Continuer avec Google »." });
+
             if (!VerifierMotDePasse(dto.MotDePasse, utilisateur.MotDePasseHash))
                 return Unauthorized(new { message = "Email ou mot de passe incorrect." });
 
@@ -107,19 +72,69 @@ namespace F237.API.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            var token = GenererToken(utilisateur);
-            var expiration = DateTime.UtcNow.AddHours(
-                _configuration.GetValue<int>("Jwt:ExpirationHours"));
+            return Ok(Reponse(utilisateur));
+        }
 
-            return Ok(new AuthResponseDto
+        // POST /api/auth/google   { "credential": "<jeton d'identité renvoyé par le bouton Google>" }
+        // Connexion OU inscription en un seul geste :
+        //  1. on vérifie le jeton auprès de Google (signature, expiration, et qu'il a bien été émis pour NOTRE Client ID) ;
+        //  2. compte déjà relié à ce Google -> connexion ;
+        //  3. sinon, compte existant avec le même email (vérifié par Google) -> on relie puis connexion ;
+        //  4. sinon -> création du compte (+ 1 000 points de bienvenue, comme une inscription classique).
+        [HttpPost("google")]
+        public async Task<ActionResult<AuthResponseDto>> ConnexionGoogle([FromBody] GoogleConnexionDto dto)
+        {
+            var clientId = _configuration["Google:ClientId"];
+            if (string.IsNullOrWhiteSpace(clientId))
+                return StatusCode(503, new { message = "Connexion Google non configurée sur le serveur (Google:ClientId)." });
+            if (string.IsNullOrWhiteSpace(dto.Credential))
+                return BadRequest(new { message = "Jeton Google manquant." });
+
+            GoogleJsonWebSignature.Payload infos;
+            try
             {
-                Token = token,
-                Nom = utilisateur.Nom,
-                Prenom = utilisateur.Prenom,
-                Email = utilisateur.Email,
-                SoldePoints = utilisateur.SoldePoints,
-                Expiration = expiration
-            });
+                infos = await GoogleJsonWebSignature.ValidateAsync(dto.Credential,
+                    new GoogleJsonWebSignature.ValidationSettings { Audience = new[] { clientId } });
+            }
+            catch (InvalidJwtException)
+            {
+                return Unauthorized(new { message = "Connexion Google refusée : jeton invalide ou expiré. Réessaie." });
+            }
+
+            // Sans email vérifié, impossible de savoir à qui appartient l'adresse : on refuse
+            if (string.IsNullOrWhiteSpace(infos.Email) || !infos.EmailVerified)
+                return Unauthorized(new { message = "Ton adresse Google n'est pas vérifiée : connecte-toi avec email et mot de passe." });
+
+            var email = infos.Email.Trim();
+
+            // 1. Déjà relié à ce compte Google
+            var utilisateur = await _context.Utilisateurs.FirstOrDefaultAsync(u => u.GoogleId == infos.Subject);
+
+            // 2. Compte classique avec le même email : on le relie (l'email est vérifié par Google)
+            if (utilisateur == null)
+            {
+                utilisateur = await _context.Utilisateurs.FirstOrDefaultAsync(u => u.Email == email);
+                if (utilisateur != null)
+                {
+                    if (utilisateur.GoogleId != null && utilisateur.GoogleId != infos.Subject)
+                        return Conflict(new { message = "Cet email est déjà relié à un autre compte Google." });
+                    utilisateur.GoogleId = infos.Subject;
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            if (utilisateur != null)
+            {
+                if (!utilisateur.EstActif)
+                    return Unauthorized(new { message = "Ce compte est désactivé." });
+                return Ok(Reponse(utilisateur));
+            }
+
+            // 3. Nouveau compte (sans mot de passe F237)
+            var prenom = Limiter(infos.GivenName ?? infos.Name ?? email.Split('@')[0], 100);
+            var nom = Limiter(infos.FamilyName ?? string.Empty, 100);
+            utilisateur = await CreerUtilisateurAsync(nom, prenom, email, motDePasseHash: string.Empty, googleId: infos.Subject);
+            return Ok(Reponse(utilisateur));
         }
 
         // GET /api/auth/profil
@@ -162,6 +177,52 @@ namespace F237.API.Controllers
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────
+
+        /// <summary>Crée un utilisateur + la transaction du bonus de bienvenue (1 000 points).</summary>
+        private async Task<Utilisateur> CreerUtilisateurAsync(string nom, string prenom, string email, string motDePasseHash, string? googleId)
+        {
+            var utilisateur = new Utilisateur
+            {
+                Nom = nom,
+                Prenom = prenom,
+                Email = email,
+                MotDePasseHash = motDePasseHash,
+                GoogleId = googleId,
+                SoldePoints = BONUS_BIENVENUE,
+                DateInscription = DateTime.UtcNow,
+                EstActif = true,
+                Role = Roles.Utilisateur // jamais Admin à l'inscription
+            };
+            _context.Utilisateurs.Add(utilisateur);
+            await _context.SaveChangesAsync();
+
+            _context.Transactions.Add(new Transaction
+            {
+                UtilisateurId = utilisateur.Id,
+                Montant = BONUS_BIENVENUE,
+                Type = "Bonus",
+                Description = "Bonus de bienvenue",
+                DateTransaction = DateTime.UtcNow
+            });
+            await _context.SaveChangesAsync();
+            return utilisateur;
+        }
+
+        private const int BONUS_BIENVENUE = 1000;
+
+        /// <summary>Réponse commune à l'inscription et aux connexions : token F237 + infos affichées.</summary>
+        private AuthResponseDto Reponse(Utilisateur utilisateur) => new()
+        {
+            Token = GenererToken(utilisateur),
+            Nom = utilisateur.Nom,
+            Prenom = utilisateur.Prenom,
+            Email = utilisateur.Email,
+            SoldePoints = utilisateur.SoldePoints,
+            Expiration = DateTime.UtcNow.AddHours(_configuration.GetValue<int>("Jwt:ExpirationHours"))
+        };
+
+        private static string Limiter(string texte, int max) =>
+            texte.Length <= max ? texte.Trim() : texte[..max].Trim();
 
         private string GenererToken(Utilisateur utilisateur)
         {
@@ -226,5 +287,14 @@ namespace F237.API.Controllers
                 ?? User.FindFirst(JwtRegisteredClaimNames.Sub);
             return claim != null ? int.Parse(claim.Value) : 0;
         }
+    }
+}
+
+namespace F237.API.Controllers
+{
+    /// <summary>Corps de POST /api/auth/google : le jeton d'identité renvoyé par le bouton Google.</summary>
+    public class GoogleConnexionDto
+    {
+        public string Credential { get; set; } = string.Empty;
     }
 }

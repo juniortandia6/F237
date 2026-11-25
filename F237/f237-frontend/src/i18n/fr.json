@@ -483,6 +483,10 @@
       "enCours": "Inscription...",
       "creer": "Créer mon compte",
       "dejaCompte": "Déjà un compte ?"
+    },
+    "google": {
+      "ou": "ou",
+      "indisponible": "Connexion Google indisponible pour le moment : utilise ton email."
     }
   },
   "actualites": {

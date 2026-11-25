@@ -55,7 +55,7 @@ namespace F237.DAL.Data
                 .HasForeignKey(t => t.EquipeArriveeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Événements de match (penalty manqué...) : supprimés avec le match ;
+            // Événements de match (penalty manqué, cartons) : supprimés avec le match ;
             // si le joueur est supprimé, l'événement reste (sans lien)
             modelBuilder.Entity<EvenementMatch>(e =>
             {
@@ -73,6 +73,17 @@ namespace F237.DAL.Data
             {
                 e.HasIndex(a => a.Slug).IsUnique();
                 e.HasIndex(a => new { a.EstPublie, a.DatePublication });
+            });
+
+            // Connexion Google : un compte Google ne peut être relié qu'à un seul utilisateur F237.
+            // Longueur limitée obligatoire : SQL Server ne peut pas indexer une colonne nvarchar(max).
+            // (L'identifiant Google fait environ 21 chiffres ; 255 laisse de la marge.)
+            modelBuilder.Entity<Utilisateur>(e =>
+            {
+                e.Property(u => u.GoogleId).HasMaxLength(255);
+                e.HasIndex(u => u.GoogleId)
+                    .IsUnique()
+                    .HasFilter("[GoogleId] IS NOT NULL");
             });
         }
     }

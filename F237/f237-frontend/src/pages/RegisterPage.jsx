@@ -9,6 +9,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { Loader2, AlertCircle, Eye, EyeOff, Mail, Lock, User, Coins, Check, ArrowRight } from "lucide-react";
 import theme from "../theme";
 import { useEcranMobile } from '../hooks/useEcranMobile';
+import BoutonGoogle, { SeparateurOu } from "../components/BoutonGoogle";
 
 const CLAIR = {
   texte: "#141414",
@@ -91,8 +92,22 @@ function RegisterPage() {
   const [voirMdp, setVoirMdp] = useState(false);
   const [erreur, setErreur] = useState("");
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const { register, loginGoogle } = useAuth();
   const navigate = useNavigate();
+
+  // Inscription avec Google : même route que la connexion (le compte est créé s'il n'existe pas)
+  const inscriptionGoogle = async (credential) => {
+    setErreur("");
+    setLoading(true);
+    try {
+      await loginGoogle(credential);
+      navigate("/jouer");
+    } catch (err) {
+      setErreur(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -192,6 +207,9 @@ function RegisterPage() {
               <AlertCircle size={16} style={{ flexShrink: 0 }} /> {erreur}
             </div>
           )}
+
+          <BoutonGoogle onJeton={inscriptionGoogle} texte="signup_with" />
+          <SeparateurOu />
 
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>

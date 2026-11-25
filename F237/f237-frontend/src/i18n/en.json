@@ -483,6 +483,10 @@
       "enCours": "Signing up...",
       "creer": "Create my account",
       "dejaCompte": "Already have an account?"
+    },
+    "google": {
+      "ou": "or",
+      "indisponible": "Google sign-in is unavailable right now: use your email."
     }
   },
   "actualites": {

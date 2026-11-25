@@ -8,7 +8,12 @@ namespace F237.Domain.Entities
         public string Nom { get; set; } = string.Empty;
         public string Prenom { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+        // Vide pour un compte créé avec Google (pas de mot de passe F237)
         public string MotDePasseHash { get; set; } = string.Empty;
+
+        // Identifiant Google ("sub" du jeton Google) : rempli à la 1re connexion avec Google.
+        // Null pour un compte classique (email + mot de passe).
+        public string? GoogleId { get; set; }
         public int SoldePoints { get; set; } = 0;
         public DateTime DateInscription { get; set; } = DateTime.Now;
         public bool EstActif { get; set; } = true;

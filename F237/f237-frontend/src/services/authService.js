@@ -102,6 +102,21 @@ const login = async (email, motDePasse) => {
   return data;
 };
 
+// Connexion / inscription avec Google : on envoie le jeton Google, l'API renvoie le token F237
+const loginGoogle = async (credential) => {
+  const response = await fetch(`${BASE_URL}/auth/google`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ credential }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.message || "Connexion Google impossible");
+
+  sauvegarderSession(data);
+  return data;
+};
+
 const logout = () => {
   supprimerSession();
 };
@@ -130,6 +145,7 @@ const getAuthHeader = () => {
 export const authService = {
   register,
   login,
+  loginGoogle,
   logout,
   getProfil,
   getToken,

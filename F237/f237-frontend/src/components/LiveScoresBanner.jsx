@@ -18,9 +18,9 @@ function LiveScoresBanner() {
     return (
       <div className="w-full px-4 py-2 flex items-center gap-2" style={BANDE}>
         {isConnected ? (
-          <Wifi size={14} className="flex-shrink-0" style={{ color: theme.greenBright }} />
+          <Wifi size={14} className="shrink-0" style={{ color: theme.greenBright }} />
         ) : (
-          <WifiOff size={14} className="flex-shrink-0" style={{ color: theme.textFaint }} />
+          <WifiOff size={14} className="shrink-0" style={{ color: theme.textFaint }} />
         )}
         <span className="text-xs font-medium" style={{ color: theme.textMuted }}>
           {isConnected ? t("bandeau.aucunMatch") : t("bandeau.connexion")}
@@ -31,7 +31,7 @@ function LiveScoresBanner() {
 
   return (
     <div className="w-full px-4 py-2 flex items-center gap-2" style={BANDE}>
-      <Radio size={14} className="animate-pulse flex-shrink-0" style={{ color: theme.red }} />
+      <Radio size={14} className="animate-pulse shrink-0" style={{ color: theme.red }} />
       <span className="text-xs font-black uppercase tracking-widest" style={{ color: theme.red }}>
         Live
       </span>
